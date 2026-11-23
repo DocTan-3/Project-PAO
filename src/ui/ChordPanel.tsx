@@ -62,7 +62,7 @@ export function ChordPanel({
         {open && <InstrumentSwitch value={instrument} onChange={onInstrument} />}
       </div>
       {open && (
-        <div class="cpanel-row">
+        <div class="cpanel-row" data-noswipe>
           {chords.map((c) => (
             <button key={c} class="ccard" onClick={() => onOpen(c)} aria-label={`Show how to play ${c}`}>
               <span class="ccard-name">{c}</span>

@@ -532,7 +532,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .picker .search { margin: 2px 0 16px; }
 .picker .letter-head { top: 0; }
 
-.reader-main { touch-action: pan-y pinch-zoom; min-height: 55vh; will-change: transform; }
+/* the whole body of the song swipes (not only the lyrics), and short songs still leave room to swipe */
+.reader-layout { touch-action: pan-y pinch-zoom; min-height: calc(100vh - var(--head-h, 110px) - 64px); }
+.reader-main { min-height: 40vh; }
 .reader.enter-next .reader-layout { animation: slide-in-next .22s ease-out; }
 .reader.enter-prev .reader-layout { animation: slide-in-prev .22s ease-out; }
 @keyframes slide-in-next { from { transform: translateX(48px); opacity: 0; } to { transform: none; opacity: 1; } }

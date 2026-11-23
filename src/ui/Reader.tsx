@@ -50,7 +50,7 @@ export function Reader({
   const [instrument, setInstrument] = useState<Instrument>(loadInstrument);
   const [sheet, setSheet] = useState<string | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const mainRef = useRef<HTMLDivElement>(null);
+  const swipeRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLElement>(null);
   const [enter] = useState<SwipeDir | null>(takeDirection);
   const [toast, setToast] = useState<string | null>(null);
@@ -90,7 +90,7 @@ export function Reader({
     const t = setTimeout(() => setToast(null), 1600);
     return () => clearTimeout(t);
   }, [toast]);
-  useSwipeNav(mainRef, {
+  useSwipeNav(swipeRef, {
     canPrev: !!nav?.prev,
     canNext: !!nav?.next,
     onPrev: () => go('prev'),
@@ -248,7 +248,7 @@ export function Reader({
         </div>
       )}
 
-      <div class="reader-layout">
+      <div class="reader-layout" ref={swipeRef}>
         <aside class="reader-side">
           {song.notes?.trim() && (
             <section class="notes" aria-label="Notes">
@@ -260,7 +260,7 @@ export function Reader({
           <ChordPanel chords={songChords} instrument={instrument} onInstrument={setInstrument} onOpen={openSheet} />
         </aside>
 
-        <div class="reader-main" ref={mainRef}>
+        <div class="reader-main">
           <div class="song" ref={bodyRef}>
             {width > 0 &&
               song.sections.map((sec) => (
