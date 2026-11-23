@@ -34,6 +34,7 @@ interface Chip {
   w: number;
   level: number;
   at: number;
+  beats?: number;
 }
 
 export function LineEditor(p: LineEditorProps) {
@@ -55,13 +56,13 @@ export function LineEditor(p: LineEditorProps) {
       .map((c, i) => ({ c, i }))
       .sort((a, b) => (chordOnlyLine ? a.i - b.i : a.c.at - b.c.at || a.i - b.i));
     for (const { c } of ordered) {
-      const w = measureChord(c.text || '?') + CHIP_PAD;
+      const w = measureChord(c.text || '?') + CHIP_PAD + (c.beats ? measureChord(String(c.beats)) * 0.75 + 8 : 0);
       const x = chordOnlyLine ? seqX : PAD + measure(line.lyrics.slice(0, c.at));
       let level = ends.findIndex((end) => x >= end);
       if (chordOnlyLine || level < 0) level = chordOnlyLine ? 0 : ends.length;
       ends[level] = x + w + 2;
       if (chordOnlyLine) seqX = x + w + 6;
-      out.push({ id: c.id, text: c.text, x, w, level, at: c.at });
+      out.push({ id: c.id, text: c.text, x, w, level, at: c.at, beats: c.beats });
     }
     return { chips: out, levels: Math.max(1, ends.length), seqEnd: seqX };
   }, [line.chords, line.lyrics, measure, measureChord, chordOnlyLine]);
@@ -130,6 +131,11 @@ export function LineEditor(p: LineEditorProps) {
                 onPointerCancel={onChipUp}
               >
                 {c.text || '?'}
+                {c.beats ? (
+                  <small class="echip-beats" title={`${c.beats} ${c.beats === 1 ? 'beat' : 'beats'}`} aria-label={`${c.beats} beats`}>
+                    {c.beats}
+                  </small>
+                ) : null}
               </button>
             ))}
             {p.pending && (

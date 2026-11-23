@@ -91,8 +91,8 @@ export function TempoSheet(p: {
         <Seg label="Scroll speed" value={p.speed} options={SPEEDS} fmt={(n) => `${n}×`} onChange={p.onSpeed} />
 
         <p class="muted center-text small">
-          Each chord lasts {p.beats} {p.beats === 1 ? 'beat' : 'beats'}, about {secondsPerChord}s at this tempo.
-          The page scrolls to keep time.
+          Chords last {p.beats} {p.beats === 1 ? 'beat' : 'beats'} (about {secondsPerChord}s at this tempo) unless you set a
+          length for that chord in the editor. The page scrolls to keep time.
         </p>
       </div>
     </div>

@@ -10,6 +10,7 @@ import {
   removeLine,
   removeSection,
   reorderChord,
+  setChordBeats,
   setChordText,
   setMeta,
   setSectionLabel,
@@ -166,6 +167,10 @@ export function Editor({
     }
     const at = unit === 'word' ? wordStep(selLine.lyrics, selChord.at, delta as 1 | -1) : selChord.at + delta;
     commit(mapLine(song, sel.lineId, (l) => moveChord(l, sel.chordId, at)), `nudge-${sel.chordId}`);
+  };
+  const onBeats = (beats: number | undefined) => {
+    if (!sel) return;
+    commit(mapLine(song, sel.lineId, (l) => setChordBeats(l, sel.chordId, beats)), `beats-${sel.chordId}`);
   };
   const onDelete = () => {
     if (!sel) return;
@@ -405,6 +410,8 @@ export function Editor({
             onText={onText}
             onNudge={onNudge}
             onConfirm={() => setSel(null)}
+            beats={selChord.beats}
+            onBeats={onBeats}
             onDelete={onDelete}
             onClose={() => setSel(null)}
           />
