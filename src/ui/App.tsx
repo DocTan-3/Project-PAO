@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'preact/hooks';
-import { demoSongs } from '../model/demo';
+import { demoSongs, tagalogDemoSongs } from '../model/demo';
 import { newSong } from '../model/edit';
 import { IndexedDbStore, type SongStore } from '../model/store';
-import type { Song } from '../model/types';
+import type { Language, Song } from '../model/types';
 import { Editor, type ExitTarget } from './Editor';
 import { Library } from './Library';
 import { Reader } from './Reader';
@@ -39,6 +39,13 @@ export function App() {
       if (all.length === 0 && !flag('pao:seeded')) {
         for (const s of demoSongs()) await store.put(s);
         flag('pao:seeded', '1');
+        flag('pao:seeded-tl', '1');
+        all = await store.list();
+      }
+      // libraries created before Tagalog existed get the Tagalog sample songs once
+      if (!flag('pao:seeded-tl')) {
+        for (const s of tagalogDemoSongs()) await store.put(s);
+        flag('pao:seeded-tl', '1');
         all = await store.list();
       }
       setSongs(all);
@@ -88,8 +95,8 @@ export function App() {
         await store.delete(id);
         await refresh();
       }}
-      onNew={async () => {
-        const s = newSong();
+      onNew={async (language: Language) => {
+        const s = { ...newSong(), language };
         await store.put(s);
         go(`#edit-${s.id}`);
       }}

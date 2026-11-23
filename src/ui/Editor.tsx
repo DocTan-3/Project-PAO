@@ -19,6 +19,7 @@ import {
 } from '../model/edit';
 import type { SongStore } from '../model/store';
 import type { Line, Song } from '../model/types';
+import { LANGUAGES, languageOf } from '../model/library';
 import { applyTranspose, songKeyOf } from '../model/view';
 import { formatNote, parseChord } from '../theory';
 import { ChordToolbar } from './ChordToolbar';
@@ -236,6 +237,18 @@ export function Editor({
           value={song.artist}
           onInput={(e) => commit(setMeta(song, { artist: (e.currentTarget as HTMLInputElement).value }), 'artist')}
         />
+        <label class="ctl lang-ctl">
+          <span class="ctl-label">Language</span>
+          <select
+            id="song-language"
+            value={languageOf(song)}
+            onChange={(e) => commit(setMeta(song, { language: (e.currentTarget as HTMLSelectElement).value as 'en' | 'tl' }))}
+          >
+            {LANGUAGES.map((l) => (
+              <option value={l.id}>{l.label}</option>
+            ))}
+          </select>
+        </label>
         <label class="notes-field">
           <span class="lbl">Notes for other players</span>
           <textarea

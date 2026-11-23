@@ -467,3 +467,36 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 .beats-btn { gap: 6px; font-variant-numeric: tabular-nums; }
 .beats-btn.open { border-color: var(--accent); background: var(--accent-soft); }
+
+/* ==========================================================================
+   Library: language tabs, letter groups, letter index
+   ========================================================================== */
+.lang-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 0 0 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.lang-tab {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--muted); font-weight: 650; font-size: .98rem; transition: background .12s, color .12s;
+}
+.lang-tab:hover { background: var(--surface-2); color: var(--text); }
+.lang-tab.on { background: var(--accent); color: var(--on-accent); }
+.lang-count { min-width: 1.6em; padding: 1px 7px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.lang-tab.on .lang-count { background: color-mix(in srgb, var(--on-accent) 22%, transparent); color: var(--on-accent); }
+
+.letter-group { margin-bottom: 6px; }
+.letter-head {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; padding: 10px 2px 6px;
+  background: var(--bg); border-bottom: 1px solid var(--line); scroll-margin-top: env(safe-area-inset-top, 0px);
+}
+.letter { font-family: var(--display); font-weight: 700; font-size: 1.35rem; letter-spacing: -.01em; color: var(--accent); min-width: 1ch; }
+.letter-count { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
+.letter-group .lib-list { margin-bottom: 14px; }
+
+.letter-rail {
+  position: fixed; z-index: 28; right: max(3px, env(safe-area-inset-right, 0px)); top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; max-height: calc(100vh - 170px); overflow-y: auto; padding: 4px 1px; border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); scrollbar-width: none;
+}
+.letter-rail::-webkit-scrollbar { display: none; }
+.letter-rail button { width: 26px; min-height: 22px; flex: none; padding: 0; border: 0; background: none; color: var(--accent); font-family: var(--display); font-weight: 700; font-size: .72rem; }
+.letter-rail button:hover { background: var(--accent-soft); border-radius: 8px; }
+@media (max-width: 1000px) { .library.has-rail { padding-right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 26px); } }
+.lang-ctl { margin: 0; }

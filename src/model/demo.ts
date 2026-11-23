@@ -3,9 +3,14 @@ import type { Song } from './types';
 
 /** Public-domain songs used to seed an empty library. */
 export function demoSongs(): Song[] {
+  return [...englishDemoSongs(), ...tagalogDemoSongs()];
+}
+
+function englishDemoSongs(): Song[] {
   return [
     mkSong({
       title: 'Amazing Grace',
+      language: 'en',
       artist: 'Traditional',
       key: 'G',
       bpm: 72,
@@ -28,6 +33,7 @@ export function demoSongs(): Song[] {
     }),
     mkSong({
       title: 'House of the Rising Sun',
+      language: 'en',
       artist: 'Traditional',
       key: 'Am',
       bpm: 110,
@@ -54,6 +60,7 @@ export function demoSongs(): Song[] {
     }),
     mkSong({
       title: 'Down by the Riverside',
+      language: 'en',
       artist: 'Traditional',
       key: 'Bb',
       bpm: 100,
@@ -67,6 +74,72 @@ export function demoSongs(): Song[] {
         S(
           'Chorus',
           L("I ain't gonna study war no more", ['I ain', 'Bb'], ['study', 'Eb'], ['war', 'F7'], ['more', 'Bb/D']),
+        ),
+      ],
+    }),
+  ];
+}
+
+/** Traditional Filipino folk songs (public domain). */
+export function tagalogDemoSongs(): Song[] {
+  return [
+    mkSong({
+      title: 'Bahay Kubo',
+      artist: 'Katutubong awit',
+      language: 'tl',
+      key: 'C',
+      bpm: 100,
+      sections: [
+        S(
+          'Verse',
+          L('Bahay kubo, kahit munti', ['Bahay', 'C'], ['munti', 'G7']),
+          L('Ang halaman doon ay sari-sari', ['Ang', 'C'], ['sari-sari', 'G7']),
+          L('Singkamas at talong, sigarilyas at mani', ['Singkamas', 'C'], ['sigarilyas', 'G7']),
+          L('Sitaw, bataw, patani', ['Sitaw', 'C'], ['patani', 'G7']),
+          L("Kundol, patola, upo't kalabasa", ['Kundol', 'C'], ['kalabasa', 'G7']),
+          L('At saka mayroon pang labanos, mustasa', ['At', 'C'], ['mustasa', 'G7']),
+          L('Sibuyas, kamatis, bawang at luya', ['Sibuyas', 'C'], ['luya', 'G7']),
+          L('Sa paligid-ligid ay puno ng linga', ['Sa', 'C'], ['puno', 'G7'], ['linga', 'C']),
+        ),
+      ],
+    }),
+    mkSong({
+      title: 'Leron, Leron Sinta',
+      artist: 'Katutubong awit',
+      language: 'tl',
+      key: 'G',
+      bpm: 120,
+      sections: [
+        S(
+          'Verse',
+          L('Leron, leron sinta', ['Leron', 'G'], ['sinta', 'D7']),
+          L('Buko ng papaya', ['Buko', 'G']),
+          L("Dala-dala'y buslo", ['Dala', 'D7']),
+          L('Sisidlan ng bunga', ['Sisidlan', 'G']),
+          L('Pagdating sa dulo', ['Pagdating', 'G']),
+          L('Nabali ang sanga', ['Nabali', 'D7']),
+          L('Kapos kapalaran', ['Kapos', 'D7']),
+          L('Humanap ng iba', ['Humanap', 'G']),
+        ),
+      ],
+    }),
+    mkSong({
+      title: 'Magtanim Ay Di Biro',
+      artist: 'Katutubong awit',
+      language: 'tl',
+      key: 'G',
+      bpm: 90,
+      sections: [
+        S(
+          'Verse',
+          L('Magtanim ay di biro', ['Magtanim', 'G'], ['biro', 'D']),
+          L('Maghapong nakayuko', ['Maghapong', 'G'], ['nakayuko', 'D']),
+          L('Di naman makatayo', ['Di', 'G'], ['makatayo', 'D']),
+          L('Di naman makaupo', ['Di', 'D'], ['makaupo', 'G']),
+          L("Braso ko'y namamanhid", ['Braso', 'G'], ['namamanhid', 'D']),
+          L("Baywang ko'y nangangawit", ['Baywang', 'G'], ['nangangawit', 'D']),
+          L("Binti ko'y namimitig", ['Binti', 'G'], ['namimitig', 'D']),
+          L('Sa pagod at sakit', ['Sa', 'D'], ['sakit', 'G']),
         ),
       ],
     }),

@@ -22,10 +22,14 @@ export interface Section {
   lines: Line[];
 }
 
+export type Language = 'en' | 'tl';
+
 export interface Song {
   id: string;
   title: string;
   artist: string;
+  /** which list the song belongs to; songs saved before this existed are English */
+  language?: Language;
   /** free-text details for other players (tuning, strumming, who plays what...) */
   notes?: string;
   /** key the chords are written in, e.g. "G" or "F#m"; null = unknown */
