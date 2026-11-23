@@ -38,6 +38,4 @@ export interface Song {
 export interface ViewSettings {
   /** transpose offset in semitones relative to the written key */
   semitones: number;
-  /** capo fret, 0 = none */
-  capo: number;
 }

@@ -1,8 +1,6 @@
 import {
   type Key,
   type Spelling,
-  capoShape,
-  capoShapeKey,
   formatChord,
   formatKey,
   parseChord,
@@ -13,7 +11,7 @@ import {
 } from '../theory';
 import type { Song, ViewSettings } from './types';
 
-export const DEFAULT_VIEW: ViewSettings = { semitones: 0, capo: 0 };
+export const DEFAULT_VIEW: ViewSettings = { semitones: 0 };
 
 export function songKeyOf(song: Song): Key | null {
   return song.key ? parseKey(song.key) : null;
@@ -40,12 +38,6 @@ export function viewKey(song: Song, v: ViewSettings): Key | null {
   return k ? transposeKey(k, v.semitones) : null;
 }
 
-/** The key whose shapes you finger (after transpose and capo). */
-export function shapeKey(song: Song, v: ViewSettings): Key | null {
-  const k = viewKey(song, v);
-  return k ? capoShapeKey(k, v.capo) : null;
-}
-
 /** Chord text to display under this view. Unparseable chords pass through untouched. */
 export function displayChord(text: string, song: Song, v: ViewSettings): string {
   const parsed = parseChord(text);
@@ -53,11 +45,7 @@ export function displayChord(text: string, song: Song, v: ViewSettings): string 
   const vk = viewKey(song, v);
   const spelling = songSpelling(song);
   const sounding = transposeChord(parsed, v.semitones, vk ?? spelling);
-  if (v.capo === 0) return formatChord(sounding);
-  const shape = vk
-    ? capoShape(sounding, v.capo, capoShapeKey(vk, v.capo))
-    : transposeChord(sounding, -v.capo, spelling);
-  return formatChord(shape);
+  return formatChord(sounding);
 }
 
 /** View offset (in -5..6 semitones, shortest move) that puts the song in `target`. */

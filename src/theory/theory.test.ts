@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  capoShape,
-  capoShapeKey,
-  capoSuggestions,
   formatChord,
   formatKey,
   parseChord,
@@ -128,31 +125,5 @@ describe('transposeChord', () => {
       expect(pitchClass(back.root)).toBe(pitchClass(chord('F#m7/C#').root));
       expect(pitchClass(back.bass!)).toBe(pitchClass(chord('F#m7/C#').bass!));
     }
-  });
-});
-
-describe('capo', () => {
-  it('song in A, capo 2 -> play G shapes', () => {
-    const shapeKey = capoShapeKey(key('A'), 2);
-    expect(formatKey(shapeKey)).toBe('G');
-    const out = ['A', 'D', 'E', 'F#m'].map((s) => formatChord(capoShape(chord(s), 2, shapeKey)));
-    expect(out).toEqual(['G', 'C', 'D', 'Em']);
-  });
-  it('song in Bb, capo 3 -> G shapes', () => {
-    const shapeKey = capoShapeKey(key('Bb'), 3);
-    expect(formatKey(shapeKey)).toBe('G');
-    expect(formatChord(capoShape(chord('Eb'), 3, shapeKey))).toBe('C');
-  });
-  it('capo 0 is identity', () => {
-    const k = key('D');
-    expect(formatChord(capoShape(chord('Bm7'), 0, capoShapeKey(k, 0)))).toBe('Bm7');
-  });
-  it('suggests friendly shape keys first', () => {
-    const s = capoSuggestions(key('Eb'));
-    expect(s[0]!.friendly).toBe(true);
-    const byCapo = Object.fromEntries(s.map((o) => [o.capo, formatKey(o.shapeKey)]));
-    expect(byCapo[1]).toBe('D');
-    expect(byCapo[3]).toBe('C');
-    expect(byCapo[8]).toBe('G');
   });
 });

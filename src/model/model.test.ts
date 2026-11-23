@@ -8,7 +8,6 @@ import {
   applyTranspose,
   displayChord,
   semitonesToKey,
-  shapeKey,
   viewKey,
 } from './view';
 import { formatKey, parseKey } from '../theory';
@@ -21,31 +20,19 @@ const song = mkSong({
 
 describe('displayChord', () => {
   it('is identity by default', () => {
-    expect(displayChord('Em7', song, { semitones: 0, capo: 0 })).toBe('Em7');
+    expect(displayChord('Em7', song, { semitones: 0 })).toBe('Em7');
   });
   it('transposes into the view key with correct spelling', () => {
-    expect(displayChord('D/F#', song, { semitones: 3, capo: 0 })).toBe('F/A'); // G -> Bb
-    expect(formatKey(viewKey(song, { semitones: 3, capo: 0 })!)).toBe('Bb');
-  });
-  it('capo shows lower shapes while the key label stays sounding', () => {
-    const v = { semitones: 0, capo: 2 };
-    expect(displayChord('G', song, v)).toBe('F');
-    expect(displayChord('D', song, v)).toBe('C');
-    expect(formatKey(shapeKey(song, v)!)).toBe('F');
-  });
-  it('combines transpose and capo', () => {
-    // G -> A (+2), capo 2 => G shapes
-    expect(displayChord('G', song, { semitones: 2, capo: 2 })).toBe('G');
-    expect(displayChord('D', song, { semitones: 2, capo: 2 })).toBe('D');
+    expect(displayChord('D/F#', song, { semitones: 3 })).toBe('F/A'); // G -> Bb
+    expect(formatKey(viewKey(song, { semitones: 3 })!)).toBe('Bb');
   });
   it('passes unparseable chord text through untouched', () => {
-    expect(displayChord('N.C.', song, { semitones: 5, capo: 3 })).toBe('N.C.');
+    expect(displayChord('N.C.', song, { semitones: 5 })).toBe('N.C.');
   });
   it('works without a song key (spelling from the song)', () => {
     const s = mkSong({ title: 'x', sections: [mkSection('', mkLine('a', ['a', 'Bb']))] });
-    expect(displayChord('Bb', s, { semitones: 1, capo: 0 })).toBe('B');
-    expect(displayChord('Bb', s, { semitones: 2, capo: 0 })).toBe('C');
-    expect(displayChord('Bb', s, { semitones: 0, capo: 1 })).toBe('A');
+    expect(displayChord('Bb', s, { semitones: 1 })).toBe('B');
+    expect(displayChord('Bb', s, { semitones: 2 })).toBe('C');
   });
 });
 
@@ -109,7 +96,7 @@ describe('demo songs', () => {
     for (const s of demoSongs())
       for (const sec of s.sections)
         for (const l of sec.lines)
-          for (const c of l.chords) expect(displayChord(c.text, s, { semitones: 0, capo: 0 })).toBe(c.text);
+          for (const c of l.chords) expect(displayChord(c.text, s, { semitones: 0 })).toBe(c.text);
   });
 });
 
