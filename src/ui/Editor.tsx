@@ -22,6 +22,7 @@ import { applyTranspose, songKeyOf } from '../model/view';
 import { formatNote, parseChord } from '../theory';
 import { ChordToolbar } from './ChordToolbar';
 import { loadFontPx, saveFontPx, useFontsReady } from './font';
+import { Icon } from './icons';
 import { LineEditor } from './LineEditor';
 
 const KEYS = [
@@ -206,12 +207,12 @@ export function Editor({
 
   return (
     <div class={`editor${sel || pending ? ' has-toolbar' : ''}`}>
-      <header class="bar ed-bar">
-        <button class="btn" onClick={() => exit('library')} aria-label="Save and go back">‹</button>
-        <span class="status" aria-live="polite">{status === 'saving' ? 'Saving…' : 'Saved'}</span>
+      <header class="ed-bar">
+        <button class="btn icon ghost" onClick={() => exit('library')} aria-label="Save and go back"><Icon name="back" /></button>
+        <span class={`status${status === 'saving' ? ' saving' : ''}`} aria-live="polite">{status === 'saving' ? 'Saving…' : 'Saved'}</span>
         <span class="grow" />
-        <button class="btn" onClick={undo} disabled={!canUndo} aria-label="Undo">Undo</button>
-        <button class="btn primary" onClick={() => exit('preview')}>Preview</button>
+        <button class="btn" onClick={undo} disabled={!canUndo} aria-label="Undo"><Icon name="undo" size={20} />Undo</button>
+        <button class="btn primary" onClick={() => exit('preview')}><Icon name="eye" size={20} />Preview</button>
       </header>
 
       <section class="meta">
@@ -241,7 +242,7 @@ export function Editor({
         </label>
         <div class="meta-row">
           <label class="ctl">
-            <span>Key</span>
+            <span class="ctl-label">Key</span>
             <select
               id="song-key"
               value={song.key ?? ''}
@@ -254,7 +255,7 @@ export function Editor({
             </select>
           </label>
           <label class="ctl">
-            <span>Tempo (BPM)</span>
+            <span class="ctl-label">Tempo (BPM)</span>
             <input
               id="song-bpm"
               type="number"
@@ -270,14 +271,14 @@ export function Editor({
             />
           </label>
           <div class="ctl">
-            <span>Shift all chords</span>
+            <span class="ctl-label">Shift all chords</span>
             <div class="stepper">
               <button class="btn" onClick={() => commit(applyTranspose(song, -1))} aria-label="Shift all chords down a semitone">−1</button>
               <button class="btn" onClick={() => commit(applyTranspose(song, 1))} aria-label="Shift all chords up a semitone">+1</button>
             </div>
           </div>
           <div class="ctl">
-            <span>Text size</span>
+            <span class="ctl-label">Text size</span>
             <div class="stepper">
               <button class="btn" onClick={() => setFontPx((f) => Math.max(12, f - 2))} aria-label="Smaller text">A−</button>
               <button class="btn" onClick={() => setFontPx((f) => Math.min(34, f + 2))} aria-label="Larger text">A+</button>

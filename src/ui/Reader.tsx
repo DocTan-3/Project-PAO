@@ -15,6 +15,8 @@ import {
   transposeKey,
 } from '../theory';
 import { FONT_FAMILY, loadFontPx, saveFontPx, useFontsReady } from './font';
+import { Icon } from './icons';
+import { ThemeToggle } from './theme';
 import { ChordPanel } from './ChordPanel';
 import { ChordSheet } from './ChordSheet';
 import { loadInstrument, saveInstrument } from './ChordView';
@@ -91,109 +93,135 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
   // keep the offset within -5..+6 so the label stays readable
   const setSemis = (n: number) => setView((v) => ({ ...v, semitones: (((n + 5) % 12) + 12) % 12 - 5 }));
 
+  const semis = view.semitones;
+  const semisLabel = semis > 0 ? `+${semis}` : String(semis);
+  const shownKey = vk ?? songKey;
+
   return (
     <div class="reader" style={{ '--fs': `${fontPx}px`, '--cs': `${chordPx}px` }}>
-      <header class="bar">
-        <button class="btn" onClick={onBack} aria-label="Back to library">‹</button>
+      <header class="topbar">
+        <button class="btn icon ghost" onClick={onBack} aria-label="Back to library"><Icon name="back" /></button>
         <div class="titles">
-          <h1>{song.title}</h1>
-          <p>{song.artist}</p>
+          <h1>{song.title || 'Untitled'}</h1>
+          {song.artist && <p>{song.artist}</p>}
         </div>
-        <button class="btn edit-btn" onClick={onEdit}>Edit</button>
+        <ThemeToggle />
+        <button class="btn edit-btn" onClick={onEdit} aria-label="Edit song">
+          <Icon name="edit" size={20} />
+          <span class="lbl">Edit</span>
+        </button>
       </header>
 
-      {song.notes?.trim() && (
-        <aside class="notes" aria-label="Notes">
-          <h2>Notes</h2>
-          <p>{song.notes}</p>
-        </aside>
+      {(shownKey || song.bpm) && (
+        <div class="tags">
+          {shownKey && (
+            <span class={`tag${semis !== 0 ? ' changed' : ''}`}>
+              Key <b>{formatKey(shownKey)}</b>
+              {semis !== 0 && <span class="muted">({semisLabel})</span>}
+            </span>
+          )}
+          {song.bpm && <span class="tag"><b>{song.bpm}</b> BPM</span>}
+        </div>
       )}
 
-      <ChordPanel chords={songChords} instrument={instrument} onInstrument={setInstrument} onOpen={setSheet} />
-
-      <div class="controls" role="toolbar" aria-label="Song controls">
-        {songKey && (
-          <label class="ctl">
-            <span>Key</span>
-            <select
-              value={vk ? formatKey(vk) : ''}
-              onChange={(e) => {
-                const target = keyChoices.find((k) => formatKey(k) === (e.target as HTMLSelectElement).value);
-                const n = target ? semitonesToKey(song, target) : null;
-                if (n !== null) setView((v) => ({ ...v, semitones: n }));
-              }}
-            >
-              {keyChoices.map((k) => (
-                <option value={formatKey(k)}>
-                  {formatKey(k)}
-                  {formatKey(k) === song.key ? ' (original)' : ''}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-
-        <div class="ctl">
-          <span>Transpose</span>
-          <div class="stepper">
-            <button class="btn" onClick={() => setSemis(view.semitones - 1)} aria-label="Down a semitone">−</button>
-            <output>{view.semitones > 0 ? `+${view.semitones}` : view.semitones}</output>
-            <button class="btn" onClick={() => setSemis(view.semitones + 1)} aria-label="Up a semitone">+</button>
-          </div>
-        </div>
-
-        <div class="ctl">
-          <span>Size</span>
-          <div class="stepper">
-            <button class="btn" onClick={() => setFontPx((f) => Math.max(12, f - 2))} aria-label="Smaller text">A−</button>
-            <button class="btn" onClick={() => setFontPx((f) => Math.min(34, f + 2))} aria-label="Larger text">A+</button>
-          </div>
-        </div>
-
-        {view.semitones !== 0 && (
-          <button class="btn reset" onClick={() => setView({ semitones: 0 })}>Reset</button>
-        )}
-      </div>
-
-      {vk && (
-        <p class="shapes">
-          Sounds in <b>{formatKey(vk)}</b>
-        </p>
-      )}
-
-      <div class="song" ref={bodyRef}>
-        {width > 0 &&
-          song.sections.map((sec) => (
-            <section key={sec.id}>
-              {sec.label && <h2>{sec.label}</h2>}
-              {sec.lines.map((line) => {
-                const chords = line.chords.map((c) => ({ ...c, text: displayChord(c.text, song, view) }));
-                const rows = layoutLine(line.lyrics, chords, measureLyric, measureChord, width, chordPx * 0.5);
-                return (
-                  <div class="line" key={line.id}>
-                    {rows.map((r) => (
-                      <div class={`row${r.chords.length ? ' has-chords' : ''}`}>
-                        {r.chords.map((c) => (
-                          <button
-                            type="button"
-                            class="chord"
-                            key={c.id}
-                            style={{ left: `${c.x}px` }}
-                            onClick={() => setSheet(c.text)}
-                            aria-label={`Show how to play ${c.text}`}
-                          >
-                            {c.text}
-                          </button>
-                        ))}
-                        <span class="lyric">{r.text || ' '}</span>
-                      </div>
+      <div class="reader-layout">
+        <aside class="reader-side">
+          <div class="dock" role="toolbar" aria-label="Song controls">
+            {songKey && (
+              <label class="ctl">
+                <span class="ctl-label">Key</span>
+                <span class="pill-select">
+                  <select
+                    aria-label="Key"
+                    value={vk ? formatKey(vk) : ''}
+                    onChange={(e) => {
+                      const target = keyChoices.find((k) => formatKey(k) === (e.target as HTMLSelectElement).value);
+                      const n = target ? semitonesToKey(song, target) : null;
+                      if (n !== null) setView((v) => ({ ...v, semitones: n }));
+                    }}
+                  >
+                    {keyChoices.map((k) => (
+                      <option value={formatKey(k)}>{formatKey(k)}</option>
                     ))}
-                  </div>
-                );
-              })}
+                  </select>
+                  <Icon name="down" size={16} />
+                </span>
+              </label>
+            )}
+
+            <div class="ctl">
+              <span class="ctl-label">Transpose</span>
+              <div class="stepgrp">
+                <button class="stepbtn" onClick={() => setSemis(semis - 1)} aria-label="Down a semitone"><Icon name="minus" size={20} /></button>
+                <button
+                  class={`stepval${semis !== 0 ? ' on' : ''}`}
+                  onClick={() => setView({ semitones: 0 })}
+                  disabled={semis === 0}
+                  aria-label={semis === 0 ? 'Original key' : `Transposed ${semisLabel}. Tap to reset.`}
+                  title={semis === 0 ? 'Original key' : 'Tap to reset'}
+                >
+                  {semisLabel}
+                </button>
+                <button class="stepbtn" onClick={() => setSemis(semis + 1)} aria-label="Up a semitone"><Icon name="plus" size={20} /></button>
+              </div>
+            </div>
+
+            <div class="ctl">
+              <span class="ctl-label">Text size</span>
+              <div class="stepgrp">
+                <button class="stepbtn" onClick={() => setFontPx((f) => Math.max(12, f - 2))} aria-label="Smaller text"><span class="aa sm">A</span></button>
+                <button class="stepbtn" onClick={() => setFontPx((f) => Math.min(34, f + 2))} aria-label="Larger text"><span class="aa lg">A</span></button>
+              </div>
+            </div>
+          </div>
+
+          {song.notes?.trim() && (
+            <section class="notes" aria-label="Notes">
+              <h2>Notes</h2>
+              <p>{song.notes}</p>
             </section>
-          ))}
+          )}
+
+          <ChordPanel chords={songChords} instrument={instrument} onInstrument={setInstrument} onOpen={setSheet} />
+        </aside>
+
+        <div class="reader-main">
+          <div class="song" ref={bodyRef}>
+            {width > 0 &&
+              song.sections.map((sec) => (
+                <section key={sec.id}>
+                  {sec.label && <h2>{sec.label}</h2>}
+                  {sec.lines.map((line) => {
+                    const chords = line.chords.map((c) => ({ ...c, text: displayChord(c.text, song, view) }));
+                    const rows = layoutLine(line.lyrics, chords, measureLyric, measureChord, width, chordPx * 0.5);
+                    return (
+                      <div class="line" key={line.id}>
+                        {rows.map((r) => (
+                          <div class={`row${r.chords.length ? ' has-chords' : ''}`}>
+                            {r.chords.map((c) => (
+                              <button
+                                type="button"
+                                class="chord"
+                                key={c.id}
+                                style={{ left: `${c.x}px` }}
+                                onClick={() => setSheet(c.text)}
+                                aria-label={`Show how to play ${c.text}`}
+                              >
+                                {c.text}
+                              </button>
+                            ))}
+                            <span class="lyric">{r.text || ' '}</span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </section>
+              ))}
+          </div>
+        </div>
       </div>
+
       {sheet && (
         <ChordSheet text={sheet} instrument={instrument} onInstrument={setInstrument} onClose={() => setSheet(null)} />
       )}

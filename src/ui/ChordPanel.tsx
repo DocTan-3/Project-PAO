@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks';
 import type { Instrument } from '../instruments';
 import { ChordDiagram, INSTRUMENTS } from './ChordView';
+import { Icon } from './icons';
 
 export function InstrumentSwitch({ value, onChange }: { value: Instrument; onChange: (i: Instrument) => void }) {
   return (
@@ -55,7 +56,7 @@ export function ChordPanel({
     <section class="cpanel" aria-label="Chords in this song">
       <div class="cpanel-head">
         <button class="cpanel-toggle" onClick={toggle} aria-expanded={open}>
-          <span class={`caret${open ? ' open' : ''}`} aria-hidden="true">▸</span>
+          <span class={`caret${open ? ' open' : ''}`} aria-hidden="true"><Icon name="next" size={18} /></span>
           Chords <span class="muted">({chords.length})</span>
         </button>
         {open && <InstrumentSwitch value={instrument} onChange={onInstrument} />}

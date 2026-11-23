@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Instrument } from '../instruments';
 import { pianoVoicings } from '../instruments';
 import { parseChord } from '../theory';
+import { Icon } from './icons';
 import { InstrumentSwitch } from './ChordPanel';
 import { ChordDiagram, chordNoteNames, shapeCount } from './ChordView';
 
@@ -55,7 +56,7 @@ export function ChordSheet({
       >
         <div class="sheet-head">
           <h2>{text}</h2>
-          <button class="btn" ref={closeRef} onClick={onClose} aria-label="Close chord view">Close</button>
+          <button class="btn icon" ref={closeRef} onClick={onClose} aria-label="Close chord view"><Icon name="close" /></button>
         </div>
         {names.length > 0 && (
           <p class="sheet-notes">
@@ -67,11 +68,11 @@ export function ChordSheet({
         </div>
         {total > 1 && (
           <div class="sheet-nav">
-            <button class="btn" onClick={() => setShape((s) => (s - 1 + total) % total)} aria-label="Previous shape">◀</button>
+            <button class="btn icon" onClick={() => setShape((s) => (s - 1 + total) % total)} aria-label="Previous shape"><Icon name="back" /></button>
             <span>
               {caption} <small class="muted">({shape + 1} of {total})</small>
             </span>
-            <button class="btn" onClick={() => setShape((s) => (s + 1) % total)} aria-label="Next shape">▶</button>
+            <button class="btn icon" onClick={() => setShape((s) => (s + 1) % total)} aria-label="Next shape"><Icon name="next" /></button>
           </div>
         )}
         {total === 0 && <p class="muted center-text">No diagram for this chord yet.</p>}
