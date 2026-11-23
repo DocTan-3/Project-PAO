@@ -25,7 +25,9 @@ version installs over the old one and keeps the songs and line ups stored in the
 
 ### Make a release
 
-Push a version tag. The **Android APK** workflow builds the app and attaches `Songbook.apk` to a new release.
+Either push a version tag, or open the **Actions** tab, choose **Android APK**, press **Run workflow**, pick the
+branch and type a version such as `0.1.0`. The workflow builds the app and attaches `Songbook.apk` to a new release
+(creating the tag for you).
 
 ```bash
 git tag v0.1.0 && git push origin v0.1.0
