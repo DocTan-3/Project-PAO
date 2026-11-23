@@ -7,10 +7,9 @@
   --accent: #b4410b;
   --chord: #b4410b;
   --radius: 10px;
-  color-scheme: light dark;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #16181d;
     --surface: #1f2229;
     --text: #e8e6e1;
@@ -18,7 +17,18 @@
     --line: #2c303a;
     --accent: #f0a05a;
     --chord: #f0a05a;
+    color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --bg: #16181d;
+  --surface: #1f2229;
+  --text: #e8e6e1;
+  --muted: #9aa0ab;
+  --line: #2c303a;
+  --accent: #f0a05a;
+  --chord: #f0a05a;
+  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text); }
@@ -28,7 +38,7 @@ button, select { font: inherit; color: inherit; }
 .center { text-align: center; padding: 3rem 1rem; }
 
 /* Library */
-.library { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+.library { max-width: 720px; margin: 0 auto; padding-block: 24px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .library h1 { font-size: 1.6rem; margin: 0 0 16px; }
 .library ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .song-card {
@@ -42,7 +52,7 @@ button, select { font: inherit; color: inherit; }
 .song-card .k { grid-row: 1 / span 2; grid-column: 2; align-self: center; color: var(--accent); font-weight: 700; }
 
 /* Reader */
-.reader { max-width: 900px; margin: 0 auto; padding: 0 16px 80px; }
+.reader { max-width: 900px; margin: 0 auto; padding-block: 0 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .bar { display: flex; align-items: center; gap: 12px; padding: 14px 0 6px; }
 .titles h1 { font-size: 1.25rem; margin: 0; line-height: 1.2; }
 .titles p { margin: 2px 0 0; color: var(--muted); font-size: .9rem; }
@@ -52,7 +62,7 @@ button, select { font: inherit; color: inherit; }
 }
 .btn:hover { border-color: var(--accent); }
 .controls {
-  position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: nowrap; gap: 14px; align-items: flex-end;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; flex-wrap: nowrap; gap: 14px; align-items: flex-end;
   padding: 8px 0; background: var(--bg); border-bottom: 1px solid var(--line);
   overflow-x: auto; scrollbar-width: none;
 }

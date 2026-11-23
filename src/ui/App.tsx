@@ -7,9 +7,10 @@ import { Reader } from './Reader';
 
 const store: SongStore = new IndexedDbStore();
 
+// Hash routes are plain "#song-<id>" (letters, digits, hyphens) so they also work when hosted in a frame.
 function currentId(): string | null {
-  const m = /^#\/song\/(.+)$/.exec(location.hash);
-  return m ? decodeURIComponent(m[1]!) : null;
+  const m = /^#song-([A-Za-z0-9-]+)$/.exec(location.hash);
+  return m ? m[1]! : null;
 }
 
 export function App() {
@@ -32,6 +33,6 @@ export function App() {
 
   if (!songs) return <p class="muted center">Loading…</p>;
   const open = openId ? songs.find((s) => s.id === openId) : undefined;
-  if (open) return <Reader song={open} onBack={() => (location.hash = '#/')} />;
-  return <Library songs={songs} onOpen={(id) => (location.hash = `#/song/${encodeURIComponent(id)}`)} />;
+  if (open) return <Reader song={open} onBack={() => (location.hash = '')} />;
+  return <Library songs={songs} onOpen={(id) => (location.hash = `#song-${id}`)} />;
 }
