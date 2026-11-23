@@ -10,7 +10,6 @@ import {
   removeLine,
   removeSection,
   reorderChord,
-  setChordBeats,
   setChordText,
   setMeta,
   setSectionLabel,
@@ -26,7 +25,6 @@ import { ChordToolbar } from './ChordToolbar';
 import { loadFontPx, saveFontPx, useFontsReady } from './font';
 import { Icon } from './icons';
 import { LineEditor } from './LineEditor';
-import { TapButton } from './TapButton';
 
 const KEYS = [
   'C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B',
@@ -179,10 +177,6 @@ export function Editor({
     const at = unit === 'word' ? wordStep(selLine.lyrics, selChord.at, delta as 1 | -1) : selChord.at + delta;
     commit(mapLine(song, sel.lineId, (l) => moveChord(l, sel.chordId, at)), `nudge-${sel.chordId}`);
   };
-  const onBeats = (beats: number | undefined) => {
-    if (!sel) return;
-    commit(mapLine(song, sel.lineId, (l) => setChordBeats(l, sel.chordId, beats)), `beats-${sel.chordId}`);
-  };
   const onDelete = () => {
     if (!sel) return;
     commit(mapLine(song, sel.lineId, (l) => removeChord(l, sel.chordId)));
@@ -283,26 +277,6 @@ export function Editor({
               ))}
             </select>
           </label>
-          <label class="ctl">
-            <span class="ctl-label">Tempo (BPM)</span>
-            <input
-              id="song-bpm"
-              type="number"
-              inputMode="numeric"
-              min={30}
-              max={300}
-              placeholder="—"
-              value={song.bpm ?? ''}
-              onInput={(e) => {
-                const n = parseInt((e.currentTarget as HTMLInputElement).value, 10);
-                commit(setMeta(song, { bpm: Number.isFinite(n) ? n : null }), 'bpm');
-              }}
-            />
-          </label>
-          <div class="ctl">
-            <span class="ctl-label">Tap tempo</span>
-            <TapButton onBpm={(n) => commit(setMeta(song, { bpm: n }), 'bpm')} />
-          </div>
           <div class="ctl">
             <span class="ctl-label">Shift all chords</span>
             <div class="stepper">
@@ -433,8 +407,6 @@ export function Editor({
             onText={onText}
             onNudge={onNudge}
             onConfirm={() => setSel(null)}
-            beats={selChord.beats}
-            onBeats={onBeats}
             onDelete={onDelete}
             onClose={() => setSel(null)}
           />

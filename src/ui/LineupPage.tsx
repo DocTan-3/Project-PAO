@@ -7,6 +7,7 @@ import {
   formatDate,
   isISODate,
   lineupEntries,
+  progressLabel,
   setLineupDate,
   slotLabel,
 } from '../model/lineup';
@@ -38,7 +39,6 @@ export function LineupPage({
   const entries = lineupEntries(lineup, songs);
   const used = new Set(entries.map((e) => e.song.id));
   const indexOf = (key: SlotKey) => entries.findIndex((e) => e.key === key);
-  const total = 6;
 
   const pickerLanguage = () => {
     const cur = picking ? byId.get(lineup.slots[picking] ?? '') : undefined;
@@ -56,7 +56,7 @@ export function LineupPage({
         <button class="btn icon ghost" onClick={onBack} aria-label="Back to line ups"><Icon name="back" /></button>
         <div class="titles">
           <h1>Line up</h1>
-          <p>{entries.length} of {total} songs</p>
+          <p>{progressLabel(entries)}</p>
         </div>
         <button
           class="btn primary start-btn"
@@ -119,7 +119,7 @@ export function LineupPage({
                     <Icon name="plus" size={20} />
                     <span>
                       {g.slots.length > 1 && <span class="slot-label">{slot.label}</span>}
-                      <span class="t">{missing ? 'That song was deleted. Choose another' : `Choose ${g.slots.length > 1 ? 'a song' : g.title.toLowerCase()}`}</span>
+                      <span class="t">{missing ? 'That song was deleted. Choose another' : 'Choose a song'}</span>
                     </span>
                   </button>
                 )}

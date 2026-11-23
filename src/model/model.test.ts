@@ -140,6 +140,30 @@ storeSuite('memory', () => new MemoryStore());
 let n = 0;
 storeSuite('indexeddb', () => new IndexedDbStore(`test-${n++}`));
 
+describe('line ups saved before Response existed', () => {
+  it('the store hands them back with Response empty', async () => {
+    const name = 'legacy-lineup-db';
+    await new Promise<void>((resolve, reject) => {
+      const req = indexedDB.open(name, 2);
+      req.onupgradeneeded = () => {
+        req.result.createObjectStore('songs', { keyPath: 'id' });
+        req.result.createObjectStore('lineups', { keyPath: 'id' });
+      };
+      req.onsuccess = () => {
+        const tx = req.result.transaction('lineups', 'readwrite');
+        tx.objectStore('lineups').put({ id: 'lu-old', date: '2026-11-22', createdAt: 1, updatedAt: 1,
+          slots: { opening: 's1', welcome: null, praise1: null, praise2: null, worship1: null, worship2: null } });
+        tx.oncomplete = () => { req.result.close(); resolve(); };
+        tx.onerror = () => reject(tx.error);
+      };
+      req.onerror = () => reject(req.error);
+    });
+    const store = new IndexedDbStore(name);
+    expect((await store.getLineup('lu-old'))!.slots).toMatchObject({ opening: 's1', response: null });
+    expect((await store.listLineups())[0]!.slots.response).toBeNull();
+  });
+});
+
 describe('upgrading an existing database', () => {
   it('keeps every song saved before line ups existed', async () => {
     const name = 'legacy-db';

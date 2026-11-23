@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import { demoSongs, tagalogDemoSongs } from '../model/demo';
 import { newSong } from '../model/edit';
-import { LANGUAGES, groupSongs, languageOf } from '../model/library';
+import { groupSongs, languageOf } from '../model/library';
 import {
   type Lineup,
-  formatDate,
   lineupEntries,
   newLineup,
   nextSunday,
@@ -149,14 +148,11 @@ export function App() {
   if (route.kind === 'song') {
     const song = songs.find((s) => s.id === route.id);
     if (song) {
-      const lang = languageOf(song);
-      const order = groupSongs(songs, lang).flatMap((g) => g.songs);
+      const order = groupSongs(songs, languageOf(song)).flatMap((g) => g.songs);
       const at = order.findIndex((s) => s.id === song.id);
       const prev = order[at - 1];
       const next = order[at + 1];
       const nav: ReaderNav = {
-        title: `${LANGUAGES.find((l) => l.id === lang)!.label} songs`,
-        subtitle: `${at + 1} of ${order.length}`,
         prev: prev && { title: prev.title, go: () => swap(`#song-${prev.id}`) },
         next: next && { title: next.title, go: () => swap(`#song-${next.id}`) },
       };
@@ -167,10 +163,6 @@ export function App() {
           nav={nav}
           onBack={() => go('')}
           onEdit={() => go(`#edit-${song.id}`)}
-          onSongChange={async (patch) => {
-            await store.put({ ...song, ...patch, updatedAt: Date.now() });
-            await refresh();
-          }}
         />
       );
     }
@@ -186,8 +178,7 @@ export function App() {
       const prev = entries[at - 1];
       const next = entries[at + 1];
       const nav: ReaderNav = {
-        title: entry.label,
-        subtitle: `Line up · ${formatDate(lineup.date, { month: 'short', day: 'numeric' })} · ${at + 1} of ${entries.length}`,
+        slot: entry.label,
         prev: prev && { title: prev.song.title, go: () => swap(`#set-${lineup.id}-${at - 1}`) },
         next: next && { title: next.song.title, go: () => swap(`#set-${lineup.id}-${at + 1}`) },
       };
@@ -198,10 +189,6 @@ export function App() {
           nav={nav}
           onBack={() => swap(`#lineup-${lineup.id}`)}
           onEdit={() => go(`#edit-${entry.song.id}`)}
-          onSongChange={async (patch) => {
-            await store.put({ ...entry.song, ...patch, updatedAt: Date.now() });
-            await refresh();
-          }}
         />
       );
     }

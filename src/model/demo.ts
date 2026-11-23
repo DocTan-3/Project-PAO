@@ -13,7 +13,6 @@ function englishDemoSongs(): Song[] {
       language: 'en',
       artist: 'Traditional',
       key: 'G',
-      bpm: 72,
       sections: [
         S(
           'Verse 1',
@@ -36,7 +35,6 @@ function englishDemoSongs(): Song[] {
       language: 'en',
       artist: 'Traditional',
       key: 'Am',
-      bpm: 110,
       sections: [
         S(
           'Intro',
@@ -63,7 +61,6 @@ function englishDemoSongs(): Song[] {
       language: 'en',
       artist: 'Traditional',
       key: 'Bb',
-      bpm: 100,
       sections: [
         S(
           'Verse',
@@ -88,7 +85,6 @@ export function tagalogDemoSongs(): Song[] {
       artist: 'Katutubong awit',
       language: 'tl',
       key: 'C',
-      bpm: 100,
       sections: [
         S(
           'Verse',
@@ -108,7 +104,6 @@ export function tagalogDemoSongs(): Song[] {
       artist: 'Katutubong awit',
       language: 'tl',
       key: 'G',
-      bpm: 120,
       sections: [
         S(
           'Verse',
@@ -128,7 +123,6 @@ export function tagalogDemoSongs(): Song[] {
       artist: 'Katutubong awit',
       language: 'tl',
       key: 'G',
-      bpm: 90,
       sections: [
         S(
           'Verse',

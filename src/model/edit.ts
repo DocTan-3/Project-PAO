@@ -77,19 +77,6 @@ export function setChordText(line: Line, id: string, text: string): Line {
   return { ...line, chords: line.chords.map((c) => (c.id === id ? { ...c, text } : c)) };
 }
 
-/** How many beats a chord lasts for autoscroll. `undefined` removes the override (the default applies). */
-export function setChordBeats(line: Line, id: string, beats: number | undefined): Line {
-  return {
-    ...line,
-    chords: line.chords.map((c) => {
-      if (c.id !== id) return c;
-      const { beats: _old, ...rest } = c;
-      void _old;
-      return beats && beats > 0 ? { ...rest, beats } : rest;
-    }),
-  };
-}
-
 export function removeChord(line: Line, id: string): Line {
   return { ...line, chords: line.chords.filter((c) => c.id !== id) };
 }
@@ -196,6 +183,6 @@ export function setSectionLabel(song: Song, sectionId: string, label: string): S
   return touch({ ...song, sections: song.sections.map((s): Section => (s.id === sectionId ? { ...s, label } : s)) });
 }
 
-export function setMeta(song: Song, patch: Partial<Pick<Song, 'title' | 'artist' | 'notes' | 'key' | 'bpm' | 'language'>>): Song {
+export function setMeta(song: Song, patch: Partial<Pick<Song, 'title' | 'artist' | 'notes' | 'key' | 'language'>>): Song {
   return touch({ ...song, ...patch });
 }

@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'preact/hooks';
-import { Icon } from './icons';
 import {
   type Key,
   diatonicChords,
@@ -9,8 +8,6 @@ import {
   spellInKey,
   spellPitchClass,
 } from '../theory';
-
-const BEAT_CHOICES: (number | undefined)[] = [undefined, 1, 2, 3, 4, 6, 8, 12, 16];
 
 const SUFFIXES: [label: string, suffix: string][] = [
   ['maj', ''], ['m', 'm'], ['7', '7'], ['maj7', 'maj7'], ['m7', 'm7'], ['sus4', 'sus4'],
@@ -24,9 +21,6 @@ export interface ChordToolbarProps {
   /** 'place': choosing where a new chord goes (Add/Cancel); 'edit': changing an existing chord */
   mode: 'place' | 'edit';
   onConfirm: () => void;
-  /** how long the selected chord lasts; undefined = follow the song's default */
-  beats?: number;
-  onBeats?: (beats: number | undefined) => void;
   onText: (text: string) => void;
   onNudge: (delta: number, unit: 'char' | 'word') => void;
   onDelete: () => void;
@@ -35,9 +29,7 @@ export interface ChordToolbarProps {
 
 export function ChordToolbar(p: ChordToolbarProps) {
   const parsed = parseChord(p.text);
-  // one extra panel at a time, so the toolbar stays short on a phone
-  const [panel, setPanel] = useState<'beats' | 'more' | null>(null);
-  const toggle = (name: 'beats' | 'more') => setPanel((cur) => (cur === name ? null : name));
+  const [more, setMore] = useState(false);
   const diatonic = useMemo(() => (p.songKey ? diatonicChords(p.songKey) : []), [p.songKey && JSON.stringify(p.songKey)]);
   const roots = useMemo(
     () =>
@@ -87,20 +79,8 @@ export function ChordToolbar(p: ChordToolbarProps) {
           spellcheck={false}
           onInput={(e) => p.onText((e.currentTarget as HTMLInputElement).value.trim())}
         />
-        {p.mode === 'edit' && p.onBeats && (
-          <button
-            class={`btn sm beats-btn${panel === 'beats' ? ' open' : ''}`}
-            onClick={() => toggle('beats')}
-            aria-expanded={panel === 'beats'}
-            aria-label={`Beats this chord lasts: ${p.beats ?? 'Auto'}`}
-            title="How long this chord lasts"
-          >
-            <Icon name="timer" size={18} />
-            {p.beats ?? 'Auto'}
-          </button>
-        )}
-        <button class="btn sm" onClick={() => toggle('more')} aria-expanded={panel === 'more'}>
-          {panel === 'more' ? 'Less' : 'More'}
+        <button class="btn sm" onClick={() => setMore((m) => !m)} aria-expanded={more}>
+          {more ? 'Less' : 'More'}
         </button>
       </div>
       {diatonic.length > 0 && (
@@ -113,23 +93,7 @@ export function ChordToolbar(p: ChordToolbarProps) {
           ))}
         </div>
       )}
-      {panel === 'beats' && p.mode === 'edit' && p.onBeats && (
-        <div class="ctb-scroll" role="radiogroup" aria-label="How long this chord lasts, in beats">
-          {BEAT_CHOICES.map((b) => (
-            <button
-              key={b ?? 'auto'}
-              role="radio"
-              aria-checked={p.beats === b}
-              class={`chipbtn flat${p.beats === b ? ' on' : ''}`}
-              onClick={() => p.onBeats?.(b)}
-              title={b === undefined ? 'Follow the default length' : `${b} ${b === 1 ? 'beat' : 'beats'}`}
-            >
-              {b === undefined ? 'Auto' : b}
-            </button>
-          ))}
-        </div>
-      )}
-      {panel === 'more' && (
+      {more && (
         <>
           <div class="ctb-scroll" aria-label="Root note">
             {roots.map((r) => (

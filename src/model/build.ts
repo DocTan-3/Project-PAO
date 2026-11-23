@@ -26,7 +26,6 @@ export function mkSong(init: Partial<Song> & Pick<Song, 'title'>): Song {
     id: uid(),
     artist: '',
     key: null,
-    bpm: null,
     sections: [],
     createdAt: now,
     updatedAt: now,

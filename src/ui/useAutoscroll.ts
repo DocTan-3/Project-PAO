@@ -1,39 +1,39 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
-import { type Timeline, beatAt, positionAt } from '../model/timeline';
 
-export interface NowPlaying {
-  lineId: string | null;
-  chordId: string | null;
+/** Scroll speed in pixels per second for each level (1-10), for 18px text. Bigger text scrolls faster so lines pass at the same pace. */
+export const SPEED_LEVELS = [6, 9, 12, 16, 20, 26, 33, 42, 54, 70];
+export const DEFAULT_SPEED = 4;
+export const MAX_SPEED = SPEED_LEVELS.length;
+
+export function loadSpeed(): number {
+  try {
+    const n = Number(localStorage.getItem('pao:speed'));
+    if (Number.isInteger(n) && n >= 1 && n <= MAX_SPEED) return n;
+  } catch {
+    /* storage unavailable */
+  }
+  return DEFAULT_SPEED;
+}
+export function saveSpeed(n: number): void {
+  try {
+    localStorage.setItem('pao:speed', String(n));
+  } catch {
+    /* ignore */
+  }
 }
 
-/** How far down the screen the current line sits while scrolling. */
-const anchorPx = () => Math.max(130, Math.round(window.innerHeight * 0.3));
-
-const lineEl = (id: string) => document.querySelector<HTMLElement>(`[data-line-id="${CSS.escape(id)}"]`);
-
 /**
- * Teleprompter-style autoscroll that follows the song's timeline: the line being played
- * stays near the top of the screen, and the current chord is reported so it can be lit.
- * Touching or scrolling the page pauses it; pressing play resumes from where you are.
+ * Plain autoscroll: the page moves steadily down at the chosen speed. Touching or scrolling the page pauses it,
+ * and pressing play again carries on from wherever the reader is. Stops at the end of the song.
  */
-export function useAutoscroll(opts: { timeline: Timeline; bpm: number; speed: number }) {
+export function useAutoscroll(opts: { speed: number; fontPx: number }) {
   const [playing, setPlaying] = useState(false);
   const [finished, setFinished] = useState(false);
-  const [now, setNow] = useState<NowPlaying>({ lineId: null, chordId: null });
-  const tl = useRef(opts.timeline);
-  const rate = useRef({ bpm: opts.bpm, speed: opts.speed });
-  const beat = useRef(0);
+  const rate = useRef(0);
   const raf = useRef(0);
   const last = useRef(0);
-  const nowRef = useRef<NowPlaying>(now);
-  tl.current = opts.timeline;
-  rate.current = { bpm: opts.bpm, speed: opts.speed };
-
-  const publish = useCallback((lineId: string | null, chordId: string | null) => {
-    if (nowRef.current.lineId === lineId && nowRef.current.chordId === chordId) return;
-    nowRef.current = { lineId, chordId };
-    setNow(nowRef.current);
-  }, []);
+  const pos = useRef(0);
+  rate.current = SPEED_LEVELS[Math.max(1, Math.min(MAX_SPEED, opts.speed)) - 1]! * (opts.fontPx / 18);
 
   const stop = useCallback(() => {
     cancelAnimationFrame(raf.current);
@@ -41,89 +41,71 @@ export function useAutoscroll(opts: { timeline: Timeline; bpm: number; speed: nu
     setPlaying(false);
   }, []);
 
-  /** The beat that matches what is currently under the reading line. */
-  const beatFromScroll = useCallback((): number => {
-    const t = tl.current;
-    const y = window.scrollY + anchorPx();
-    for (let i = 0; i < t.lines.length; i++) {
-      const el = lineEl(t.lines[i]!.id);
-      if (!el) continue;
-      const r = el.getBoundingClientRect();
-      const top = r.top + window.scrollY;
-      if (y < top) return i === 0 ? 0 : t.lines[i]!.start; // in a gap: start the next line
-      if (y < top + r.height) return beatAt(t, i, (y - top) / Math.max(1, r.height));
-    }
-    return 0; // past the end: start over
-  }, []);
+  const maxScroll = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
 
   const frame = useCallback(
     (ts: number) => {
       const dt = Math.min(0.25, (ts - last.current) / 1000);
       last.current = ts;
-      beat.current += dt * (rate.current.bpm / 60) * rate.current.speed;
-      const t = tl.current;
-      const pos = positionAt(t, beat.current);
-      if (!pos) return stop();
-      const line = t.lines[pos.lineIndex]!;
-      publish(line.id, pos.chordId);
-      const el = lineEl(line.id);
-      if (el) {
-        const r = el.getBoundingClientRect();
-        const top = r.top + window.scrollY;
-        window.scrollTo(0, top + pos.progress * r.height - anchorPx());
-      }
-      if (pos.finished) {
+      // if something else moved the page (a flick that is still gliding, the scrollbar), carry on from there
+      if (Math.abs(window.scrollY - pos.current) > 3) pos.current = window.scrollY;
+      pos.current += rate.current * dt;
+      const max = maxScroll();
+      if (pos.current >= max) {
+        window.scrollTo(0, max);
         setFinished(true);
-        publish(null, null);
         return stop();
       }
+      window.scrollTo(0, pos.current);
       raf.current = requestAnimationFrame(frame);
     },
-    [publish, stop],
+    [stop],
   );
 
   const play = useCallback(() => {
-    if (tl.current.lines.length === 0) return;
-    beat.current = beatFromScroll();
+    if (maxScroll() <= 0) return; // a song that fits on the screen has nothing to scroll
+    pos.current = window.scrollY;
+    if (maxScroll() - pos.current < 4) {
+      // already at the end: start again from the top
+      window.scrollTo(0, 0);
+      pos.current = 0;
+    }
     setFinished(false);
     last.current = performance.now();
     setPlaying(true);
     cancelAnimationFrame(raf.current);
     raf.current = requestAnimationFrame(frame);
-  }, [beatFromScroll, frame]);
+  }, [frame]);
 
   const toggle = useCallback(() => (raf.current ? stop() : play()), [play, stop]);
 
   const restart = useCallback(() => {
     stop();
-    beat.current = 0;
+    pos.current = 0;
     setFinished(false);
-    publish(null, null);
     window.scrollTo({ top: 0 });
-  }, [stop, publish]);
+  }, [stop]);
 
   // pause when the reader takes over: touching/scrolling the song, paging keys, or leaving the tab
   useEffect(() => {
     if (!playing) return;
-    const inControls = (e: Event) =>
-      !!(e.target as Element | null)?.closest?.('.bottom-stack, .sheet-backdrop, .topbar, .reader-side');
+    const inControls = (e: Event) => !!(e.target as Element | null)?.closest?.('.reader-head, .sheet-backdrop, .reader-side');
     const touch = (e: Event) => {
       if (!inControls(e)) stop();
     };
-    const wheel = () => stop();
     const key = (e: KeyboardEvent) => {
       if (['PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown'].includes(e.key)) stop();
     };
     const hidden = () => document.hidden && stop();
     addEventListener('touchstart', touch, { passive: true });
     addEventListener('pointerdown', touch, { passive: true });
-    addEventListener('wheel', wheel, { passive: true });
+    addEventListener('wheel', stop, { passive: true });
     addEventListener('keydown', key);
     document.addEventListener('visibilitychange', hidden);
     return () => {
       removeEventListener('touchstart', touch);
       removeEventListener('pointerdown', touch);
-      removeEventListener('wheel', wheel);
+      removeEventListener('wheel', stop);
       removeEventListener('keydown', key);
       document.removeEventListener('visibilitychange', hidden);
     };
@@ -143,5 +125,5 @@ export function useAutoscroll(opts: { timeline: Timeline; bpm: number; speed: nu
 
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
 
-  return { playing, finished, now, toggle, play, stop, restart };
+  return { playing, finished, toggle, stop, restart };
 }

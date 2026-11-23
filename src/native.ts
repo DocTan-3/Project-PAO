@@ -16,10 +16,7 @@ export function backAction(hash: string, overlayOpen: boolean, historyLength: nu
 
 const OVERLAYS = '.drawer-wrap.open, .sheet-backdrop, .picker, .ctb-wrap';
 
-const isDark = (): boolean => {
-  const t = document.documentElement.getAttribute('data-theme');
-  return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-};
+const isDark = (): boolean => document.documentElement.getAttribute('data-theme') === 'dark';
 
 /** Match the status and navigation bar icons to the app's own theme (which can differ from the phone's). */
 function syncSystemBars(): void {
@@ -40,5 +37,4 @@ export function initNative(): void {
 
   syncSystemBars();
   new MutationObserver(syncSystemBars).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncSystemBars);
 }

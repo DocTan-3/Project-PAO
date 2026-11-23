@@ -5,8 +5,6 @@ export interface PlacedChord {
   at: number;
   /** chord as written, e.g. "F#m7/C#" (parsed on demand; unparseable text is kept as-is) */
   text: string;
-  /** duration in beats for autoscroll and chord highlight (default 4) */
-  beats?: number;
 }
 
 export interface Line {
@@ -34,7 +32,6 @@ export interface Song {
   notes?: string;
   /** key the chords are written in, e.g. "G" or "F#m"; null = unknown */
   key: string | null;
-  bpm: number | null;
   sections: Section[];
   createdAt: number;
   updatedAt: number;

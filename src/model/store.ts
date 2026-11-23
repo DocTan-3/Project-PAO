@@ -1,4 +1,4 @@
-import type { Lineup } from './lineup';
+import { type Lineup, normalizeLineup } from './lineup';
 import type { Song } from './types';
 
 export interface SongStore {
@@ -37,10 +37,11 @@ export class MemoryStore implements Store {
     this.songs.delete(id);
   }
   async listLineups() {
-    return [...this.lineups.values()].sort(byDateDesc);
+    return [...this.lineups.values()].map(normalizeLineup).sort(byDateDesc);
   }
   async getLineup(id: string) {
-    return this.lineups.get(id);
+    const l = this.lineups.get(id);
+    return l && normalizeLineup(l);
   }
   async putLineup(l: Lineup) {
     this.lineups.set(l.id, structuredClone(l));
@@ -101,10 +102,11 @@ export class IndexedDbStore implements Store {
   }
   async listLineups() {
     const all = await this.run<Lineup[]>(LINEUPS, 'readonly', (s) => s.getAll());
-    return all.sort(byDateDesc);
+    return all.map(normalizeLineup).sort(byDateDesc);
   }
-  getLineup(id: string) {
-    return this.run<Lineup | undefined>(LINEUPS, 'readonly', (s) => s.get(id));
+  async getLineup(id: string) {
+    const l = await this.run<Lineup | undefined>(LINEUPS, 'readonly', (s) => s.get(id));
+    return l && normalizeLineup(l);
   }
   async putLineup(l: Lineup) {
     await this.run(LINEUPS, 'readwrite', (s) => s.put(l));

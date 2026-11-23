@@ -4,9 +4,8 @@ import { diatonicChords, formatChord, parseKey } from '../theory';
 import { mkLine, mkSection, mkSong } from './build';
 import {
   addChord, adjustAnchors, mergeUp, moveChord, removeChord, removeLine, reorderChord, setLyrics,
-  setChordBeats, splitAt, splitLine, wordStep,
+  splitAt, splitLine, wordStep,
 } from './edit';
-import { buildTimeline } from './timeline';
 
 const at = (line: { chords: { at: number }[] }) => line.chords.map((c) => c.at);
 
@@ -85,33 +84,6 @@ describe('chord operations', () => {
     const l = mkLine('x');
     const song = mkSong({ title: 't', sections: [mkSection('v', l)] });
     expect(removeLine(song, l.id).sections[0]!.lines).toHaveLength(1);
-  });
-});
-
-describe('setChordBeats', () => {
-  it('sets a length, changes it, and clears it back to the default', () => {
-    const l = mkLine('hello world', ['hello', 'G'], ['world', 'D']);
-    const [a, b] = l.chords;
-    const set = setChordBeats(l, a!.id, 8);
-    expect(set.chords[0]!.beats).toBe(8);
-    expect(set.chords[1]).toBe(b); // the other chord is untouched
-    expect(setChordBeats(set, a!.id, 2).chords[0]!.beats).toBe(2);
-    const cleared = setChordBeats(set, a!.id, undefined);
-    expect('beats' in cleared.chords[0]!).toBe(false);
-  });
-  it('ignores zero and negative lengths', () => {
-    const l = mkLine('x', [0, 'C']);
-    expect('beats' in setChordBeats(l, l.chords[0]!.id, 0).chords[0]!).toBe(false);
-    expect('beats' in setChordBeats(l, l.chords[0]!.id, -3).chords[0]!).toBe(false);
-  });
-  it('keeps the chord position and text', () => {
-    const l = mkLine('hello world', [6, 'D']);
-    expect(setChordBeats(l, l.chords[0]!.id, 4).chords[0]).toMatchObject({ at: 6, text: 'D', beats: 4 });
-  });
-  it('a custom length changes how long the line lasts in the timeline', () => {
-    const l = mkLine('hello world', ['hello', 'G'], ['world', 'D']);
-    const song = mkSong({ title: 't', sections: [mkSection('v', setChordBeats(l, l.chords[0]!.id, 8))] });
-    expect(buildTimeline(song, 4).total).toBe(12); // 8 + the default 4
   });
 });
 

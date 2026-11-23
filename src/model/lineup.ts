@@ -1,8 +1,8 @@
 import { uid } from './id';
 import type { Song } from './types';
 
-/** The six places a song can go in a service line up. */
-export type SlotKey = 'opening' | 'welcome' | 'praise1' | 'praise2' | 'worship1' | 'worship2';
+/** The places a song can go in a service line up: six required, plus an optional Response. */
+export type SlotKey = 'opening' | 'welcome' | 'praise1' | 'praise2' | 'worship1' | 'worship2' | 'response';
 
 export interface Lineup {
   id: string;
@@ -20,10 +20,12 @@ export interface SlotDef {
 }
 export interface SlotGroup {
   title: string;
+  /** the group does not need to be filled for the line up to be complete */
+  optional?: boolean;
   slots: SlotDef[];
 }
 
-/** What the form shows: Opening, Welcome, Praise (2 songs), Worship (2 songs). */
+/** What the form shows: Opening, Welcome, Praise (2 songs), Worship (2 songs), Response (optional). */
 export const SLOT_GROUPS: SlotGroup[] = [
   { title: 'Opening Song', slots: [{ key: 'opening', label: 'Opening Song' }] },
   { title: 'Welcome Song', slots: [{ key: 'welcome', label: 'Welcome Song' }] },
@@ -41,16 +43,23 @@ export const SLOT_GROUPS: SlotGroup[] = [
       { key: 'worship2', label: 'Worship 2' },
     ],
   },
+  { title: 'Response (Optional)', optional: true, slots: [{ key: 'response', label: 'Response' }] },
 ];
 
 /** Service order, which is also the order songs are swiped through. */
 export const SLOT_ORDER: SlotKey[] = SLOT_GROUPS.flatMap((g) => g.slots.map((s) => s.key));
 
+/** How many songs make a line up complete (Response is optional and not counted). */
+export const REQUIRED_SLOTS: SlotKey[] = SLOT_GROUPS.filter((g) => !g.optional).flatMap((g) => g.slots.map((s) => s.key));
+
 export const slotLabel = (key: SlotKey): string => SLOT_GROUPS.flatMap((g) => g.slots).find((s) => s.key === key)!.label;
 
 const emptySlots = (): Record<SlotKey, string | null> => ({
-  opening: null, welcome: null, praise1: null, praise2: null, worship1: null, worship2: null,
+  opening: null, welcome: null, praise1: null, praise2: null, worship1: null, worship2: null, response: null,
 });
+
+/** Line ups saved before a slot existed get that slot empty (so old line ups keep working). */
+export const normalizeLineup = (l: Lineup): Lineup => ({ ...l, slots: { ...emptySlots(), ...l.slots } });
 
 export function newLineup(date: string): Lineup {
   const now = Date.now();
@@ -120,3 +129,13 @@ export function groupLineups(lineups: Lineup[], today: string): { upcoming: Line
 }
 
 export const filledCount = (l: Lineup, songs: Song[]): number => lineupEntries(l, songs).length;
+
+/** "4 of 6 songs", "6 of 6 songs", and "6 of 6 songs + Response" when the optional slot is used. */
+export function progressLabel(entries: LineupEntry[]): string {
+  const required = entries.filter((e) => REQUIRED_SLOTS.includes(e.key)).length;
+  const response = entries.some((e) => e.key === 'response');
+  return `${required} of ${REQUIRED_SLOTS.length} songs${response ? ' + Response' : ''}`;
+}
+
+export const isComplete = (entries: LineupEntry[]): boolean =>
+  REQUIRED_SLOTS.every((k) => entries.some((e) => e.key === k));

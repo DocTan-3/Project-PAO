@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { LANGUAGES, countByLanguage, groupSongs } from '../model/library';
 import type { Language, Song } from '../model/types';
 import { Icon } from './icons';
@@ -50,23 +50,37 @@ export function Library({
     [songs, q],
   );
   const counts = countByLanguage(filtered);
-  const totals = countByLanguage(songs);
   const groups = useMemo(() => groupSongs(filtered, lang), [filtered, lang]);
   const langLabel = LANGUAGES.find((l) => l.id === lang)!.label;
   const other = LANGUAGES.find((l) => l.id !== lang)!;
   const showRail = groups.length >= 2;
 
+  // the top block (title, search, English/Tagalog) stays pinned; the letter headings stick just beneath it
+  const pinRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = pinRef.current;
+    const root = rootRef.current;
+    if (!el || !root) return;
+    const set = () => root.style.setProperty('--lib-head-h', `${el.offsetHeight}px`);
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    set();
+    return () => ro.disconnect();
+  }, []);
+
   const jump = (letter: string) =>
     document.getElementById(`letter-${lang}-${letter}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
 
   return (
-    <main class={`library${showRail ? ' has-rail' : ''}`}>
+    <main class={`library${showRail ? ' has-rail' : ''}`} ref={rootRef}>
+      <div class="lib-pinned" ref={pinRef}>
       <div class="lib-top">
         <div class="brand">
           <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
           Songs
         </div>
-        <ThemeToggle />
+        <ThemeToggle labelled />
       </div>
 
       {songs.length > 0 && (
@@ -100,14 +114,7 @@ export function Library({
         ))}
       </div>
 
-      {groups.length > 0 && (
-        <p class="lib-count">
-          {q
-            ? `${counts[lang]} of ${totals[lang]} ${langLabel} songs`
-            : `${counts[lang]} ${langLabel} ${counts[lang] === 1 ? 'song' : 'songs'}`}
-          <span class="lib-hint"> · hold a song to delete</span>
-        </p>
-      )}
+      </div>
 
       {groups.length === 0 && (
         <div class="empty" role="tabpanel">

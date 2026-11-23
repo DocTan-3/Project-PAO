@@ -1,18 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { mkSong } from './build';
 import {
-  SLOT_GROUPS, SLOT_ORDER, assignSlot, filledCount, formatDate, groupLineups, isISODate, lineupEntries,
-  newLineup, nextSunday, removeSongFromLineup, setLineupDate, todayISO,
+  REQUIRED_SLOTS, SLOT_GROUPS, SLOT_ORDER, assignSlot, filledCount, formatDate, groupLineups, isComplete, isISODate,
+  lineupEntries, newLineup, nextSunday, normalizeLineup, progressLabel, removeSongFromLineup, setLineupDate, todayISO,
 } from './lineup';
 
-const songs = ['Opener', 'Welcome', 'Praise A', 'Praise B', 'Worship A', 'Worship B'].map((t) => mkSong({ title: t }));
+const songs = ['Opener', 'Welcome', 'Praise A', 'Praise B', 'Worship A', 'Worship B', 'Response Song'].map((t) => mkSong({ title: t }));
 
 describe('slots', () => {
   it('has the sections the client asked for, in order', () => {
     expect(SLOT_GROUPS.map((g) => [g.title, g.slots.length])).toEqual([
-      ['Opening Song', 1], ['Welcome Song', 1], ['Praise', 2], ['Worship', 2],
+      ['Opening Song', 1], ['Welcome Song', 1], ['Praise', 2], ['Worship', 2], ['Response (Optional)', 1],
     ]);
-    expect(SLOT_ORDER).toEqual(['opening', 'welcome', 'praise1', 'praise2', 'worship1', 'worship2']);
+    expect(SLOT_ORDER).toEqual(['opening', 'welcome', 'praise1', 'praise2', 'worship1', 'worship2', 'response']);
+  });
+  it('Response is optional; the other six are required', () => {
+    expect(REQUIRED_SLOTS).toEqual(['opening', 'welcome', 'praise1', 'praise2', 'worship1', 'worship2']);
+    expect(SLOT_GROUPS.filter((g) => g.optional).map((g) => g.title)).toEqual(['Response (Optional)']);
   });
   it('a new line up is empty and has the date given', () => {
     const l = newLineup('2026-11-29');
@@ -70,6 +74,43 @@ describe('lineupEntries', () => {
     expect(out.slots).toMatchObject({ praise1: null, worship1: null, opening: songs[0]!.id });
     const untouched = removeSongFromLineup(l, 'nobody');
     expect(untouched).toBe(l);
+  });
+});
+
+describe('Response and the counter', () => {
+  const six = () => {
+    let l = newLineup('2026-11-29');
+    (['opening', 'welcome', 'praise1', 'praise2', 'worship1', 'worship2'] as const).forEach((k, i) => (l = assignSlot(l, k, songs[i]!.id)));
+    return l;
+  };
+  it('six filled songs read "6 of 6 songs" and count as complete without a Response', () => {
+    const e = lineupEntries(six(), songs);
+    expect(progressLabel(e)).toBe('6 of 6 songs');
+    expect(isComplete(e)).toBe(true);
+  });
+  it('a Response is added on top and shown as a plus, never as "7 of 6"', () => {
+    const e = lineupEntries(assignSlot(six(), 'response', songs[6]!.id), songs);
+    expect(progressLabel(e)).toBe('6 of 6 songs + Response');
+    expect(e[e.length - 1]!.label).toBe('Response'); // last in service order, so it is the last song swiped to
+  });
+  it('an incomplete line up counts only the required slots', () => {
+    let l = assignSlot(newLineup('2026-11-29'), 'opening', songs[0]!.id);
+    l = assignSlot(l, 'response', songs[6]!.id); // a Response alone does not make progress on the six
+    const e = lineupEntries(l, songs);
+    expect(progressLabel(e)).toBe('1 of 6 songs + Response');
+    expect(isComplete(e)).toBe(false);
+  });
+  it('an empty line up', () => {
+    expect(progressLabel([])).toBe('0 of 6 songs');
+  });
+  it('line ups saved before Response existed open with it empty and keep their songs', () => {
+    const old = { id: 'old', date: '2026-11-22', createdAt: 1, updatedAt: 1,
+      slots: { opening: songs[0]!.id, welcome: null, praise1: null, praise2: null, worship1: songs[4]!.id, worship2: null } } as never;
+    const l = normalizeLineup(old);
+    expect(l.slots.response).toBeNull();
+    expect(l.slots.opening).toBe(songs[0]!.id);
+    expect(l.slots.worship1).toBe(songs[4]!.id);
+    expect(lineupEntries(l, songs)).toHaveLength(2);
   });
 });
 

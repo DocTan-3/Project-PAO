@@ -1,57 +1,54 @@
 import { useState } from 'preact/hooks';
 import { Icon, type IconName } from './icons';
 
-export type Theme = 'system' | 'light' | 'dark';
+/** Light (white and black), Dark (black and white) and BPCG (light brown and dark brown). */
+export type Theme = 'light' | 'dark' | 'bpcg';
 const KEY = 'pao:theme';
-let applied = false; // whether we have set data-theme ourselves (so "system" only undoes our own change)
+const ORDER: Theme[] = ['light', 'dark', 'bpcg'];
 
+const LABEL: Record<Theme, string> = { light: 'Light', dark: 'Dark', bpcg: 'BPCG' };
+const ICON: Record<Theme, IconName> = { light: 'sun', dark: 'moon', bpcg: 'palette' };
+
+/** The saved theme. Anything else (including no choice yet, or the old "match device") opens in Light. */
 export function loadTheme(): Theme {
   try {
     const v = localStorage.getItem(KEY);
-    if (v === 'light' || v === 'dark') return v;
+    if (v === 'dark' || v === 'bpcg') return v;
   } catch {
     /* storage unavailable */
   }
-  return 'system';
+  return 'light';
 }
 
 export function applyTheme(t: Theme): void {
-  const root = document.documentElement;
-  if (t === 'system') {
-    if (applied) root.removeAttribute('data-theme');
-    applied = false;
-  } else {
-    root.setAttribute('data-theme', t);
-    applied = true;
-  }
+  document.documentElement.setAttribute('data-theme', t);
 }
 
-const NEXT: Record<Theme, Theme> = { system: 'light', light: 'dark', dark: 'system' };
-const ICON: Record<Theme, IconName> = { system: 'auto', light: 'sun', dark: 'moon' };
-const LABEL: Record<Theme, string> = { system: 'Match device', light: 'Light', dark: 'Dark' };
+export const nextTheme = (t: Theme): Theme => ORDER[(ORDER.indexOf(t) + 1) % ORDER.length]!;
+export const themeLabel = (t: Theme): string => LABEL[t];
 
-/** One button that cycles Match device -> Light -> Dark. */
-export function ThemeToggle() {
+/** One button that cycles Light -> Dark -> BPCG. `labelled` also shows the theme's name. */
+export function ThemeToggle({ labelled = false }: { labelled?: boolean }) {
   const [theme, setTheme] = useState<Theme>(loadTheme);
   const cycle = () => {
-    const next = NEXT[theme];
+    const next = nextTheme(theme);
     setTheme(next);
     applyTheme(next);
     try {
-      if (next === 'system') localStorage.removeItem(KEY);
-      else localStorage.setItem(KEY, next);
+      localStorage.setItem(KEY, next);
     } catch {
       /* ignore */
     }
   };
   return (
     <button
-      class="btn icon ghost"
+      class={`btn ${labelled ? 'theme-pill' : 'icon ghost'}`}
       onClick={cycle}
       aria-label={`Theme: ${LABEL[theme]}. Tap to change.`}
       title={`Theme: ${LABEL[theme]}`}
     >
       <Icon name={ICON[theme]} />
+      {labelled && <span>{LABEL[theme]}</span>}
     </button>
   );
 }

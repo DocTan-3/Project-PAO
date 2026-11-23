@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'preact/hooks';
-import { type Lineup, SLOT_ORDER, formatDate, groupLineups, lineupEntries, todayISO } from '../model/lineup';
+import { type Lineup, formatDate, groupLineups, isComplete, lineupEntries, progressLabel, todayISO } from '../model/lineup';
 import type { Song } from '../model/types';
 import { Icon } from './icons';
 import { ThemeToggle } from './theme';
@@ -47,7 +47,7 @@ export function LineupList({
             onClick={() => {
               if (!hold.consumeClick()) onOpen(l.id);
             }}
-            aria-label={`${formatDate(l.date, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}, ${entries.length} of ${SLOT_ORDER.length} songs. Press and hold, or press Delete, to delete.`}
+            aria-label={`${formatDate(l.date, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}, ${progressLabel(entries)}. Press and hold, or press Delete, to delete.`}
           >
             <span class="datebadge">
               <span class="dow">{formatDate(l.date, { weekday: 'short' })}</span>
@@ -59,9 +59,7 @@ export function LineupList({
               <span class="a">
                 {entries.length === 0 ? 'No songs yet' : entries.map((e) => e.song.title || 'Untitled').join(' · ')}
               </span>
-              <span class={`progress${entries.length === SLOT_ORDER.length ? ' done' : ''}`}>
-                {entries.length} of {SLOT_ORDER.length} songs
-              </span>
+              <span class={`progress${isComplete(entries) ? ' done' : ''}`}>{progressLabel(entries)}</span>
             </span>
             <span class="chev"><Icon name="next" size={20} /></span>
           </button>
@@ -105,7 +103,6 @@ export function LineupList({
           <ul class="lib-list">{past.map(card)}</ul>
         </section>
       )}
-      {lineups.length > 0 && <p class="lib-count center-text">Hold a line up to delete it</p>}
     </main>
   );
 }
