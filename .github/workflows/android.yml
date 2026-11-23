@@ -1,11 +1,15 @@
 name: Android APK
 
-# Builds an installable APK of the app on every push, and on demand from the Actions tab.
+# Builds an installable APK on every push and on demand from the Actions tab.
+# Pushing a version tag (for example v0.1.0) also publishes that APK as a GitHub Release.
 on:
   push:
     paths-ignore:
       - '**.md'
   workflow_dispatch:
+
+permissions:
+  contents: write # needed to create the release
 
 jobs:
   apk:
@@ -39,13 +43,40 @@ jobs:
 
       - name: Build the APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: |
+          # a tag like v0.1.0 becomes the app's version name 0.1.0
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then export APP_VERSION="${GITHUB_REF_NAME#v}"; fi
+          ./gradlew assembleDebug --no-daemon
 
       - name: Name the APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Songbook-debug.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Songbook.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Songbook-debug-apk
-          path: Songbook-debug.apk
+          name: Songbook-apk
+          path: Songbook.apk
           if-no-files-found: error
+
+      - name: Publish a GitHub Release (version tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > install-notes.md <<'NOTES'
+          ## Install on Android
+          1. On the phone, open this page and download **Songbook.apk**, then open it.
+          2. Android will ask to allow installs from this source. Allow it, then tap **Install**.
+          3. Later versions install over this one and **keep your songs and line ups**.
+
+          > **Installed an earlier test build?** Uninstall it once before installing this one (this is the first build
+          > with a fixed signing key, so Android treats it as a different app). Songs saved in the old copy are removed
+          > with it. From here on, updates install over the top without losing anything.
+
+          This is a sideload build (signed with the shared debug key), not a Play Store release.
+
+          ---
+          NOTES
+          gh release create "$GITHUB_REF_NAME" Songbook.apk \
+            --title "Songbook ${GITHUB_REF_NAME}" \
+            --notes-file install-notes.md \
+            --generate-notes

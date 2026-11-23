@@ -17,12 +17,22 @@ npm run typecheck
 
 The web app is wrapped with [Capacitor](https://capacitorjs.com). App name `Songbook`, package `app.pao.songbook`.
 
-### Get an APK without installing anything
+### Install it on a phone
 
-Every push builds an APK on GitHub: open the repository's **Actions** tab, choose the latest **Android APK**
-run, and download **Songbook-debug-apk** from the Artifacts section. Unzip it and copy `Songbook-debug.apk`
-to the phone, then open it (Android will ask to allow installs from that source).
-You can also start a build by hand with **Run workflow**.
+Open the repository's **Releases** page, download **Songbook.apk** from the latest release, and open it on the
+phone (Android will ask to allow installs from that source). Every release is signed with the same key, so a new
+version installs over the old one and keeps the songs and line ups stored in the app.
+
+### Make a release
+
+Push a version tag. The **Android APK** workflow builds the app and attaches `Songbook.apk` to a new release.
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+Every push (without a tag) also builds an APK: open the **Actions** tab, choose the run, and download
+**Songbook-apk** from its Artifacts. You can start a build by hand with **Run workflow**.
 
 ### Build it yourself
 
@@ -38,7 +48,9 @@ After changing the logo in `assets/`, run `npm run assets` to regenerate the ico
 
 ### Notes
 
-- Debug APKs are signed with a debug key: fine for installing on your own devices. A release build for
-  the Play Store needs your own signing key.
+- The APK is signed with a shared debug key kept in the repo (`android/app/debug.keystore`). That is fine for
+  installing on your own devices and gives every build the same signature, so updates work. A Play Store release
+  needs your own private key instead.
+- Each build gets a higher version number (the workflow run number), and a tagged release is named after its tag.
 - The screen stays on while a song is open (switch in the reader and in the menu).
 - The Android back button closes an open panel first, then steps back, and only exits from the song list.
