@@ -22,6 +22,7 @@ import { ChordPanel } from './ChordPanel';
 import { ChordSheet } from './ChordSheet';
 import { loadInstrument, saveInstrument } from './ChordView';
 import { makeMeasure } from './measure';
+import { useKeepAwakeSetting, useScreenAwake } from './keepAwake';
 import { PlayBar } from './PlayBar';
 import { type SwipeDir, rememberDirection, takeDirection, useSwipeNav } from './useSwipe';
 import { SPEEDS, TempoSheet } from './TempoSheet';
@@ -91,6 +92,9 @@ export function Reader({
   const mainRef = useRef<HTMLDivElement>(null);
   const [enter] = useState<SwipeDir | null>(takeDirection);
   const [toast, setToast] = useState<string | null>(null);
+  // the screen stays on while a song is open (unless the user turned that off)
+  const [awake, setAwake] = useKeepAwakeSetting();
+  useScreenAwake(awake);
   const saveBpm = useRef(0);
   const [width, setWidth] = useState(0);
   const fontsReady = useFontsReady();
@@ -199,6 +203,18 @@ export function Reader({
           <h1>{song.title || 'Untitled'}</h1>
           {song.artist && <p>{song.artist}</p>}
         </div>
+        <button
+          class={`btn icon ghost awake-btn${awake ? ' on' : ''}`}
+          aria-pressed={awake}
+          aria-label={awake ? 'Screen stays on while reading. Tap to let it sleep.' : 'Screen may go to sleep. Tap to keep it on.'}
+          title={awake ? 'Screen stays on' : 'Screen may sleep'}
+          onClick={() => {
+            setAwake(!awake);
+            setToast(awake ? 'Screen can sleep again' : 'Screen will stay on');
+          }}
+        >
+          <Icon name={awake ? 'eye' : 'eyeoff'} />
+        </button>
         <ThemeToggle />
         <button class="btn edit-btn" onClick={onEdit} aria-label="Edit song">
           <Icon name="edit" size={20} />

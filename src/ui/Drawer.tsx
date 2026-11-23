@@ -13,12 +13,16 @@ export function Drawer({
   open,
   active,
   counts,
+  keepAwake,
+  onKeepAwake,
   onPick,
   onClose,
 }: {
   open: boolean;
   active: Section;
   counts: Record<Section, number>;
+  keepAwake: boolean;
+  onKeepAwake: (on: boolean) => void;
   onPick: (s: Section) => void;
   onClose: () => void;
 }) {
@@ -61,6 +65,22 @@ export function Drawer({
             </li>
           ))}
         </ul>
+        <div class="drawer-setting">
+          <span class="drawer-setting-text">
+            <span class="drawer-setting-title">Keep screen on</span>
+            <span class="drawer-setting-sub">Stops the screen dimming while you read a song</span>
+          </span>
+          <button
+            class={`switch${keepAwake ? ' on' : ''}`}
+            role="switch"
+            aria-checked={keepAwake}
+            aria-label="Keep screen on while reading"
+            tabIndex={open ? 0 : -1}
+            onClick={() => onKeepAwake(!keepAwake)}
+          >
+            <span class="knob" />
+          </button>
+        </div>
       </nav>
     </div>
   );

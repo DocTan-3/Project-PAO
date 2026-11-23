@@ -69,6 +69,16 @@ export function Editor({
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => saveFontPx(fontPx), [fontPx]);
+  // Escape (and the Android back button) puts the chord toolbar away
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setSel(null);
+      setPending(null);
+    };
+    addEventListener('keydown', key);
+    return () => removeEventListener('keydown', key);
+  }, []);
 
   const commit = useCallback((next: Song, key = '') => {
     const now = Date.now();

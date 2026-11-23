@@ -17,6 +17,7 @@ import { Editor, type ExitTarget } from './Editor';
 import { Library } from './Library';
 import { LineupList } from './LineupList';
 import { LineupPage } from './LineupPage';
+import { useKeepAwakeSetting } from './keepAwake';
 import { Reader, type ReaderNav } from './Reader';
 
 const store: Store = new IndexedDbStore();
@@ -63,6 +64,7 @@ export function App() {
   const [lineups, setLineups] = useState<Lineup[]>([]);
   const [route, setRoute] = useState<Route>(parseRoute);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [keepAwake, setKeepAwake] = useKeepAwakeSetting();
 
   const refresh = useCallback(async () => {
     setSongs(await store.list());
@@ -122,6 +124,8 @@ export function App() {
       open={menuOpen}
       active={active}
       counts={{ songs: songs.length, lineups: lineups.length }}
+      keepAwake={keepAwake}
+      onKeepAwake={setKeepAwake}
       onPick={pickSection}
       onClose={() => setMenuOpen(false)}
     />
