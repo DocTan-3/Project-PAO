@@ -33,19 +33,42 @@ export function useKeepAwakeSetting(): [boolean, (on: boolean) => void] {
   return [on, saveKeepAwake];
 }
 
-async function hold(): Promise<void> {
-  try {
-    if ((await KeepAwake.isSupported()).isSupported) await KeepAwake.keepAwake();
-  } catch {
-    /* not available (older browser, or the page is hidden): the screen just behaves normally */
-  }
+// Several screens can ask for the lock at once (moving to the next song mounts the new reader before, or
+// after, the old one lets go). So we count the askers and apply changes strictly one at a time: the result
+// always matches the latest request, and the screen is never left unlocked by two async calls crossing.
+let wanted = 0;
+let held = false;
+let queue: Promise<void> = Promise.resolve();
+
+function apply(): void {
+  queue = queue.then(async () => {
+    try {
+      if (wanted > 0 && !held) {
+        if ((await KeepAwake.isSupported()).isSupported) {
+          await KeepAwake.keepAwake();
+          held = true;
+        }
+      } else if (wanted === 0 && held) {
+        held = false;
+        await KeepAwake.allowSleep();
+      }
+    } catch {
+      /* not available (older browser, or the page is hidden): the screen just behaves normally */
+    }
+  });
 }
-async function release(): Promise<void> {
-  try {
-    await KeepAwake.allowSleep();
-  } catch {
-    /* nothing was held */
-  }
+
+/** Ask for the screen to stay on. Returns the function that withdraws the request. */
+export function retainAwake(): () => void {
+  wanted++;
+  apply();
+  let done = false;
+  return () => {
+    if (done) return;
+    done = true;
+    wanted--;
+    apply();
+  };
 }
 
 /**
@@ -56,7 +79,6 @@ async function release(): Promise<void> {
 export function useScreenAwake(active: boolean): void {
   useEffect(() => {
     if (!active) return;
-    void hold();
-    return () => void release();
+    return retainAwake();
   }, [active]);
 }
