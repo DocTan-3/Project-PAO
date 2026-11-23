@@ -24,6 +24,7 @@ import { ChordToolbar } from './ChordToolbar';
 import { loadFontPx, saveFontPx, useFontsReady } from './font';
 import { Icon } from './icons';
 import { LineEditor } from './LineEditor';
+import { TapButton } from './TapButton';
 
 const KEYS = [
   'C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B',
@@ -270,6 +271,10 @@ export function Editor({
               }}
             />
           </label>
+          <div class="ctl">
+            <span class="ctl-label">Tap tempo</span>
+            <TapButton onBpm={(n) => commit(setMeta(song, { bpm: n }), 'bpm')} />
+          </div>
           <div class="ctl">
             <span class="ctl-label">Shift all chords</span>
             <div class="stepper">

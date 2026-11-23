@@ -17,11 +17,34 @@ import {
 import { FONT_FAMILY, loadFontPx, saveFontPx, useFontsReady } from './font';
 import { Icon } from './icons';
 import { ThemeToggle } from './theme';
+import { buildTimeline, DEFAULT_BEATS_PER_CHORD } from '../model/timeline';
 import { ChordPanel } from './ChordPanel';
 import { ChordSheet } from './ChordSheet';
 import { loadInstrument, saveInstrument } from './ChordView';
 import { makeMeasure } from './measure';
+import { PlayBar } from './PlayBar';
+import { SPEEDS, TempoSheet } from './TempoSheet';
+import { useAutoscroll } from './useAutoscroll';
 
+
+const DEFAULT_BPM = 90;
+
+interface Timing {
+  beats: number;
+  speed: number;
+}
+function loadTiming(id: string): Timing {
+  try {
+    const raw = localStorage.getItem(`pao:timing:${id}`);
+    if (raw) {
+      const t = JSON.parse(raw);
+      return { beats: Number(t.beats) || DEFAULT_BEATS_PER_CHORD, speed: SPEEDS.includes(t.speed) ? t.speed : 1 };
+    }
+  } catch {
+    /* storage unavailable */
+  }
+  return { beats: DEFAULT_BEATS_PER_CHORD, speed: 1 };
+}
 
 function loadView(id: string): ViewSettings {
   try {
@@ -33,12 +56,26 @@ function loadView(id: string): ViewSettings {
   return { semitones: 0 };
 }
 
-export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => void; onEdit: () => void }) {
+export function Reader({
+  song,
+  onBack,
+  onEdit,
+  onSongChange,
+}: {
+  song: Song;
+  onBack: () => void;
+  onEdit: () => void;
+  onSongChange: (patch: Partial<Pick<Song, 'bpm'>>) => void;
+}) {
   const [view, setView] = useState<ViewSettings>(() => loadView(song.id));
   const [fontPx, setFontPx] = useState<number>(loadFontPx);
   const [instrument, setInstrument] = useState<Instrument>(loadInstrument);
   const [sheet, setSheet] = useState<string | null>(null);
+  const [bpm, setBpmState] = useState<number>(song.bpm ?? DEFAULT_BPM);
+  const [timing, setTiming] = useState<Timing>(() => loadTiming(song.id));
+  const [tempoOpen, setTempoOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const saveBpm = useRef(0);
   const [width, setWidth] = useState(0);
   const fontsReady = useFontsReady();
 
@@ -50,6 +87,25 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
     }
   }, [view, song.id]);
   useEffect(() => saveFontPx(fontPx), [fontPx]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(`pao:timing:${song.id}`, JSON.stringify(timing));
+    } catch {
+      /* ignore */
+    }
+  }, [timing, song.id]);
+  // the tempo is part of the song, so keep it (debounced: tapping changes it many times a second)
+  const setBpm = (n: number) => {
+    setBpmState(n);
+    clearTimeout(saveBpm.current);
+    saveBpm.current = window.setTimeout(() => onSongChange({ bpm: n }), 500);
+  };
+  const timeline = useMemo(() => buildTimeline(song, timing.beats), [song, timing.beats]);
+  const auto = useAutoscroll({ timeline, bpm, speed: timing.speed });
+  const openSheet = (text: string) => {
+    auto.stop();
+    setSheet(text);
+  };
   useEffect(() => saveInstrument(instrument), [instrument]);
 
   useEffect(() => {
@@ -126,6 +182,16 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
 
       <div class="reader-layout">
         <aside class="reader-side">
+          <div class="bottom-stack">
+          <PlayBar
+            playing={auto.playing}
+            finished={auto.finished}
+            bpm={bpm}
+            speed={timing.speed}
+            onToggle={auto.toggle}
+            onRestart={auto.restart}
+            onTempo={() => setTempoOpen(true)}
+          />
           <div class="dock" role="toolbar" aria-label="Song controls">
             {songKey && (
               <label class="ctl">
@@ -174,6 +240,7 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
               </div>
             </div>
           </div>
+          </div>
 
           {song.notes?.trim() && (
             <section class="notes" aria-label="Notes">
@@ -182,11 +249,11 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
             </section>
           )}
 
-          <ChordPanel chords={songChords} instrument={instrument} onInstrument={setInstrument} onOpen={setSheet} />
+          <ChordPanel chords={songChords} instrument={instrument} onInstrument={setInstrument} onOpen={openSheet} />
         </aside>
 
         <div class="reader-main">
-          <div class="song" ref={bodyRef}>
+          <div class={`song${auto.playing ? ' playing' : ''}`} ref={bodyRef}>
             {width > 0 &&
               song.sections.map((sec) => (
                 <section key={sec.id}>
@@ -195,16 +262,16 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
                     const chords = line.chords.map((c) => ({ ...c, text: displayChord(c.text, song, view) }));
                     const rows = layoutLine(line.lyrics, chords, measureLyric, measureChord, width, chordPx * 0.5);
                     return (
-                      <div class="line" key={line.id}>
+                      <div class={`line${auto.now.lineId === line.id ? ' now' : ''}`} key={line.id} data-line-id={line.id}>
                         {rows.map((r) => (
                           <div class={`row${r.chords.length ? ' has-chords' : ''}`}>
                             {r.chords.map((c) => (
                               <button
                                 type="button"
-                                class="chord"
+                                class={`chord${auto.now.chordId === c.id ? ' now' : ''}`}
                                 key={c.id}
                                 style={{ left: `${c.x}px` }}
-                                onClick={() => setSheet(c.text)}
+                                onClick={() => openSheet(c.text)}
                                 aria-label={`Show how to play ${c.text}`}
                               >
                                 {c.text}
@@ -222,6 +289,17 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
         </div>
       </div>
 
+      {tempoOpen && (
+        <TempoSheet
+          bpm={bpm}
+          onBpm={setBpm}
+          beats={timing.beats}
+          onBeats={(beats) => setTiming((t) => ({ ...t, beats }))}
+          speed={timing.speed}
+          onSpeed={(speed) => setTiming((t) => ({ ...t, speed }))}
+          onClose={() => setTempoOpen(false)}
+        />
+      )}
       {sheet && (
         <ChordSheet text={sheet} instrument={instrument} onInstrument={setInstrument} onClose={() => setSheet(null)} />
       )}

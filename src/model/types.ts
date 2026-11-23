@@ -5,7 +5,7 @@ export interface PlacedChord {
   at: number;
   /** chord as written, e.g. "F#m7/C#" (parsed on demand; unparseable text is kept as-is) */
   text: string;
-  /** duration in beats, for chord highlight (default 4) */
+  /** duration in beats for autoscroll and chord highlight (default 4) */
   beats?: number;
 }
 

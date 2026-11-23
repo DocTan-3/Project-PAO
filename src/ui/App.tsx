@@ -68,7 +68,17 @@ export function App() {
       />
     );
   if (route.kind === 'song' && song)
-    return <Reader song={song} onBack={() => go('')} onEdit={() => go(`#edit-${song.id}`)} />;
+    return (
+      <Reader
+        song={song}
+        onBack={() => go('')}
+        onEdit={() => go(`#edit-${song.id}`)}
+        onSongChange={async (patch) => {
+          await store.put({ ...song, ...patch, updatedAt: Date.now() });
+          await refresh();
+        }}
+      />
+    );
 
   return (
     <Library
