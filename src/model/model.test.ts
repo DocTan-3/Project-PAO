@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { demoSongs } from './demo';
 import { mkLine, mkSection, mkSong } from './build';
 import { parseChordSheet } from './importSheet';
-import { IndexedDbStore, MemoryStore, type SongStore } from './store';
+import { IndexedDbStore, MemoryStore, type Store } from './store';
+import { assignSlot, newLineup } from './lineup';
 import {
   applyTranspose,
   displayChord,
@@ -100,7 +101,7 @@ describe('demo songs', () => {
   });
 });
 
-function storeSuite(name: string, make: () => SongStore) {
+function storeSuite(name: string, make: () => Store) {
   describe(`${name} store`, () => {
     it('put/get/list/delete', async () => {
       const store = make();
@@ -117,8 +118,48 @@ function storeSuite(name: string, make: () => SongStore) {
       expect(await store.get(a.id)).toBeUndefined();
       expect(await store.list()).toHaveLength(1);
     });
+
+    it('line ups: put/get/list (newest date first)/delete, kept apart from songs', async () => {
+      const store = make();
+      const a = newLineup('2026-11-22');
+      const b = assignSlot(newLineup('2026-11-29'), 'opening', 'song-1');
+      await store.putLineup(a);
+      await store.putLineup(b);
+      expect((await store.listLineups()).map((l) => l.date)).toEqual(['2026-11-29', '2026-11-22']);
+      expect(await store.getLineup(b.id)).toEqual(b);
+      expect(await store.list()).toEqual([]); // line ups are not songs
+      await store.putLineup(assignSlot(b, 'welcome', 'song-2'));
+      expect((await store.getLineup(b.id))!.slots).toMatchObject({ opening: 'song-1', welcome: 'song-2' });
+      await store.deleteLineup(a.id);
+      expect(await store.getLineup(a.id)).toBeUndefined();
+      expect(await store.listLineups()).toHaveLength(1);
+    });
   });
 }
 storeSuite('memory', () => new MemoryStore());
 let n = 0;
 storeSuite('indexeddb', () => new IndexedDbStore(`test-${n++}`));
+
+describe('upgrading an existing database', () => {
+  it('keeps every song saved before line ups existed', async () => {
+    const name = 'legacy-db';
+    // a version-1 database, as the app created it before line ups
+    await new Promise<void>((resolve, reject) => {
+      const req = indexedDB.open(name, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore('songs', { keyPath: 'id' });
+      req.onsuccess = () => {
+        const tx = req.result.transaction('songs', 'readwrite');
+        tx.objectStore('songs').put({ ...mkSong({ title: 'Saved Long Ago', updatedAt: 5 }), id: 'old-1' });
+        tx.oncomplete = () => { req.result.close(); resolve(); };
+        tx.onerror = () => reject(tx.error);
+      };
+      req.onerror = () => reject(req.error);
+    });
+    const store = new IndexedDbStore(name); // opens at version 2: adds the line ups table
+    expect((await store.list()).map((s) => s.title)).toEqual(['Saved Long Ago']);
+    expect(await store.listLineups()).toEqual([]);
+    await store.putLineup(newLineup('2026-11-29'));
+    expect(await store.listLineups()).toHaveLength(1);
+    expect(await store.list()).toHaveLength(1);
+  });
+});

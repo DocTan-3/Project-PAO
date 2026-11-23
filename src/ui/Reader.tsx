@@ -23,11 +23,22 @@ import { ChordSheet } from './ChordSheet';
 import { loadInstrument, saveInstrument } from './ChordView';
 import { makeMeasure } from './measure';
 import { PlayBar } from './PlayBar';
+import { type SwipeDir, rememberDirection, takeDirection, useSwipeNav } from './useSwipe';
 import { SPEEDS, TempoSheet } from './TempoSheet';
 import { useAutoscroll } from './useAutoscroll';
 
 
 const DEFAULT_BPM = 90;
+
+/** Where this song sits among its neighbours (a line up, or all songs of a language) */
+export interface ReaderNav {
+  /** short heading, e.g. "Worship 2" or "English songs" */
+  title: string;
+  /** e.g. "Line up · Nov 29 · 6 of 6" */
+  subtitle: string;
+  prev?: { title: string; go: () => void };
+  next?: { title: string; go: () => void };
+}
 
 interface Timing {
   beats: number;
@@ -61,11 +72,13 @@ export function Reader({
   onBack,
   onEdit,
   onSongChange,
+  nav,
 }: {
   song: Song;
   onBack: () => void;
   onEdit: () => void;
   onSongChange: (patch: Partial<Pick<Song, 'bpm'>>) => void;
+  nav?: ReaderNav;
 }) {
   const [view, setView] = useState<ViewSettings>(() => loadView(song.id));
   const [fontPx, setFontPx] = useState<number>(loadFontPx);
@@ -75,6 +88,9 @@ export function Reader({
   const [timing, setTiming] = useState<Timing>(() => loadTiming(song.id));
   const [tempoOpen, setTempoOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
+  const [enter] = useState<SwipeDir | null>(takeDirection);
+  const [toast, setToast] = useState<string | null>(null);
   const saveBpm = useRef(0);
   const [width, setWidth] = useState(0);
   const fontsReady = useFontsReady();
@@ -106,6 +122,28 @@ export function Reader({
     auto.stop();
     setSheet(text);
   };
+
+  // swipe (or arrow keys) to the next / previous song of the line up or the song list
+  const go = (dir: SwipeDir) => {
+    const target = dir === 'next' ? nav?.next : nav?.prev;
+    if (!target) return;
+    auto.stop();
+    rememberDirection(dir);
+    target.go();
+  };
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 1600);
+    return () => clearTimeout(t);
+  }, [toast]);
+  useSwipeNav(mainRef, {
+    canPrev: !!nav?.prev,
+    canNext: !!nav?.next,
+    onPrev: () => go('prev'),
+    onNext: () => go('next'),
+    onEdge: (dir) => nav && setToast(dir === 'next' ? 'That was the last song' : 'This is the first song'),
+    disabled: !nav || !!sheet || tempoOpen,
+  });
   useEffect(() => saveInstrument(instrument), [instrument]);
 
   useEffect(() => {
@@ -154,7 +192,7 @@ export function Reader({
   const shownKey = vk ?? songKey;
 
   return (
-    <div class="reader" style={{ '--fs': `${fontPx}px`, '--cs': `${chordPx}px` }}>
+    <div class={`reader${enter ? ` enter-${enter}` : ''}`} style={{ '--fs': `${fontPx}px`, '--cs': `${chordPx}px` }}>
       <header class="topbar">
         <button class="btn icon ghost" onClick={onBack} aria-label="Back to library"><Icon name="back" /></button>
         <div class="titles">
@@ -167,6 +205,33 @@ export function Reader({
           <span class="lbl">Edit</span>
         </button>
       </header>
+
+      {nav && (
+        <nav class="navstrip" aria-label="Songs in this list">
+          <button
+            class="btn icon"
+            disabled={!nav.prev}
+            onClick={() => go('prev')}
+            aria-label={nav.prev ? `Previous song: ${nav.prev.title}` : 'No previous song'}
+            title={nav.prev ? `Previous: ${nav.prev.title}` : undefined}
+          >
+            <Icon name="back" />
+          </button>
+          <div class="navmid">
+            <span class="navtitle">{nav.title}</span>
+            <span class="navsub">{nav.subtitle}</span>
+          </div>
+          <button
+            class="btn icon"
+            disabled={!nav.next}
+            onClick={() => go('next')}
+            aria-label={nav.next ? `Next song: ${nav.next.title}` : 'No next song'}
+            title={nav.next ? `Next: ${nav.next.title}` : undefined}
+          >
+            <Icon name="next" />
+          </button>
+        </nav>
+      )}
 
       {(shownKey || song.bpm) && (
         <div class="tags">
@@ -252,7 +317,7 @@ export function Reader({
           <ChordPanel chords={songChords} instrument={instrument} onInstrument={setInstrument} onOpen={openSheet} />
         </aside>
 
-        <div class="reader-main">
+        <div class="reader-main" ref={mainRef}>
           <div class={`song${auto.playing ? ' playing' : ''}`} ref={bodyRef}>
             {width > 0 &&
               song.sections.map((sec) => (
@@ -289,6 +354,7 @@ export function Reader({
         </div>
       </div>
 
+      {toast && <div class="toast" role="status">{toast}</div>}
       {tempoOpen && (
         <TempoSheet
           bpm={bpm}

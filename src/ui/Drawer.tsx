@@ -1,0 +1,67 @@
+import { useEffect, useRef } from 'preact/hooks';
+import { Icon, type IconName } from './icons';
+
+export type Section = 'songs' | 'lineups';
+
+const ITEMS: { id: Section; label: string; icon: IconName }[] = [
+  { id: 'songs', label: 'Songs', icon: 'note' },
+  { id: 'lineups', label: 'Line up', icon: 'list' },
+];
+
+/** Side menu opened by the hamburger button: the two sections of the app. */
+export function Drawer({
+  open,
+  active,
+  counts,
+  onPick,
+  onClose,
+}: {
+  open: boolean;
+  active: Section;
+  counts: Record<Section, number>;
+  onPick: (s: Section) => void;
+  onClose: () => void;
+}) {
+  const first = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    first.current?.focus();
+    const key = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    addEventListener('keydown', key);
+    return () => removeEventListener('keydown', key);
+  }, [open, onClose]);
+
+  return (
+    <div class={`drawer-wrap${open ? ' open' : ''}`} aria-hidden={!open}>
+      <div class="drawer-backdrop" onClick={onClose} />
+      <nav class="drawer" aria-label="Main menu">
+        <div class="drawer-head">
+          <div class="brand">
+            <span class="brand-mark"><Icon name="note" size={22} /></span>
+            Songbook
+          </div>
+          <button class="btn icon ghost" onClick={onClose} aria-label="Close menu" tabIndex={open ? 0 : -1}>
+            <Icon name="close" />
+          </button>
+        </div>
+        <ul>
+          {ITEMS.map((it, i) => (
+            <li key={it.id}>
+              <button
+                ref={i === 0 ? first : undefined}
+                class={`drawer-item${active === it.id ? ' on' : ''}`}
+                aria-current={active === it.id ? 'page' : undefined}
+                tabIndex={open ? 0 : -1}
+                onClick={() => onPick(it.id)}
+              >
+                <Icon name={it.icon} size={22} />
+                <span class="drawer-label">{it.label}</span>
+                <span class="drawer-count">{counts[it.id]}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  );
+}

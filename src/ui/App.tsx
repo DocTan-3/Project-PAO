@@ -1,20 +1,45 @@
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import { demoSongs, tagalogDemoSongs } from '../model/demo';
 import { newSong } from '../model/edit';
-import { IndexedDbStore, type SongStore } from '../model/store';
+import { LANGUAGES, groupSongs, languageOf } from '../model/library';
+import {
+  type Lineup,
+  formatDate,
+  lineupEntries,
+  newLineup,
+  nextSunday,
+  removeSongFromLineup,
+} from '../model/lineup';
+import { IndexedDbStore, type Store } from '../model/store';
 import type { Language, Song } from '../model/types';
+import { Drawer, type Section } from './Drawer';
 import { Editor, type ExitTarget } from './Editor';
 import { Library } from './Library';
-import { Reader } from './Reader';
+import { LineupList } from './LineupList';
+import { LineupPage } from './LineupPage';
+import { Reader, type ReaderNav } from './Reader';
 
-const store: SongStore = new IndexedDbStore();
+const store: Store = new IndexedDbStore();
 
-type Route = { kind: 'library' } | { kind: 'song' | 'edit'; id: string };
+type Route =
+  | { kind: 'songs' }
+  | { kind: 'lineups' }
+  | { kind: 'lineup'; id: string }
+  | { kind: 'set'; id: string; index: number }
+  | { kind: 'song' | 'edit'; id: string };
 
-// Hash routes are plain "#song-<id>" / "#edit-<id>" (letters, digits, hyphens) so they also work when hosted in a frame.
+// Hash routes use only letters, digits and hyphens, so they also work when hosted in a frame:
+//   #  (songs)  #lineups  #lineup-<id>  #set-<lineupId>-<position>  #song-<id>  #edit-<id>
 function parseRoute(): Route {
-  const m = /^#(song|edit)-([A-Za-z0-9-]+)$/.exec(location.hash);
-  return m ? { kind: m[1] as 'song' | 'edit', id: m[2]! } : { kind: 'library' };
+  const h = location.hash;
+  if (h === '#lineups') return { kind: 'lineups' };
+  let m = /^#lineup-([A-Za-z0-9-]+)$/.exec(h);
+  if (m) return { kind: 'lineup', id: m[1]! };
+  m = /^#set-([A-Za-z0-9-]+)-(\d+)$/.exec(h);
+  if (m) return { kind: 'set', id: m[1]!, index: Number(m[2]) };
+  m = /^#(song|edit)-([A-Za-z0-9-]+)$/.exec(h);
+  if (m) return { kind: m[1] as 'song' | 'edit', id: m[2]! };
+  return { kind: 'songs' };
 }
 
 /** Read (or set, when `set` is given) a localStorage flag; storage may be blocked, so never throw. */
@@ -27,11 +52,22 @@ function flag(key: string, set?: string): string | null {
   }
 }
 
+const go = (hash: string) => {
+  location.hash = hash;
+};
+/** Move without adding a history entry (swiping through songs should not fill the back button). */
+const swap = (hash: string) => location.replace(hash.startsWith('#') ? hash : `#${hash}`);
+
 export function App() {
   const [songs, setSongs] = useState<Song[] | null>(null);
+  const [lineups, setLineups] = useState<Lineup[]>([]);
   const [route, setRoute] = useState<Route>(parseRoute);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const refresh = useCallback(async () => setSongs(await store.list()), []);
+  const refresh = useCallback(async () => {
+    setSongs(await store.list());
+    setLineups(await store.listLineups());
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -49,9 +85,11 @@ export function App() {
         all = await store.list();
       }
       setSongs(all);
+      setLineups(await store.listLineups());
     })();
     const onHash = () => {
       setRoute(parseRoute());
+      setMenuOpen(false);
       void refresh();
     };
     addEventListener('hashchange', onHash);
@@ -60,46 +98,172 @@ export function App() {
 
   if (!songs) return <p class="muted center">Loading…</p>;
 
-  const go = (hash: string) => {
-    location.hash = hash;
+  const saveLineup = async (l: Lineup) => {
+    setLineups((list) => list.map((x) => (x.id === l.id ? l : x)));
+    await store.putLineup(l);
   };
-  const song = route.kind !== 'library' ? songs.find((s) => s.id === route.id) : undefined;
 
-  if (route.kind === 'edit' && song)
+  const deleteSong = async (id: string) => {
+    await store.delete(id);
+    // a song that is gone must not stay in any line up
+    for (const l of lineups) {
+      const cleaned = removeSongFromLineup(l, id);
+      if (cleaned !== l) await store.putLineup(cleaned);
+    }
+    await refresh();
+  };
+
+  const pickSection = (s: Section) => {
+    setMenuOpen(false);
+    go(s === 'lineups' ? '#lineups' : '');
+  };
+  const drawer = (active: Section) => (
+    <Drawer
+      open={menuOpen}
+      active={active}
+      counts={{ songs: songs.length, lineups: lineups.length }}
+      onPick={pickSection}
+      onClose={() => setMenuOpen(false)}
+    />
+  );
+
+  // ---- editor ----
+  if (route.kind === 'edit') {
+    const song = songs.find((s) => s.id === route.id);
+    if (song)
+      return (
+        <Editor
+          key={song.id}
+          initial={song}
+          store={store}
+          onExit={(to: ExitTarget, id) => go(to === 'preview' && id ? `#song-${id}` : '')}
+        />
+      );
+  }
+
+  // ---- reader: a single song, swiping through all songs of its language ----
+  if (route.kind === 'song') {
+    const song = songs.find((s) => s.id === route.id);
+    if (song) {
+      const lang = languageOf(song);
+      const order = groupSongs(songs, lang).flatMap((g) => g.songs);
+      const at = order.findIndex((s) => s.id === song.id);
+      const prev = order[at - 1];
+      const next = order[at + 1];
+      const nav: ReaderNav = {
+        title: `${LANGUAGES.find((l) => l.id === lang)!.label} songs`,
+        subtitle: `${at + 1} of ${order.length}`,
+        prev: prev && { title: prev.title, go: () => swap(`#song-${prev.id}`) },
+        next: next && { title: next.title, go: () => swap(`#song-${next.id}`) },
+      };
+      return (
+        <Reader
+          key={song.id}
+          song={song}
+          nav={nav}
+          onBack={() => go('')}
+          onEdit={() => go(`#edit-${song.id}`)}
+          onSongChange={async (patch) => {
+            await store.put({ ...song, ...patch, updatedAt: Date.now() });
+            await refresh();
+          }}
+        />
+      );
+    }
+  }
+
+  // ---- reader: a song of a line up, swiping through the service order ----
+  if (route.kind === 'set') {
+    const lineup = lineups.find((l) => l.id === route.id);
+    const entries = lineup ? lineupEntries(lineup, songs) : [];
+    const at = Math.min(Math.max(route.index, 0), entries.length - 1);
+    const entry = entries[at];
+    if (lineup && entry) {
+      const prev = entries[at - 1];
+      const next = entries[at + 1];
+      const nav: ReaderNav = {
+        title: entry.label,
+        subtitle: `Line up · ${formatDate(lineup.date, { month: 'short', day: 'numeric' })} · ${at + 1} of ${entries.length}`,
+        prev: prev && { title: prev.song.title, go: () => swap(`#set-${lineup.id}-${at - 1}`) },
+        next: next && { title: next.song.title, go: () => swap(`#set-${lineup.id}-${at + 1}`) },
+      };
+      return (
+        <Reader
+          key={`set-${lineup.id}-${at}`}
+          song={entry.song}
+          nav={nav}
+          onBack={() => swap(`#lineup-${lineup.id}`)}
+          onEdit={() => go(`#edit-${entry.song.id}`)}
+          onSongChange={async (patch) => {
+            await store.put({ ...entry.song, ...patch, updatedAt: Date.now() });
+            await refresh();
+          }}
+        />
+      );
+    }
+  }
+
+  // ---- one line up ----
+  if (route.kind === 'lineup' || route.kind === 'set') {
+    const lineup = lineups.find((l) => l.id === route.id);
+    if (lineup)
+      return (
+        <LineupPage
+          key={lineup.id}
+          lineup={lineup}
+          songs={songs}
+          onChange={saveLineup}
+          onBack={() => go('#lineups')}
+          onOpenSong={(index) => go(`#set-${lineup.id}-${index}`)}
+          onDelete={async () => {
+            await store.deleteLineup(lineup.id);
+            await refresh();
+            go('#lineups');
+          }}
+        />
+      );
+  }
+
+  // ---- line up list ----
+  if (route.kind === 'lineups' || route.kind === 'lineup' || route.kind === 'set') {
     return (
-      <Editor
-        key={song.id}
-        initial={song}
-        store={store}
-        onExit={(to: ExitTarget, id) => go(to === 'preview' && id ? `#song-${id}` : '')}
-      />
+      <>
+        <LineupList
+          lineups={lineups}
+          songs={songs}
+          onMenu={() => setMenuOpen(true)}
+          onOpen={(id) => go(`#lineup-${id}`)}
+          onCreate={async () => {
+            const l = newLineup(nextSunday());
+            await store.putLineup(l);
+            await refresh();
+            go(`#lineup-${l.id}`);
+          }}
+          onDelete={async (id) => {
+            await store.deleteLineup(id);
+            await refresh();
+          }}
+        />
+        {drawer('lineups')}
+      </>
     );
-  if (route.kind === 'song' && song)
-    return (
-      <Reader
-        song={song}
-        onBack={() => go('')}
-        onEdit={() => go(`#edit-${song.id}`)}
-        onSongChange={async (patch) => {
-          await store.put({ ...song, ...patch, updatedAt: Date.now() });
-          await refresh();
+  }
+
+  // ---- songs (home) ----
+  return (
+    <>
+      <Library
+        songs={songs}
+        onMenu={() => setMenuOpen(true)}
+        onOpen={(id) => go(`#song-${id}`)}
+        onDelete={deleteSong}
+        onNew={async (language: Language) => {
+          const s = { ...newSong(), language };
+          await store.put(s);
+          go(`#edit-${s.id}`);
         }}
       />
-    );
-
-  return (
-    <Library
-      songs={songs}
-      onOpen={(id) => go(`#song-${id}`)}
-      onDelete={async (id) => {
-        await store.delete(id);
-        await refresh();
-      }}
-      onNew={async (language: Language) => {
-        const s = { ...newSong(), language };
-        await store.put(s);
-        go(`#edit-${s.id}`);
-      }}
-    />
+      {drawer('songs')}
+    </>
   );
 }

@@ -1,10 +1,9 @@
-import { useMemo, useRef, useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import { LANGUAGES, countByLanguage, groupSongs } from '../model/library';
 import type { Language, Song } from '../model/types';
 import { Icon } from './icons';
 import { ThemeToggle } from './theme';
-
-const HOLD_MS = 550;
+import { useHold } from './useHold';
 
 function loadLang(): Language {
   try {
@@ -19,11 +18,13 @@ export function Library({
   onOpen,
   onNew,
   onDelete,
+  onMenu,
 }: {
   songs: Song[];
   onOpen: (id: string) => void;
   onNew: (language: Language) => void;
   onDelete: (id: string) => void;
+  onMenu: () => void;
 }) {
   const [lang, setLangState] = useState<Language>(loadLang);
   const [query, setQuery] = useState('');
@@ -31,35 +32,7 @@ export function Library({
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   // press and hold a song to delete it
-  const [pressing, setPressing] = useState<string | null>(null);
-  const holdTimer = useRef(0);
-  const held = useRef(false);
-  const origin = useRef({ x: 0, y: 0 });
-  const cancelHold = () => {
-    clearTimeout(holdTimer.current);
-    setPressing(null);
-  };
-  const beginHold = (e: PointerEvent, id: string) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    held.current = false;
-    origin.current = { x: e.clientX, y: e.clientY };
-    setPressing(id);
-    clearTimeout(holdTimer.current);
-    holdTimer.current = window.setTimeout(() => {
-      held.current = true;
-      setPressing(null);
-      try {
-        navigator.vibrate?.(30);
-      } catch {
-        /* not supported */
-      }
-      setConfirmId(id);
-    }, HOLD_MS);
-  };
-  const moveHold = (e: PointerEvent) => {
-    // scrolling or dragging is not a press
-    if (Math.hypot(e.clientX - origin.current.x, e.clientY - origin.current.y) > 10) cancelHold();
-  };
+  const hold = useHold((id) => setConfirmId(id));
 
   const setLang = (l: Language) => {
     setLangState(l);
@@ -90,8 +63,8 @@ export function Library({
     <main class={`library${showRail ? ' has-rail' : ''}`}>
       <div class="lib-top">
         <div class="brand">
-          <span class="brand-mark"><Icon name="note" size={22} /></span>
-          Songbook
+          <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
+          Songs
         </div>
         <ThemeToggle />
       </div>
@@ -177,13 +150,8 @@ export function Library({
                     </div>
                   ) : (
                     <button
-                      class={`song-card${pressing === s.id ? ' pressing' : ''}`}
-                      onPointerDown={(e) => beginHold(e, s.id)}
-                      onPointerMove={moveHold}
-                      onPointerUp={cancelHold}
-                      onPointerLeave={cancelHold}
-                      onPointerCancel={cancelHold}
-                      onContextMenu={(e) => e.preventDefault()}
+                      class={`song-card${hold.pressing === s.id ? ' pressing' : ''}`}
+                      {...hold.bind(s.id)}
                       onKeyDown={(e) => {
                         if (e.key === 'Delete' || e.key === 'Backspace') {
                           e.preventDefault();
@@ -191,11 +159,7 @@ export function Library({
                         }
                       }}
                       onClick={() => {
-                        if (held.current) {
-                          held.current = false; // the press that opened the delete prompt must not also open the song
-                          return;
-                        }
-                        onOpen(s.id);
+                        if (!hold.consumeClick()) onOpen(s.id); // the press that opened the delete prompt must not also open the song
                       }}
                       aria-label={`${s.title || 'Untitled'}${s.artist ? `, ${s.artist}` : ''}. Press and hold, or press Delete, to delete.`}
                     >
