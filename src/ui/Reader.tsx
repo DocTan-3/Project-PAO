@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { layoutLine } from '../layout/layoutLine';
+import type { Instrument } from '../instruments';
 import type { Song, ViewSettings } from '../model/types';
 import {
   displayChord,
@@ -14,6 +15,9 @@ import {
   transposeKey,
 } from '../theory';
 import { FONT_FAMILY, loadFontPx, saveFontPx, useFontsReady } from './font';
+import { ChordPanel } from './ChordPanel';
+import { ChordSheet } from './ChordSheet';
+import { loadInstrument, saveInstrument } from './ChordView';
 import { makeMeasure } from './measure';
 
 
@@ -30,6 +34,8 @@ function loadView(id: string): ViewSettings {
 export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => void; onEdit: () => void }) {
   const [view, setView] = useState<ViewSettings>(() => loadView(song.id));
   const [fontPx, setFontPx] = useState<number>(loadFontPx);
+  const [instrument, setInstrument] = useState<Instrument>(loadInstrument);
+  const [sheet, setSheet] = useState<string | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const fontsReady = useFontsReady();
@@ -42,6 +48,7 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
     }
   }, [view, song.id]);
   useEffect(() => saveFontPx(fontPx), [fontPx]);
+  useEffect(() => saveInstrument(instrument), [instrument]);
 
   useEffect(() => {
     const el = bodyRef.current;
@@ -64,6 +71,15 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
 
   const songKey = songKeyOf(song);
   const vk = viewKey(song, view);
+
+  // every distinct chord in the song as displayed (after transpose), in order of first appearance
+  const songChords = useMemo(() => {
+    const seen = new Set<string>();
+    for (const sec of song.sections)
+      for (const line of sec.lines)
+        for (const c of [...line.chords].sort((a, b) => a.at - b.at)) seen.add(displayChord(c.text, song, view));
+    return [...seen];
+  }, [song, view.semitones]);
 
   const keyChoices: Key[] = useMemo(() => {
     if (!songKey) return [];
@@ -92,6 +108,8 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
           <p>{song.notes}</p>
         </aside>
       )}
+
+      <ChordPanel chords={songChords} instrument={instrument} onInstrument={setInstrument} onOpen={setSheet} />
 
       <div class="controls" role="toolbar" aria-label="Song controls">
         {songKey && (
@@ -156,9 +174,16 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
                     {rows.map((r) => (
                       <div class={`row${r.chords.length ? ' has-chords' : ''}`}>
                         {r.chords.map((c) => (
-                          <span class="chord" key={c.id} style={{ left: `${c.x}px` }}>
+                          <button
+                            type="button"
+                            class="chord"
+                            key={c.id}
+                            style={{ left: `${c.x}px` }}
+                            onClick={() => setSheet(c.text)}
+                            aria-label={`Show how to play ${c.text}`}
+                          >
                             {c.text}
-                          </span>
+                          </button>
                         ))}
                         <span class="lyric">{r.text || ' '}</span>
                       </div>
@@ -169,6 +194,9 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
             </section>
           ))}
       </div>
+      {sheet && (
+        <ChordSheet text={sheet} instrument={instrument} onInstrument={setInstrument} onClose={() => setSheet(null)} />
+      )}
     </div>
   );
 }
