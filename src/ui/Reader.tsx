@@ -86,6 +86,13 @@ export function Reader({ song, onBack, onEdit }: { song: Song; onBack: () => voi
         <button class="btn edit-btn" onClick={onEdit}>Edit</button>
       </header>
 
+      {song.notes?.trim() && (
+        <aside class="notes" aria-label="Notes">
+          <h2>Notes</h2>
+          <p>{song.notes}</p>
+        </aside>
+      )}
+
       <div class="controls" role="toolbar" aria-label="Song controls">
         {songKey && (
           <label class="ctl">

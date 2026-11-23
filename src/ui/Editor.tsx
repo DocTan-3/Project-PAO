@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
+  addChord,
   addLineToSection,
   addSection,
   mapLine,
@@ -53,6 +54,10 @@ export function Editor({
   const [status, setStatus] = useState<'saved' | 'saving'>('saved');
   const [sel, setSel] = useState<{ lineId: string; chordId: string } | null>(null);
   const [lastChord, setLastChord] = useState<string | null>(null);
+  // a chord being placed: a tap picks the spot, "Add chord" confirms it
+  const [pending, setPending] = useState<{ lineId: string; at: number } | null>(null);
+  const [pendingText, setPendingText] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [fontPx, setFontPx] = useState(loadFontPx);
   const fontsReady = useFontsReady();
   const inputs = useRef(new Map<string, HTMLInputElement>());
@@ -135,15 +140,16 @@ export function Editor({
   const selChord = selLine?.chords.find((c) => c.id === sel?.chordId);
 
   // keep the line being edited visible above the chord toolbar
+  const focusLineId = sel?.lineId ?? pending?.lineId ?? null;
   useEffect(() => {
-    if (!sel) return;
-    const el = document.querySelector(`[data-line="${sel.lineId}"]`);
+    if (!focusLineId) return;
+    const el = document.querySelector(`[data-line="${focusLineId}"]`);
     const tb = toolbarRef.current;
     if (!el || !tb) return;
     const limit = window.innerHeight - tb.offsetHeight - 12;
     const r = el.getBoundingClientRect();
     if (r.bottom > limit) window.scrollBy({ top: r.bottom - limit, behavior: 'smooth' });
-  }, [sel?.lineId, sel?.chordId]);
+  }, [focusLineId, sel?.chordId, pending?.at]);
 
   const onText = (text: string) => {
     if (!sel) return;
@@ -165,6 +171,33 @@ export function Editor({
     setSel(null);
   };
 
+  // ---- placing a new chord: tap = move marker, "Add chord" = commit ----
+  const pendingLine = pending ? find(pending.lineId) : undefined;
+  const tapStrip = (lineId: string, at: number) => {
+    if (!pending) setPendingText(defaultChord);
+    setSel(null);
+    setPending({ lineId, at });
+  };
+  const confirmPending = () => {
+    if (!pending || !pendingLine) return;
+    const text = pendingText.trim() || defaultChord;
+    const r = addChord(pendingLine, pending.at, text);
+    commit(mapLine(song, pending.lineId, () => r.line));
+    if (parseChord(text)) setLastChord(text);
+    setSel({ lineId: pending.lineId, chordId: r.id });
+    setPending(null);
+  };
+  const nudgePending = (delta: number, unit: 'char' | 'word') => {
+    if (!pending || !pendingLine || pendingLine.lyrics.length === 0) return;
+    const at = unit === 'word' ? wordStep(pendingLine.lyrics, pending.at, delta as 1 | -1) : pending.at + delta;
+    setPending({ ...pending, at: Math.max(0, Math.min(pendingLine.lyrics.length, at)) });
+  };
+
+  const deleteSong = async () => {
+    await store.delete(songRef.current.id);
+    onExit('library', null);
+  };
+
   const verses = (label: string) => song.sections.filter((s) => s.label.startsWith(label)).length;
   const addNamedSection = (base: string) => {
     const n = verses(base);
@@ -172,7 +205,7 @@ export function Editor({
   };
 
   return (
-    <div class={`editor${sel ? ' has-toolbar' : ''}`}>
+    <div class={`editor${sel || pending ? ' has-toolbar' : ''}`}>
       <header class="bar ed-bar">
         <button class="btn" onClick={() => exit('library')} aria-label="Save and go back">‹</button>
         <span class="status" aria-live="polite">{status === 'saving' ? 'Saving…' : 'Saved'}</span>
@@ -196,6 +229,16 @@ export function Editor({
           value={song.artist}
           onInput={(e) => commit(setMeta(song, { artist: (e.currentTarget as HTMLInputElement).value }), 'artist')}
         />
+        <label class="notes-field">
+          <span class="lbl">Notes for other players</span>
+          <textarea
+            id="song-notes"
+            rows={3}
+            placeholder="Tuning, strumming, who plays what, how to count in…"
+            value={song.notes ?? ''}
+            onInput={(e) => commit(setMeta(song, { notes: (e.currentTarget as HTMLTextAreaElement).value }), 'notes')}
+          />
+        </label>
         <div class="meta-row">
           <label class="ctl">
             <span>Key</span>
@@ -242,7 +285,7 @@ export function Editor({
           </div>
         </div>
         <p class="hint">
-          Tap above a lyric to place a chord. Drag a chord to line it up, or use the arrows below.
+          Tap above a lyric to mark a spot, then press Add. Drag a chord to line it up, or use the arrows.
         </p>
       </section>
 
@@ -267,8 +310,12 @@ export function Editor({
               fontPx={fontPx}
               fontsReady={fontsReady}
               selectedId={sel?.lineId === line.id ? sel.chordId : null}
-              defaultChord={defaultChord}
-              onSelect={(id) => setSel(id ? { lineId: line.id, chordId: id } : null)}
+              pending={pending?.lineId === line.id ? { at: pending.at, text: pendingText || defaultChord } : null}
+              onTapStrip={(at) => tapStrip(line.id, at)}
+              onSelect={(id) => {
+                setPending(null);
+                setSel(id ? { lineId: line.id, chordId: id } : null);
+              }}
               onChange={(l, key) => commit(mapLine(song, line.id, () => l), key)}
               onEnter={(caret) => {
                 const r = splitAt(song, line.id, caret);
@@ -285,6 +332,7 @@ export function Editor({
               onRemoveLine={() => {
                 commit(removeLine(song, line.id));
                 if (sel?.lineId === line.id) setSel(null);
+                if (pending?.lineId === line.id) setPending(null);
               }}
               registerInput={(el) => {
                 if (el) inputs.current.set(line.id, el);
@@ -314,14 +362,43 @@ export function Editor({
         ))}
       </div>
 
+      <div class="danger-zone">
+        {confirmDelete ? (
+          <div class="confirm" role="alertdialog" aria-label="Confirm delete">
+            <span>Delete “{song.title || 'Untitled'}” for good?</span>
+            <button class="btn danger" onClick={deleteSong}>Delete song</button>
+            <button class="btn" onClick={() => setConfirmDelete(false)}>Keep it</button>
+          </div>
+        ) : (
+          <button class="btn danger" onClick={() => setConfirmDelete(true)}>Delete this song</button>
+        )}
+      </div>
+
+      {pending && pendingLine && !sel && (
+        <div class="ctb-wrap" ref={toolbarRef}>
+          <ChordToolbar
+            mode="place"
+            text={pendingText || defaultChord}
+            songKey={songKey}
+            isChordOnly={pendingLine.lyrics.length === 0}
+            onText={setPendingText}
+            onNudge={nudgePending}
+            onConfirm={confirmPending}
+            onDelete={() => setPending(null)}
+            onClose={() => setPending(null)}
+          />
+        </div>
+      )}
       {sel && selChord && (
         <div class="ctb-wrap" ref={toolbarRef}>
           <ChordToolbar
+            mode="edit"
             text={selChord.text}
             songKey={songKey}
             isChordOnly={!!selLine && selLine.lyrics.length === 0}
             onText={onText}
             onNudge={onNudge}
+            onConfirm={() => setSel(null)}
             onDelete={onDelete}
             onClose={() => setSel(null)}
           />

@@ -18,6 +18,9 @@ export interface ChordToolbarProps {
   text: string;
   songKey: Key | null;
   isChordOnly: boolean;
+  /** 'place': choosing where a new chord goes (Add/Cancel); 'edit': changing an existing chord */
+  mode: 'place' | 'edit';
+  onConfirm: () => void;
   onText: (text: string) => void;
   onNudge: (delta: number, unit: 'char' | 'word') => void;
   onDelete: () => void;
@@ -53,10 +56,17 @@ export function ChordToolbar(p: ChordToolbarProps) {
           <button class="btn sm" onClick={() => p.onNudge(1, 'char')} aria-label="One character right" title={p.isChordOnly ? 'Move later' : 'One character right'}>▶</button>
           <button class="btn sm" onClick={() => p.onNudge(1, 'word')} aria-label="Next word" title={p.isChordOnly ? 'Move later' : 'Next word'}>⇥</button>
         </div>
-        <div class="stepper">
-          <button class="btn sm danger" onClick={p.onDelete} aria-label="Delete chord">Delete</button>
-          <button class="btn sm" onClick={p.onClose} aria-label="Deselect chord">Done</button>
-        </div>
+        {p.mode === 'place' ? (
+          <div class="stepper">
+            <button class="btn sm" onClick={p.onClose} aria-label="Cancel, do not add a chord">Cancel</button>
+            <button class="btn sm primary" onClick={p.onConfirm} aria-label="Add this chord">Add</button>
+          </div>
+        ) : (
+          <div class="stepper">
+            <button class="btn sm danger" onClick={p.onDelete} aria-label="Delete chord">Delete</button>
+            <button class="btn sm" onClick={p.onClose} aria-label="Deselect chord">Done</button>
+          </div>
+        )}
       </div>
       <div class="ctb-row">
         <input

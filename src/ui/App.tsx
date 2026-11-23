@@ -74,6 +74,10 @@ export function App() {
     <Library
       songs={songs}
       onOpen={(id) => go(`#song-${id}`)}
+      onDelete={async (id) => {
+        await store.delete(id);
+        await refresh();
+      }}
       onNew={async () => {
         const s = newSong();
         await store.put(s);

@@ -26,6 +26,8 @@ export interface Song {
   id: string;
   title: string;
   artist: string;
+  /** free-text details for other players (tuning, strumming, who plays what...) */
+  notes?: string;
   /** key the chords are written in, e.g. "G" or "F#m"; null = unknown */
   key: string | null;
   bpm: number | null;

@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'preact/hooks';
 import { indexAtX } from '../layout/indexAtX';
-import { addChord, moveChord, setLyrics } from '../model/edit';
+import { moveChord, setLyrics } from '../model/edit';
 import type { Line } from '../model/types';
 import { parseChord } from '../theory';
 import { FONT_FAMILY } from './font';
@@ -15,9 +15,11 @@ export interface LineEditorProps {
   fontPx: number;
   fontsReady: boolean;
   selectedId: string | null;
-  /** chord text used when the user taps the strip to place a new chord */
-  defaultChord: string;
+  /** a chord that is being placed but not yet added (tap marker) */
+  pending: { at: number; text: string } | null;
   onSelect: (chordId: string | null) => void;
+  /** the user tapped the strip: move the placement marker here (nothing is added yet) */
+  onTapStrip: (at: number) => void;
   onChange: (line: Line, coalesceKey?: string) => void;
   onEnter: (caret: number) => void;
   onBackspaceAtStart: () => void;
@@ -45,7 +47,7 @@ export function LineEditor(p: LineEditorProps) {
 
   // Position every chip. Chord-only lines lay chips out in order; otherwise each sits at its anchor,
   // and overlapping chips are stacked onto extra levels so none is hidden.
-  const { chips, levels } = useMemo(() => {
+  const { chips, levels, seqEnd } = useMemo(() => {
     const out: Chip[] = [];
     const ends: number[] = [];
     let seqX = 0;
@@ -61,24 +63,22 @@ export function LineEditor(p: LineEditorProps) {
       if (chordOnlyLine) seqX = x + w + 6;
       out.push({ id: c.id, text: c.text, x, w, level, at: c.at });
     }
-    return { chips: out, levels: Math.max(1, ends.length) };
+    return { chips: out, levels: Math.max(1, ends.length), seqEnd: seqX };
   }, [line.chords, line.lyrics, measure, measureChord, chordOnlyLine]);
 
   const textW = measure(line.lyrics);
   const seqW = chips.reduce((m, c) => Math.max(m, c.x + c.w), 0);
-  const innerW = Math.max(textW, seqW) + PAD * 2 + 80;
+  const ghostText = p.pending?.text || '?';
+  const ghostX = p.pending ? (chordOnlyLine ? seqEnd : PAD + measure(line.lyrics.slice(0, p.pending.at))) : 0;
+  const ghostW = p.pending ? measureChord(ghostText) + CHIP_PAD : 0;
+  const innerW = Math.max(textW, seqW, ghostX + ghostW) + PAD * 2 + 80;
 
-  const xFromPointer = (clientX: number) => {
-    const rect = stripRef.current!.getBoundingClientRect();
-    return clientX - rect.left - PAD;
-  };
+  const xFromPointer = (clientX: number) => clientX - stripRef.current!.getBoundingClientRect().left - PAD;
 
-  const placeChord = (e: MouseEvent) => {
+  // A tap only moves the placement marker. The chord is added when the user confirms in the toolbar.
+  const tapStrip = (e: MouseEvent) => {
     if ((e.target as HTMLElement).closest('.echip')) return;
-    const at = chordOnlyLine ? 0 : indexAtX(line.lyrics, xFromPointer(e.clientX), measure);
-    const { line: next, id } = addChord(line, at, p.defaultChord);
-    p.onChange(next);
-    p.onSelect(id);
+    p.onTapStrip(chordOnlyLine ? 0 : indexAtX(line.lyrics, xFromPointer(e.clientX), measure));
   };
 
   const onChipDown = (e: PointerEvent, id: string) => {
@@ -102,7 +102,8 @@ export function LineEditor(p: LineEditorProps) {
   };
 
   const sel = chips.find((c) => c.id === p.selectedId);
-  const stripH = levels * CHIP_H + 4;
+  const rows = levels + (p.pending ? 1 : 0);
+  const stripH = rows * CHIP_H + 4;
 
   return (
     <div class="le" data-line={line.id}>
@@ -112,10 +113,10 @@ export function LineEditor(p: LineEditorProps) {
             class="le-strip"
             ref={stripRef}
             style={{ height: `${stripH}px`, fontSize: `${chordPx}px` }}
-            onClick={placeChord}
+            onClick={tapStrip}
             role="group"
             aria-label="Chords"
-            title="Tap to place a chord"
+            title="Tap to choose where a chord goes"
           >
             {chips.map((c) => (
               <button
@@ -131,7 +132,21 @@ export function LineEditor(p: LineEditorProps) {
                 {c.text || '?'}
               </button>
             ))}
-            {sel && !chordOnlyLine && (
+            {p.pending && (
+              <>
+                <span
+                  class="echip ghost"
+                  style={{ left: `${ghostX}px`, top: `${levels * CHIP_H + 2}px`, height: `${CHIP_H - 4}px` }}
+                  aria-label="Chord to be added here"
+                >
+                  {ghostText}
+                </span>
+                {!chordOnlyLine && (
+                  <span class="le-guide ghost" style={{ left: `${ghostX}px`, top: `${levels * CHIP_H + CHIP_H - 2}px` }} />
+                )}
+              </>
+            )}
+            {sel && !chordOnlyLine && !p.pending && (
               <span class="le-guide" style={{ left: `${sel.x}px`, top: `${stripH - 2}px` }} />
             )}
           </div>

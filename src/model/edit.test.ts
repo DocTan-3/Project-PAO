@@ -121,3 +121,13 @@ describe('diatonicChords', () => {
     expect(names('Am')).toEqual(['Am', 'Bdim', 'C', 'Dm', 'Em', 'F', 'G', 'E']);
   });
 });
+
+describe('song notes', () => {
+  it('setMeta stores notes without touching sections', async () => {
+    const { setMeta } = await import('./edit');
+    const s = mkSong({ title: 't', sections: [mkSection('v', mkLine('x'))] });
+    const out = setMeta(s, { notes: 'Capo-free. Count in 4.' });
+    expect(out.notes).toBe('Capo-free. Count in 4.');
+    expect(out.sections).toBe(s.sections);
+  });
+});

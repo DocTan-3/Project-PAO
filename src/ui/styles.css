@@ -185,3 +185,33 @@ button, select { font: inherit; color: inherit; }
 .chipbtn:hover { border-color: var(--accent); }
 .chipbtn.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .chipbtn.flat { font-weight: 500; }
+
+/* Delete, confirm, notes, chord placement */
+.lib-item { display: flex; gap: 8px; align-items: stretch; }
+.lib-item .song-card { flex: 1; min-width: 0; }
+.btn.trash { color: var(--muted); font-size: .85rem; }
+.btn.trash:hover { color: var(--danger); border-color: var(--danger); }
+.confirm {
+  flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 14px;
+  border: 1px solid var(--danger); border-radius: var(--radius); background: var(--surface);
+}
+.confirm span { flex: 1 1 100%; font-weight: 600; }
+.danger-zone { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); }
+.danger-zone .confirm { flex: none; }
+
+.notes {
+  margin: 12px 0 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface);
+}
+.notes h2 { margin: 0 0 6px; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.notes p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+.notes-field { display: grid; gap: 4px; }
+.notes-field .lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.notes-field textarea {
+  font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 10px 12px; width: 100%; resize: vertical; min-height: 5.5em; line-height: 1.45;
+}
+
+.echip.ghost { background: transparent; border: 2px dashed var(--accent); color: var(--accent); pointer-events: none; z-index: 1; }
+.le-guide.ghost { border-left-style: dashed; opacity: .9; }
+.ctb-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); white-space: nowrap; }

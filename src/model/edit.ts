@@ -183,6 +183,6 @@ export function setSectionLabel(song: Song, sectionId: string, label: string): S
   return touch({ ...song, sections: song.sections.map((s): Section => (s.id === sectionId ? { ...s, label } : s)) });
 }
 
-export function setMeta(song: Song, patch: Partial<Pick<Song, 'title' | 'artist' | 'key' | 'bpm'>>): Song {
+export function setMeta(song: Song, patch: Partial<Pick<Song, 'title' | 'artist' | 'notes' | 'key' | 'bpm'>>): Song {
   return touch({ ...song, ...patch });
 }
