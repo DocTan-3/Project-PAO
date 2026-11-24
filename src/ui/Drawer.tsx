@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'preact/hooks';
 import { Icon, type IconName } from './icons';
+import { Logo } from './logo';
 
 export type Section = 'songs' | 'lineups' | 'chords' | 'settings';
 
@@ -43,7 +44,7 @@ export function Drawer({
       <nav class="drawer" aria-label="Main menu">
         <div class="drawer-head">
           <div class="brand">
-            <span class="brand-mark"><Icon name="note" size={22} /></span>
+            <span class="brand-mark logo"><Logo size={38} /></span>
             BPCG - PAW
           </div>
           <button class="btn icon ghost" onClick={onClose} aria-label="Close menu" tabIndex={open ? 0 : -1}>

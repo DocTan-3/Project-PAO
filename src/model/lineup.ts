@@ -120,12 +120,15 @@ export function formatDate(iso: string, opts: Intl.DateTimeFormatOptions = { wee
   return new Intl.DateTimeFormat('en-US', { ...opts, timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`));
 }
 
-/** Upcoming line ups (today onward, soonest first) and past ones (most recent first). */
-export function groupLineups(lineups: Lineup[], today: string): { upcoming: Lineup[]; past: Lineup[] } {
+/**
+ * Upcoming line ups (today onward, soonest first) and finished ones (their date has passed, most recent first).
+ * A line up moves from Upcoming to Finished by itself once its date is before today.
+ */
+export function groupLineups(lineups: Lineup[], today: string): { upcoming: Lineup[]; finished: Lineup[] } {
   const byDate = (a: Lineup, b: Lineup) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.createdAt - b.createdAt);
   const upcoming = lineups.filter((l) => l.date >= today).sort(byDate);
-  const past = lineups.filter((l) => l.date < today).sort((a, b) => byDate(b, a));
-  return { upcoming, past };
+  const finished = lineups.filter((l) => l.date < today).sort((a, b) => byDate(b, a));
+  return { upcoming, finished };
 }
 
 export const filledCount = (l: Lineup, songs: Song[]): number => lineupEntries(l, songs).length;

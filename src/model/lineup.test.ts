@@ -144,12 +144,17 @@ describe('dates', () => {
 describe('groupLineups', () => {
   const mk = (date: string) => newLineup(date);
   const all = [mk('2026-11-15'), mk('2026-12-06'), mk('2026-11-29'), mk('2026-11-01'), mk('2026-11-23')];
-  it('upcoming soonest first, past most recent first, today counts as upcoming', () => {
+  it('upcoming soonest first, finished most recent first, today counts as upcoming', () => {
     const g = groupLineups(all, '2026-11-23');
     expect(g.upcoming.map((l) => l.date)).toEqual(['2026-11-23', '2026-11-29', '2026-12-06']);
-    expect(g.past.map((l) => l.date)).toEqual(['2026-11-15', '2026-11-01']);
+    expect(g.finished.map((l) => l.date)).toEqual(['2026-11-15', '2026-11-01']);
+  });
+  it('a line up moves to finished by itself when the day changes', () => {
+    const l = [newLineup('2026-11-29')];
+    expect(groupLineups(l, '2026-11-29').upcoming).toHaveLength(1);
+    expect(groupLineups(l, '2026-11-30')).toEqual({ upcoming: [], finished: l });
   });
   it('handles empty', () => {
-    expect(groupLineups([], '2026-11-23')).toEqual({ upcoming: [], past: [] });
+    expect(groupLineups([], '2026-11-23')).toEqual({ upcoming: [], finished: [] });
   });
 });

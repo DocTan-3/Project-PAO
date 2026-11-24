@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "android:sync": "vite build && cap sync android",
     "android:open": "cap open android",
-    "assets": "capacitor-assets generate --android --iconBackgroundColor '#2442d4' --iconBackgroundColorDark '#000000' --splashBackgroundColor '#2442d4' --splashBackgroundColorDark '#000000'"
+    "assets": "capacitor-assets generate --android --iconBackgroundColor '#000000' --iconBackgroundColorDark '#000000' --splashBackgroundColor '#000000' --splashBackgroundColorDark '#000000'"
   },
   "devDependencies": {
     "@capacitor/android": "^8.6.2",
