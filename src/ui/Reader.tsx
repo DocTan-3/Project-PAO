@@ -7,7 +7,8 @@ import { type Key, formatKey, keySpelling, transposeKey } from '../theory';
 import { ChordPanel } from './ChordPanel';
 import { ChordSheet } from './ChordSheet';
 import { loadInstrument, saveInstrument } from './ChordView';
-import { FONT_FAMILY, loadFontPx, saveFontPx, useFontsReady } from './font';
+import { loadFontPx, saveFontPx, useFontsReady } from './font';
+import { songFamily } from './appearance';
 import { Icon } from './icons';
 import { useKeepAwakeSetting, useScreenAwake } from './keepAwake';
 import { makeMeasure } from './measure';
@@ -119,8 +120,8 @@ export function Reader({
   }, []);
 
   const chordPx = Math.round(fontPx * 0.9);
-  const measureLyric = useMemo(() => makeMeasure(`400 ${fontPx}px ${FONT_FAMILY}`), [fontPx, fontsReady]);
-  const measureChord = useMemo(() => makeMeasure(`700 ${chordPx}px ${FONT_FAMILY}`), [chordPx, fontsReady]);
+  const measureLyric = useMemo(() => makeMeasure(`400 ${fontPx}px ${songFamily()}`), [fontPx, fontsReady]);
+  const measureChord = useMemo(() => makeMeasure(`700 ${chordPx}px ${songFamily()}`), [chordPx, fontsReady]);
 
   const songKey = songKeyOf(song);
   const vk = viewKey(song, view);

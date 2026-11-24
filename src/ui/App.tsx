@@ -13,17 +13,21 @@ import { IndexedDbStore, type Store } from '../model/store';
 import type { Language, Song } from '../model/types';
 import { Drawer, type Section } from './Drawer';
 import { Editor, type ExitTarget } from './Editor';
+import { ChordsPage } from './ChordsPage';
 import { Library } from './Library';
 import { LineupList } from './LineupList';
 import { LineupPage } from './LineupPage';
 import { useKeepAwakeSetting } from './keepAwake';
 import { Reader, type ReaderNav } from './Reader';
+import { SettingsPage } from './SettingsPage';
 
 const store: Store = new IndexedDbStore();
 
 type Route =
   | { kind: 'songs' }
   | { kind: 'lineups' }
+  | { kind: 'chords' }
+  | { kind: 'settings' }
   | { kind: 'lineup'; id: string }
   | { kind: 'set'; id: string; index: number }
   | { kind: 'song' | 'edit'; id: string };
@@ -33,6 +37,8 @@ type Route =
 function parseRoute(): Route {
   const h = location.hash;
   if (h === '#lineups') return { kind: 'lineups' };
+  if (h === '#chords') return { kind: 'chords' };
+  if (h === '#settings') return { kind: 'settings' };
   let m = /^#lineup-([A-Za-z0-9-]+)$/.exec(h);
   if (m) return { kind: 'lineup', id: m[1]! };
   m = /^#set-([A-Za-z0-9-]+)-(\d+)$/.exec(h);
@@ -116,7 +122,7 @@ export function App() {
 
   const pickSection = (s: Section) => {
     setMenuOpen(false);
-    go(s === 'lineups' ? '#lineups' : '');
+    go(s === 'songs' ? '' : `#${s}`);
   };
   const drawer = (active: Section) => (
     <Drawer
@@ -213,6 +219,20 @@ export function App() {
           }}
         />
       );
+  }
+
+  // ---- chords and settings ----
+  if (route.kind === 'chords' || route.kind === 'settings') {
+    return (
+      <>
+        {route.kind === 'chords' ? (
+          <ChordsPage onMenu={() => setMenuOpen(true)} />
+        ) : (
+          <SettingsPage onMenu={() => setMenuOpen(true)} />
+        )}
+        {drawer(route.kind)}
+      </>
+    );
   }
 
   // ---- line up list ----

@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'preact/hooks';
 import { Icon, type IconName } from './icons';
 
-export type Section = 'songs' | 'lineups';
+export type Section = 'songs' | 'lineups' | 'chords' | 'settings';
 
 const ITEMS: { id: Section; label: string; icon: IconName }[] = [
   { id: 'songs', label: 'Songs', icon: 'note' },
   { id: 'lineups', label: 'Line up', icon: 'list' },
+  { id: 'chords', label: 'Chords', icon: 'chord' },
+  { id: 'settings', label: 'Settings', icon: 'settings' },
 ];
 
 /** Side menu opened by the hamburger button: the two sections of the app. */
@@ -20,7 +22,7 @@ export function Drawer({
 }: {
   open: boolean;
   active: Section;
-  counts: Record<Section, number>;
+  counts: Partial<Record<Section, number>>;
   keepAwake: boolean;
   onKeepAwake: (on: boolean) => void;
   onPick: (s: Section) => void;
@@ -60,7 +62,7 @@ export function Drawer({
               >
                 <Icon name={it.icon} size={22} />
                 <span class="drawer-label">{it.label}</span>
-                <span class="drawer-count">{counts[it.id]}</span>
+                {counts[it.id] !== undefined && <span class="drawer-count">{counts[it.id]}</span>}
               </button>
             </li>
           ))}

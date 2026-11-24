@@ -10,13 +10,13 @@ export type BackAction = 'close-overlay' | 'to-songs' | 'history-back' | 'exit';
 export function backAction(hash: string, overlayOpen: boolean, historyLength: number): BackAction {
   if (overlayOpen) return 'close-overlay';
   if (hash === '' || hash === '#') return 'exit';
-  if (hash === '#lineups') return 'to-songs';
+  if (hash === '#lineups' || hash === '#chords' || hash === '#settings') return 'to-songs';
   return historyLength > 1 ? 'history-back' : 'to-songs';
 }
 
 const OVERLAYS = '.drawer-wrap.open, .sheet-backdrop, .picker, .ctb-wrap';
 
-const isDark = (): boolean => document.documentElement.getAttribute('data-theme') === 'dark';
+const isDark = (): boolean => document.documentElement.getAttribute('data-tone') === 'dark';
 
 /** Match the status and navigation bar icons to the app's own theme (which can differ from the phone's). */
 function syncSystemBars(): void {
@@ -36,5 +36,5 @@ export function initNative(): void {
   });
 
   syncSystemBars();
-  new MutationObserver(syncSystemBars).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  new MutationObserver(syncSystemBars).observe(document.documentElement, { attributes: true, attributeFilter: ['data-tone'] });
 }

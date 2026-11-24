@@ -3,7 +3,7 @@ import { indexAtX } from '../layout/indexAtX';
 import { moveChord, setLyrics } from '../model/edit';
 import type { Line } from '../model/types';
 import { parseChord } from '../theory';
-import { FONT_FAMILY } from './font';
+import { songFamily } from './appearance';
 import { makeMeasure } from './measure';
 
 const PAD = 12; // left padding of the lyric input, in px
@@ -39,8 +39,8 @@ interface Chip {
 export function LineEditor(p: LineEditorProps) {
   const { line, fontPx } = p;
   const chordPx = Math.round(fontPx * 0.85);
-  const measure = useMemo(() => makeMeasure(`400 ${fontPx}px ${FONT_FAMILY}`), [fontPx, p.fontsReady]);
-  const measureChord = useMemo(() => makeMeasure(`700 ${chordPx}px ${FONT_FAMILY}`), [chordPx, p.fontsReady]);
+  const measure = useMemo(() => makeMeasure(`400 ${fontPx}px ${songFamily()}`), [fontPx, p.fontsReady]);
+  const measureChord = useMemo(() => makeMeasure(`700 ${chordPx}px ${songFamily()}`), [chordPx, p.fontsReady]);
   const stripRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ id: string; startX: number; moved: boolean } | null>(null);
   const chordOnlyLine = line.lyrics.length === 0;

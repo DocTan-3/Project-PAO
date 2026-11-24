@@ -80,7 +80,7 @@ export function Library({
           <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
           Songs
         </div>
-        <ThemeToggle labelled />
+        <ThemeToggle />
       </div>
 
       {songs.length > 0 && (
@@ -195,9 +195,8 @@ export function Library({
         </nav>
       )}
 
-      <button class="fab" onClick={() => onNew(lang)}>
-        <Icon name="plus" size={22} />
-        New {langLabel} song
+      <button class="fab" onClick={() => onNew(lang)} aria-label={`New ${langLabel} song`} title={`New ${langLabel} song`}>
+        <Icon name="plus" size={26} />
       </button>
     </main>
   );

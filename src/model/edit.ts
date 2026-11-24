@@ -96,7 +96,7 @@ export function reorderChord(line: Line, id: string, dir: 1 | -1): Line {
 const touch = (song: Song): Song => ({ ...song, updatedAt: Date.now() });
 
 export function newSong(): Song {
-  return mkSong({ title: '', sections: [mkSection('Verse 1', mkLine(''))] });
+  return mkSong({ title: '', sections: [mkSection('Intro', mkLine(''))] });
 }
 
 export function mapLine(song: Song, lineId: string, fn: (l: Line) => Line): Song {

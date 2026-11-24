@@ -3,6 +3,7 @@ import { indexAtX } from '../layout/indexAtX';
 import { diatonicChords, formatChord, parseKey } from '../theory';
 import { mkLine, mkSection, mkSong } from './build';
 import {
+  newSong,
   addChord, adjustAnchors, mergeUp, moveChord, removeChord, removeLine, reorderChord, setLyrics,
   splitAt, splitLine, wordStep,
 } from './edit';
@@ -129,5 +130,12 @@ describe('song notes', () => {
     const out = setMeta(s, { notes: 'Capo-free. Count in 4.' });
     expect(out.notes).toBe('Capo-free. Count in 4.');
     expect(out.sections).toBe(s.sections);
+  });
+});
+
+describe('a new song', () => {
+  it('starts with an Intro section, not Verse 1', () => {
+    const song = newSong();
+    expect(song.sections.map((x) => x.label)).toEqual(['Intro']);
   });
 });
