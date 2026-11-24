@@ -62,14 +62,14 @@ export const SWATCHES: Record<string, Record<"day" | "night", [string, string, s
   },
   "grace": {
     "day": [
-      "#f4e4e6",
-      "#4d2b33",
-      "#b86b79"
+      "#f7e6ee",
+      "#4a2238",
+      "#a8537f"
     ],
     "night": [
-      "#2a1a1d",
-      "#f1dadd",
-      "#d9919d"
+      "#28141f",
+      "#f6dcea",
+      "#d683ad"
     ]
   },
   "sacrifice": {
