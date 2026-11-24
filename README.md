@@ -1,8 +1,7 @@
 # Songbook (Project PAO)
 
 Chord sheets for guitar, ukulele and piano: write songs with chords above the lyrics, transpose, scroll the page
-hands-free while you play, plan service line ups, and read in one of three themes (Light, Dark, or BPCG light
-brown). Everything is stored on the device, so it works offline.
+hands-free while you play, plan service line ups, and pick a colour palette (each has a Day and a Night look) and a font in Settings. Everything is stored on the device, so it works offline.
 
 ## Develop
 
