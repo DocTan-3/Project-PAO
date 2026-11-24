@@ -3,7 +3,7 @@ import { backAction } from './native';
 
 describe('Android back button', () => {
   it('closes an open panel before anything else, wherever you are', () => {
-    for (const h of ['', '#lineups', '#chords', '#settings', '#song-1', '#edit-1', '#set-x-2']) expect(backAction(h, true, 5)).toBe('close-overlay');
+    for (const h of ['', '#lineups', '#chords', '#settings', '#share', '#song-1', '#edit-1', '#set-x-2']) expect(backAction(h, true, 5)).toBe('close-overlay');
   });
   it('leaves the app only from the songs home screen', () => {
     expect(backAction('', false, 1)).toBe('exit');

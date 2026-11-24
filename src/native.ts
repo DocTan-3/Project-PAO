@@ -10,7 +10,7 @@ export type BackAction = 'close-overlay' | 'to-songs' | 'history-back' | 'exit';
 export function backAction(hash: string, overlayOpen: boolean, historyLength: number): BackAction {
   if (overlayOpen) return 'close-overlay';
   if (hash === '' || hash === '#') return 'exit';
-  if (hash === '#lineups' || hash === '#chords' || hash === '#settings') return 'to-songs';
+  if (hash === '#lineups' || hash === '#chords' || hash === '#settings' || hash === '#share') return 'to-songs';
   return historyLength > 1 ? 'history-back' : 'to-songs';
 }
 

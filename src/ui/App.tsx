@@ -9,6 +9,7 @@ import {
   nextSunday,
   removeSongFromLineup,
 } from '../model/lineup';
+import { planMerge } from '../model/share';
 import { IndexedDbStore, type Store } from '../model/store';
 import type { Language, Song } from '../model/types';
 import { Drawer, type Section } from './Drawer';
@@ -20,6 +21,7 @@ import { LineupPage } from './LineupPage';
 import { useKeepAwakeSetting } from './keepAwake';
 import { Reader, type ReaderNav } from './Reader';
 import { SettingsPage } from './SettingsPage';
+import { SharePage } from './SharePage';
 
 const store: Store = new IndexedDbStore();
 
@@ -28,6 +30,7 @@ type Route =
   | { kind: 'lineups' }
   | { kind: 'chords' }
   | { kind: 'settings' }
+  | { kind: 'share' }
   | { kind: 'lineup'; id: string }
   | { kind: 'set'; id: string; index: number }
   | { kind: 'song' | 'edit'; id: string };
@@ -39,6 +42,7 @@ function parseRoute(): Route {
   if (h === '#lineups') return { kind: 'lineups' };
   if (h === '#chords') return { kind: 'chords' };
   if (h === '#settings') return { kind: 'settings' };
+  if (h === '#share') return { kind: 'share' };
   let m = /^#lineup-([A-Za-z0-9-]+)$/.exec(h);
   if (m) return { kind: 'lineup', id: m[1]! };
   m = /^#set-([A-Za-z0-9-]+)-(\d+)$/.exec(h);
@@ -118,6 +122,13 @@ export function App() {
       if (cleaned !== l) await store.putLineup(cleaned);
     }
     await refresh();
+  };
+
+  const importSongs = async (incoming: Song[]) => {
+    const plan = planMerge(songs, incoming);
+    for (const s of plan.puts) await store.put(s);
+    await refresh();
+    return plan;
   };
 
   const pickSection = (s: Section) => {
@@ -222,11 +233,13 @@ export function App() {
   }
 
   // ---- chords and settings ----
-  if (route.kind === 'chords' || route.kind === 'settings') {
+  if (route.kind === 'chords' || route.kind === 'settings' || route.kind === 'share') {
     return (
       <>
         {route.kind === 'chords' ? (
           <ChordsPage onMenu={() => setMenuOpen(true)} />
+        ) : route.kind === 'share' ? (
+          <SharePage songs={songs} onMenu={() => setMenuOpen(true)} onImport={importSongs} />
         ) : (
           <SettingsPage onMenu={() => setMenuOpen(true)} />
         )}
