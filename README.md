@@ -1,4 +1,4 @@
-# Songbook (Project PAO)
+# BPCG - PAW (Project PAO)
 
 Chord sheets for guitar, ukulele and piano: write songs with chords above the lyrics, transpose, scroll the page
 hands-free while you play, plan service line ups, and pick a colour palette (each has a Day and a Night look) and a font in Settings. Everything is stored on the device, so it works offline.
@@ -14,7 +14,7 @@ npm run typecheck
 
 ## Android app (APK)
 
-The web app is wrapped with [Capacitor](https://capacitorjs.com). App name `Songbook`, package `app.pao.songbook`.
+The web app is wrapped with [Capacitor](https://capacitorjs.com). App name `BPCG - PAW`, package `app.pao.songbook`.
 
 ### Install it on a phone
 

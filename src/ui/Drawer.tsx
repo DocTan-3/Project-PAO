@@ -44,7 +44,7 @@ export function Drawer({
         <div class="drawer-head">
           <div class="brand">
             <span class="brand-mark"><Icon name="note" size={22} /></span>
-            Songbook
+            BPCG - PAW
           </div>
           <button class="btn icon ghost" onClick={onClose} aria-label="Close menu" tabIndex={open ? 0 : -1}>
             <Icon name="close" />

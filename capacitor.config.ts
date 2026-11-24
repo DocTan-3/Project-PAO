@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.pao.songbook',
-  appName: 'Songbook',
+  appName: 'BPCG - PAW',
   webDir: 'dist',
   plugins: {
     // Android 15+ draws apps edge to edge. The page already pads itself with env(safe-area-inset-*),

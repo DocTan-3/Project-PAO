@@ -89,6 +89,6 @@ jobs:
           ---
           NOTES
           gh release create "$TAG" Songbook.apk --target "$GITHUB_SHA" \
-            --title "Songbook ${TAG}" \
+            --title "BPCG - PAW ${TAG}" \
             --notes-file install-notes.md \
             --generate-notes

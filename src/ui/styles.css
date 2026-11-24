@@ -163,7 +163,7 @@
   --on-lit: #f3efe4;
   --ok: #3d7a3f;
   --accent-ink: #555555;
-  --rule: #d3cfc2;
+  --rule: #b9b3a0;
   --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
@@ -189,7 +189,7 @@
   --on-lit: #1c1c1c;
   --ok: #7fd1a0;
   --accent-ink: #b0b0b0;
-  --rule: #2d2d2d;
+  --rule: #505050;
   --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
@@ -394,10 +394,19 @@
   color-scheme: dark;
 }
 
-/* Devotion: notebook paper with ruled lines (and chords in red pen by day) */
+/* Devotion: notebook paper with ruled lines. The lines are fixed to the screen and repeated on the pinned bars,
+   so they show in every gap (cards and boxes cover them) and run straight through the headers. */
 html[data-palette="devotion"] {
-  background-image: linear-gradient(to bottom, transparent 27px, var(--rule) 27px 28px);
+  --ruled: linear-gradient(to bottom, transparent 27px, var(--rule) 27px 28px);
+}
+html[data-palette="devotion"],
+html[data-palette="devotion"] .lib-pinned,
+html[data-palette="devotion"] .letter-head,
+html[data-palette="devotion"] .reader-head,
+html[data-palette="devotion"] body::before {
+  background-image: var(--ruled);
   background-size: 100% 28px;
+  background-attachment: fixed;
 }
 html[data-palette="devotion"] body { background: transparent; }
 
@@ -412,6 +421,8 @@ h1, h2, h3, p { margin: 0; }
 .grow { flex: 1; }
 .icon { display: block; flex: none; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* inside rows that scroll or clip, draw the focus ring just inside the control so it is never cut off or drawn over its neighbours */
+.controlbar :focus-visible, .cpanel-row :focus-visible, .le-scroll :focus-visible, .letter-rail :focus-visible { outline-offset: -3px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 
 /* page gutters honour phone safe areas */

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Songbook</string>
-    <string name="title_activity_main">Songbook</string>
+    <string name="app_name">BPCG - PAW</string>
+    <string name="title_activity_main">BPCG - PAW</string>
     <string name="package_name">app.pao.songbook</string>
     <string name="custom_url_scheme">app.pao.songbook</string>
 </resources>
