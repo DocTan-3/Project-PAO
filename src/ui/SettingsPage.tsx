@@ -114,9 +114,10 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
               role="radio"
               aria-checked={face === f.id}
               class={`font-card${face === f.id ? ' on' : ''}`}
+              style={{ fontFamily: f.family }}
               onClick={() => pickFace(f.id)}
             >
-              <span class="font-sample" style={{ fontFamily: f.family }}>Amazing grace</span>
+              <span class="font-sample">All for His Glory</span>
               <span class="font-meta">
                 <b>{f.label}</b>
                 <small>{f.note}</small>
@@ -129,6 +130,7 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
 
       <section class="set-sec" aria-labelledby="set-size">
         <h2 id="set-size">Font size</h2>
+        <p class="set-hint">Applies to the whole app, not just the songs.</p>
         <div class="size-row">
           <button class="btn" onClick={() => setSize(px - 2)} disabled={px <= FONT_MIN} aria-label="Smaller text">A−</button>
           <input
@@ -145,9 +147,9 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
         </div>
         <div class="preview" aria-label={`Preview in ${fontInfo(face).label}`} style={{ '--fs': `${px}px`, '--cs': `${Math.round(px * 0.9)}px` }}>
           <p class="pv-line">
-            <span class="pv-seg"><b>G</b><span>Amazing </span></span>
-            <span class="pv-seg"><b>C</b><span>grace, how </span></span>
-            <span class="pv-seg"><b>G</b><span>sweet the sound</span></span>
+            <span class="pv-seg"><b>G</b><span>All for </span></span>
+            <span class="pv-seg"><b>C</b><span>His </span></span>
+            <span class="pv-seg"><b>G</b><span>Glory</span></span>
           </p>
         </div>
       </section>

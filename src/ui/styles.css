@@ -1,6 +1,6 @@
 /* ==========================================================================
    Songbook
-   Colour palettes, chosen in Settings (never from the phone's setting): Classic, BPCG, Devotion (notebook paper),
+   Colour palettes, chosen in Settings (never from the phone's setting): Servant, BPCG, Devotion (notebook paper),
    Deep, Freedom, Grace and Sacrifice. Each has a Day look and a darker Night look; the button at the top
    right flips between the two. The font (one for the whole app) is also chosen in Settings.
    Chords are bold and the lyrics a touch softer, so they stay distinct without colour.
@@ -15,7 +15,7 @@
   --song-font: "Inter Variable", system-ui, sans-serif; /* the song text; changed in Settings */
   --gutter: 16px;
 
-  /* Classic Day (the default until a palette is chosen) */
+  /* Servant Day (the default until a palette is chosen) */
   --bg: #ffffff;
   --surface: #ffffff;
   --surface-2: #f2f2f2;
@@ -403,7 +403,7 @@ html[data-palette="devotion"] body { background: transparent; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text); }
-body { font-family: var(--sans); font-size: 16px; line-height: 1.45; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+body { font-family: var(--sans); font-size: 1rem; line-height: 1.45; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 h1, h2, h3, p { margin: 0; }
@@ -914,11 +914,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .theme-name { font-weight: 650; font-size: .92rem; }
 .theme-check { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--on-accent); }
 .font-list { display: grid; gap: 8px; }
-.font-card { position: relative; display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 2px solid var(--line); border-radius: var(--radius); background: var(--surface); text-align: left; }
-.font-sample { flex: none; min-width: 7.2em; font-size: 1.35rem; line-height: 1.2; }
-.font-meta { display: grid; min-width: 0; }
+.font-card { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border: 2px solid var(--line); border-radius: var(--radius); background: var(--surface); text-align: left; }
+.font-sample { font-size: 1.5rem; line-height: 1.25; }
+.font-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; min-width: 0; }
 .font-meta small { color: var(--muted); font-size: .8rem; line-height: 1.3; }
 .font-card .theme-check { top: 50%; transform: translateY(-50%); right: 14px; }
+.set-hint { margin: -4px 0 10px; color: var(--muted); font-size: .85rem; }
 .size-row { display: flex; align-items: center; gap: 10px; }
 .size-row input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); height: 44px; }
 .size-val { min-width: 2ch; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }

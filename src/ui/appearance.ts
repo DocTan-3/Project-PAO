@@ -20,7 +20,7 @@ export type Palette = 'classic' | 'bpcg' | 'devotion' | 'deep' | 'freedom' | 'gr
 export type PaletteInfo = { id: Palette; label: string; note: string };
 
 export const PALETTES: PaletteInfo[] = [
-  { id: 'classic', label: 'Classic', note: 'Black and white' },
+  { id: 'classic', label: 'Servant', note: 'Black and white' },
   { id: 'bpcg', label: 'BPCG', note: 'Warm browns' },
   { id: 'devotion', label: 'Devotion', note: 'Notebook paper, ruled lines' },
   { id: 'deep', label: 'Deep', note: 'Blues' },
@@ -173,4 +173,16 @@ export function saveFontPx(n: number): void {
   } catch {
     /* ignore */
   }
+  applyTextSize(n);
+}
+
+/**
+ * The text size applies to the whole app: the songs use it directly, and everything else (titles, buttons,
+ * labels, boxes) scales with it, kept between 80% and 150% so screens stay usable.
+ */
+export function applyTextSize(px: number): void {
+  const scale = Math.min(1.5, Math.max(0.8, px / FONT_DEFAULT));
+  const root = document.documentElement;
+  root.style.fontSize = `${Math.round(scale * 1000) / 10}%`;
+  root.style.setProperty('--ui-scale', String(scale));
 }
