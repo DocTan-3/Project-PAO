@@ -943,7 +943,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 /* Line up list: finished line ups are a little quieter, and an empty section says what will appear */
 .lineup-card.finished { background: var(--surface-2); }
 .lineup-card.finished .datebadge { opacity: .75; }
-.section-empty { margin: 4px 2px 18px; color: var(--muted); font-size: .92rem; }
+.section-empty { margin: 28px 2px; text-align: center; color: var(--muted); }
+.library.lineups .create-btn { margin-top: 14px; }
 
 .brand-mark.logo { background: #000; overflow: hidden; }
 .brand-mark.logo svg { display: block; }

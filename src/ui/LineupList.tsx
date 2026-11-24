@@ -44,6 +44,23 @@ export function LineupList({
     };
   }, []);
   const { upcoming, finished } = useMemo(() => groupLineups(lineups, today), [lineups, today]);
+  const [tab, setTabState] = useState<'upcoming' | 'finished'>(() => {
+    try {
+      return localStorage.getItem('pao:lineuptab') === 'finished' ? 'finished' : 'upcoming';
+    } catch {
+      return 'upcoming';
+    }
+  });
+  const setTab = (t: 'upcoming' | 'finished') => {
+    setTabState(t);
+    setConfirmId(null);
+    try {
+      localStorage.setItem('pao:lineuptab', t);
+    } catch {
+      /* ignore */
+    }
+  };
+  const shown = tab === 'upcoming' ? upcoming : finished;
 
   const card = (l: Lineup, isFinished = false) => {
     const entries = lineupEntries(l, songs);
@@ -91,12 +108,37 @@ export function LineupList({
 
   return (
     <main class="library lineups">
-      <div class="lib-top">
-        <div class="brand">
-          <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
-          Line up
+      <div class="lib-pinned">
+        <div class="lib-top">
+          <div class="brand">
+            <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
+            Line up
+          </div>
+          <ThemeToggle />
         </div>
-        <ThemeToggle />
+
+        {lineups.length > 0 && (
+          <div class="lang-tabs" role="tablist" aria-label="Line ups">
+            {(
+              [
+                ['upcoming', 'Upcoming', upcoming.length],
+                ['finished', 'Finished', finished.length],
+              ] as const
+            ).map(([id, label, n]) => (
+              <button
+                key={id}
+                role="tab"
+                id={`tab-${id}`}
+                aria-selected={tab === id}
+                class={`lang-tab${tab === id ? ' on' : ''}`}
+                onClick={() => setTab(id)}
+              >
+                {label}
+                <span class="lang-count">{n}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <button class="btn primary create-btn" onClick={onCreate}>
@@ -113,24 +155,13 @@ export function LineupList({
       )}
 
       {lineups.length > 0 && (
-        <>
-          <section class="letter-group" id="lineups-upcoming" aria-label="Upcoming line ups">
-            <h2 class="letter-head"><span class="letter small">Upcoming</span><span class="letter-count">{upcoming.length}</span></h2>
-            {upcoming.length > 0 ? (
-              <ul class="lib-list">{upcoming.map((l) => card(l))}</ul>
-            ) : (
-              <p class="section-empty">Nothing planned. Tap Create new line up to plan the next service.</p>
-            )}
-          </section>
-          <section class="letter-group" id="lineups-finished" aria-label="Finished line ups">
-            <h2 class="letter-head"><span class="letter small">Finished</span><span class="letter-count">{finished.length}</span></h2>
-            {finished.length > 0 ? (
-              <ul class="lib-list">{finished.map((l) => card(l, true))}</ul>
-            ) : (
-              <p class="section-empty">A line up moves here by itself once its date has passed.</p>
-            )}
-          </section>
-        </>
+        <div role="tabpanel" aria-labelledby={`tab-${tab}`} id="lineups-panel">
+          {shown.length > 0 ? (
+            <ul class="lib-list">{shown.map((l) => card(l, tab === 'finished'))}</ul>
+          ) : (
+            <p class="section-empty">{tab === 'upcoming' ? 'No upcoming line ups' : 'No finished line ups'}</p>
+          )}
+        </div>
       )}
     </main>
   );
