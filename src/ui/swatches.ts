@@ -1,4 +1,4 @@
-// Generated from the palette tokens in styles.css: [background, text, accent] for each palette and mode.
+// [background, text, accent] for each palette and mode (the full set of colors is in styles.css).
 export const SWATCHES: Record<string, Record<"day" | "night", [string, string, string]>> = {
   "classic": {
     "day": [
@@ -14,74 +14,74 @@ export const SWATCHES: Record<string, Record<"day" | "night", [string, string, s
   },
   "bpcg": {
     "day": [
-      "#e6d3b3",
-      "#3b2412",
-      "#5a3a1c"
+      "#efe2cf",
+      "#4a3020",
+      "#8a5a35"
     ],
     "night": [
-      "#26170c",
-      "#f0dfc0",
-      "#e0b878"
+      "#2d1f16",
+      "#f3e4cd",
+      "#d9a066"
     ]
   },
   "devotion": {
     "day": [
-      "#fbf6e6",
-      "#22304d",
-      "#2f4a8a"
+      "#f3efe4",
+      "#2a2a2a",
+      "#555555"
     ],
     "night": [
-      "#1a2133",
-      "#e9e4d2",
-      "#8fb0ff"
+      "#1c1c1c",
+      "#e8e4d8",
+      "#b0b0b0"
     ]
   },
   "deep": {
     "day": [
-      "#e4eefb",
-      "#0e2a52",
-      "#1f5fbf"
+      "#e6ebf0",
+      "#1f2f3f",
+      "#3f6285"
     ],
     "night": [
-      "#0d1626",
-      "#e4ecfa",
-      "#7fb0ff"
+      "#0f1720",
+      "#dde6ee",
+      "#7fa6c9"
     ]
   },
   "freedom": {
     "day": [
-      "#e8f0e2",
-      "#1d3322",
-      "#2f6b3f"
+      "#e9eee3",
+      "#2b3a2d",
+      "#6b8f5e"
     ],
     "night": [
-      "#0f1c13",
-      "#dcebd5",
-      "#7fd18f"
+      "#161d17",
+      "#e0e8dc",
+      "#a3c293"
     ]
   },
   "grace": {
     "day": [
-      "#fbeaee",
-      "#47202c",
-      "#b0365c"
+      "#fff1f5",
+      "#5c2c40",
+      "#e58fb0"
     ],
     "night": [
-      "#2b0f19",
-      "#fbd9e2",
-      "#ff8fb0"
+      "#301823",
+      "#ffe0ea",
+      "#ffa6c6"
     ]
   },
   "sacrifice": {
     "day": [
-      "#ece6fa",
-      "#2e1a5c",
-      "#5b2fb5"
+      "#efe6ee",
+      "#3d2a44",
+      "#8a5a96"
     ],
     "night": [
-      "#1c1033",
-      "#e6dcff",
-      "#b794ff"
+      "#231a27",
+      "#efe3f2",
+      "#c093ce"
     ]
   }
 } as const as never;

@@ -24,6 +24,7 @@
   --muted: #5c5c5c;
   --line: #d6d6d6;
   --accent: #000000;
+  --accent-ink: #000000; /* the accent used for text: darkened where the accent itself is too light to read */
   --accent-soft: #ececec;
   --accent-line: #b5b5b5;
   --on-accent: #ffffff;
@@ -41,6 +42,7 @@
   color-scheme: light;
 }
 :root[data-palette="classic"][data-mode="day"] {
+  --accent-ink: #000000;
   --bg: #ffffff;
   --surface: #ffffff;
   --surface-2: #f2f2f2;
@@ -65,6 +67,7 @@
   color-scheme: light;
 }
 :root[data-palette="classic"][data-mode="night"] {
+  --accent-ink: #ffffff;
   --bg: #000000;
   --surface: #0e0e0e;
   --surface-2: #181818;
@@ -89,292 +92,304 @@
   color-scheme: dark;
 }
 :root[data-palette="bpcg"][data-mode="day"] {
-  --bg: #e6d3b3;
-  --surface: #efe0c6;
-  --surface-2: #dcc7a2;
-  --text: #3b2412;
-  --lyric: #4a2f1a;
-  --muted: #6e5033;
-  --line: #c3a97c;
-  --accent: #5a3a1c;
-  --accent-soft: #d9c196;
-  --accent-line: #b08f5c;
-  --on-accent: #fbf1df;
-  --chord: #3b2412;
+  --bg: #efe2cf;
+  --surface: #f7eddc;
+  --surface-2: #ede2d1;
+  --text: #4a3020;
+  --lyric: #5e4535;
+  --muted: #786251;
+  --line: #d5c6b3;
+  --accent: #8a5a35;
+  --accent-soft: #dfccb6;
+  --accent-line: #bc9e82;
+  --on-accent: #efe2cf;
+  --chord: #6b3d1e;
   --danger: #a3281c;
-  --danger-soft: #ecc9bd;
-  --key-white: #f7ecd8;
-  --key-black: #3b2412;
-  --key-edge: #8a6a45;
-  --key-lit: #8a5a2b;
-  --on-lit: #ffffff;
-  --ok: #4f7a2a;
+  --danger-soft: #e3c4b2;
+  --key-white: #fbf6ee;
+  --key-black: #4a3020;
+  --key-edge: #94806f;
+  --key-lit: #8a5a35;
+  --on-lit: #efe2cf;
+  --ok: #3d7a3f;
+  --accent-ink: #8a5a35;
   --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
 :root[data-palette="bpcg"][data-mode="night"] {
-  --bg: #26170c;
-  --surface: #301d10;
-  --surface-2: #3b2616;
-  --text: #f0dfc0;
-  --lyric: #dcc8a4;
-  --muted: #a58b66;
-  --line: #50351f;
-  --accent: #e0b878;
-  --accent-soft: #43291a;
-  --accent-line: #7d5a35;
-  --on-accent: #26170c;
-  --chord: #f6d9a4;
-  --danger: #ff8f7d;
-  --danger-soft: #3a1c16;
-  --key-white: #6b5237;
-  --key-black: #1a0e06;
-  --key-edge: #a58b66;
-  --key-lit: #e0b878;
-  --on-lit: #26170c;
-  --ok: #9bc77a;
+  --bg: #2d1f16;
+  --surface: #38271c;
+  --surface-2: #453428;
+  --text: #f3e4cd;
+  --lyric: #dbccb7;
+  --muted: #ac9d8b;
+  --line: #493b30;
+  --accent: #d9a066;
+  --accent-soft: #533b28;
+  --accent-line: #8c6642;
+  --on-accent: #2d1f16;
+  --chord: #f0c48c;
+  --danger: #ff8f87;
+  --danger-soft: #4a2f26;
+  --key-white: #605246;
+  --key-black: #140e0a;
+  --key-edge: #9a8b7b;
+  --key-lit: #d9a066;
+  --on-lit: #2d1f16;
+  --ok: #7fd1a0;
+  --accent-ink: #d9a066;
   --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
 :root[data-palette="devotion"][data-mode="day"] {
-  --bg: #fbf6e6;
-  --surface: #fffbef;
-  --surface-2: #f1e9d2;
-  --text: #22304d;
-  --lyric: #2a3a5c;
-  --muted: #66718c;
-  --line: #d7cfb4;
-  --accent: #2f4a8a;
-  --accent-soft: #e3e5ee;
-  --accent-line: #9aa8cf;
-  --on-accent: #ffffff;
-  --chord: #b3261e;
+  --bg: #f3efe4;
+  --surface: #fbf8ef;
+  --surface-2: #eeece3;
+  --text: #2a2a2a;
+  --lyric: #424240;
+  --muted: #62615e;
+  --line: #d3cfc6;
+  --accent: #555555;
+  --accent-soft: #dad6cd;
+  --accent-line: #a4a29c;
+  --on-accent: #f3efe4;
+  --chord: #a12b24;
   --danger: #a3281c;
-  --danger-soft: #f4d9d2;
-  --key-white: #fffdf6;
-  --key-black: #22304d;
-  --key-edge: #7d86a0;
-  --key-lit: #2f4a8a;
-  --on-lit: #ffffff;
+  --danger-soft: #e6cfc4;
+  --key-white: #fdfcf7;
+  --key-black: #2a2a2a;
+  --key-edge: #84837e;
+  --key-lit: #555555;
+  --on-lit: #f3efe4;
   --ok: #3d7a3f;
-  --rule: #c5d2ee;
+  --accent-ink: #555555;
+  --rule: #d3cfc2;
   --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
 :root[data-palette="devotion"][data-mode="night"] {
-  --bg: #1a2133;
-  --surface: #212a40;
-  --surface-2: #2a3550;
-  --text: #e9e4d2;
-  --lyric: #cfcab8;
-  --muted: #98a2bd;
-  --line: #35405c;
-  --accent: #8fb0ff;
-  --accent-soft: #26324f;
-  --accent-line: #4d6296;
-  --on-accent: #121828;
-  --chord: #ff9d8f;
+  --bg: #1c1c1c;
+  --surface: #262626;
+  --surface-2: #343332;
+  --text: #e8e4d8;
+  --lyric: #d0ccc1;
+  --muted: #9f9c94;
+  --line: #393836;
+  --accent: #b0b0b0;
+  --accent-soft: #3d3d3d;
+  --accent-line: #6d6d6d;
+  --on-accent: #1c1c1c;
+  --chord: #ff9a8c;
   --danger: #ff8f87;
-  --danger-soft: #3a1e22;
-  --key-white: #44506f;
-  --key-black: #0e1424;
-  --key-edge: #98a2bd;
-  --key-lit: #8fb0ff;
-  --on-lit: #121828;
+  --danger-soft: #3c2c2b;
+  --key-white: #51504d;
+  --key-black: #0d0d0d;
+  --key-edge: #8c8a83;
+  --key-lit: #b0b0b0;
+  --on-lit: #1c1c1c;
   --ok: #7fd1a0;
-  --rule: #2b3550;
+  --accent-ink: #b0b0b0;
+  --rule: #2d2d2d;
   --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
 :root[data-palette="deep"][data-mode="day"] {
-  --bg: #e4eefb;
-  --surface: #f0f6fe;
-  --surface-2: #d3e3f7;
-  --text: #0e2a52;
-  --lyric: #17365f;
-  --muted: #51698c;
-  --line: #b3c9e6;
-  --accent: #1f5fbf;
-  --accent-soft: #cfe0f7;
-  --accent-line: #7fa3d6;
-  --on-accent: #ffffff;
-  --chord: #0e2a52;
+  --bg: #e6ebf0;
+  --surface: #f1f4f7;
+  --surface-2: #e4e8ec;
+  --text: #1f2f3f;
+  --lyric: #374654;
+  --muted: #576471;
+  --line: #c6cdd4;
+  --accent: #3f6285;
+  --accent-soft: #cbd5df;
+  --accent-line: #92a6ba;
+  --on-accent: #e6ebf0;
+  --chord: #1f2f3f;
   --danger: #a3281c;
-  --danger-soft: #f0d4cc;
-  --key-white: #f6faff;
-  --key-black: #0e2a52;
-  --key-edge: #6f8bb3;
-  --key-lit: #2f6fcf;
-  --on-lit: #ffffff;
-  --ok: #2f7a4f;
+  --danger-soft: #dbccce;
+  --key-white: #f8fafb;
+  --key-black: #1f2f3f;
+  --key-edge: #79848f;
+  --key-lit: #3f6285;
+  --on-lit: #e6ebf0;
+  --ok: #3d7a3f;
+  --accent-ink: #3f6285;
   --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
 :root[data-palette="deep"][data-mode="night"] {
-  --bg: #0d1626;
-  --surface: #142036;
-  --surface-2: #1b2a45;
-  --text: #e4ecfa;
-  --lyric: #c3d0ea;
-  --muted: #8a9bbd;
-  --line: #263553;
-  --accent: #7fb0ff;
-  --accent-soft: #1a2c4d;
-  --accent-line: #3c5a8f;
-  --on-accent: #0d1626;
-  --chord: #9cc3ff;
+  --bg: #0f1720;
+  --surface: #17222e;
+  --surface-2: #25303b;
+  --text: #dde6ee;
+  --lyric: #c4cdd5;
+  --muted: #939ba4;
+  --line: #2c343d;
+  --accent: #7fa6c9;
+  --accent-soft: #283645;
+  --accent-line: #4d667d;
+  --on-accent: #0f1720;
+  --chord: #b0cbe3;
   --danger: #ff8f87;
-  --danger-soft: #2d1a1f;
-  --key-white: #3a4a6b;
-  --key-black: #07101e;
-  --key-edge: #8a9bbd;
-  --key-lit: #7fb0ff;
-  --on-lit: #0d1626;
-  --ok: #6fd1a0;
+  --danger-soft: #31282e;
+  --key-white: #454d56;
+  --key-black: #070a0e;
+  --key-edge: #808991;
+  --key-lit: #7fa6c9;
+  --on-lit: #0f1720;
+  --ok: #7fd1a0;
+  --accent-ink: #7fa6c9;
   --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
 :root[data-palette="freedom"][data-mode="day"] {
-  --bg: #e8f0e2;
-  --surface: #f1f6ec;
-  --surface-2: #d9e6d0;
-  --text: #1d3322;
-  --lyric: #274030;
-  --muted: #567259;
-  --line: #b9ccae;
-  --accent: #2f6b3f;
-  --accent-soft: #cfe2c6;
-  --accent-line: #86a97c;
-  --on-accent: #f4faef;
-  --chord: #1d3322;
+  --bg: #e9eee3;
+  --surface: #f3f6ee;
+  --surface-2: #e7ebe2;
+  --text: #2b3a2d;
+  --lyric: #425043;
+  --muted: #606c60;
+  --line: #cbd1c6;
+  --accent: #6b8f5e;
+  --accent-soft: #d5dfce;
+  --accent-line: #aabea0;
+  --on-accent: #000000;
+  --chord: #2b3a2d;
   --danger: #a3281c;
-  --danger-soft: #f0d4cc;
-  --key-white: #f6faf1;
-  --key-black: #1d3322;
-  --key-edge: #6f8f6a;
-  --key-lit: #3f8a52;
-  --on-lit: #ffffff;
-  --ok: #2f6b3f;
+  --danger-soft: #decec3;
+  --key-white: #f9faf6;
+  --key-black: #2b3a2d;
+  --key-edge: #808b7f;
+  --key-lit: #6b8f5e;
+  --on-lit: #000000;
+  --ok: #3d7a3f;
+  --accent-ink: #55714d;
   --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
 :root[data-palette="freedom"][data-mode="night"] {
-  --bg: #0f1c13;
-  --surface: #162619;
-  --surface-2: #1e3323;
-  --text: #dcebd5;
-  --lyric: #c3d9bb;
-  --muted: #86a58b;
-  --line: #2a4430;
-  --accent: #7fd18f;
-  --accent-soft: #1c3322;
-  --accent-line: #3f7a4f;
-  --on-accent: #0f1c13;
-  --chord: #a8e6b2;
+  --bg: #161d17;
+  --surface: #1e2820;
+  --surface-2: #2c352d;
+  --text: #e0e8dc;
+  --lyric: #c8d0c4;
+  --muted: #979f95;
+  --line: #323933;
+  --accent: #a3c293;
+  --accent-soft: #354132;
+  --accent-line: #64785b;
+  --on-accent: #161d17;
+  --chord: #c4dcb6;
   --danger: #ff8f87;
-  --danger-soft: #331c19;
-  --key-white: #3f5a45;
-  --key-black: #08120b;
-  --key-edge: #86a58b;
-  --key-lit: #7fd18f;
-  --on-lit: #0f1c13;
-  --ok: #7fd18f;
+  --danger-soft: #372d27;
+  --key-white: #4b524a;
+  --key-black: #0a0d0a;
+  --key-edge: #858d83;
+  --key-lit: #a3c293;
+  --on-lit: #161d17;
+  --ok: #7fd1a0;
+  --accent-ink: #a3c293;
   --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
 :root[data-palette="grace"][data-mode="day"] {
-  --bg: #fbeaee;
-  --surface: #fff4f6;
-  --surface-2: #f4d6de;
-  --text: #47202c;
-  --lyric: #5a2d3a;
-  --muted: #8a5a68;
-  --line: #e6bfca;
-  --accent: #b0365c;
-  --accent-soft: #f4d0da;
-  --accent-line: #d08aa0;
-  --on-accent: #ffffff;
-  --chord: #8c1f45;
+  --bg: #fff1f5;
+  --surface: #fff9fb;
+  --surface-2: #f5edf0;
+  --text: #5c2c40;
+  --lyric: #704456;
+  --muted: #8a6373;
+  --line: #e5d1d8;
+  --accent: #e58fb0;
+  --accent-soft: #fbe1ea;
+  --accent-line: #f2c0d2;
+  --on-accent: #5c2c40;
+  --chord: #b04a76;
   --danger: #a3281c;
-  --danger-soft: #f6d0d0;
-  --key-white: #fff7f9;
-  --key-black: #47202c;
-  --key-edge: #a8788a;
-  --key-lit: #c04870;
-  --on-lit: #ffffff;
+  --danger-soft: #f0d1d2;
+  --key-white: #fffcfd;
+  --key-black: #5c2c40;
+  --key-edge: #a58591;
+  --key-lit: #e58fb0;
+  --on-lit: #5c2c40;
   --ok: #3d7a3f;
+  --accent-ink: #9d5b75;
   --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
 :root[data-palette="grace"][data-mode="night"] {
-  --bg: #2b0f19;
-  --surface: #371522;
-  --surface-2: #451c2c;
-  --text: #fbd9e2;
-  --lyric: #efc0cd;
-  --muted: #b98796;
-  --line: #5a2639;
-  --accent: #ff8fb0;
-  --accent-soft: #4a1a2c;
-  --accent-line: #8f3f5b;
-  --on-accent: #2b0f19;
-  --chord: #ffb3c9;
-  --danger: #ffa08f;
-  --danger-soft: #3d1a1a;
-  --key-white: #6a3a4a;
-  --key-black: #1a0810;
-  --key-edge: #b98796;
-  --key-lit: #ff8fb0;
-  --on-lit: #2b0f19;
-  --ok: #8fd1a0;
+  --bg: #301823;
+  --surface: #3c202d;
+  --surface-2: #4a2d3a;
+  --text: #ffe0ea;
+  --lyric: #e6c8d2;
+  --muted: #b498a2;
+  --line: #4d343f;
+  --accent: #ffa6c6;
+  --accent-soft: #5e3747;
+  --accent-line: #a2667d;
+  --on-accent: #301823;
+  --chord: #ffc9dc;
+  --danger: #ff8f87;
+  --danger-soft: #4d2931;
+  --key-white: #664c57;
+  --key-black: #160b10;
+  --key-edge: #a28690;
+  --key-lit: #ffa6c6;
+  --on-lit: #301823;
+  --ok: #7fd1a0;
+  --accent-ink: #ffa6c6;
   --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
 :root[data-palette="sacrifice"][data-mode="day"] {
-  --bg: #ece6fa;
-  --surface: #f5f1fd;
-  --surface-2: #ddd2f5;
-  --text: #2e1a5c;
-  --lyric: #3d2a70;
-  --muted: #6f5fa0;
-  --line: #cbbfe8;
-  --accent: #5b2fb5;
-  --accent-soft: #dcd0f4;
-  --accent-line: #a490d8;
+  --bg: #efe6ee;
+  --surface: #f8f1f7;
+  --surface-2: #ede5ec;
+  --text: #3d2a44;
+  --lyric: #524158;
+  --muted: #6f5f74;
+  --line: #d3c8d3;
+  --accent: #8a5a96;
+  --accent-soft: #dfd0e0;
+  --accent-line: #bca0c2;
   --on-accent: #ffffff;
-  --chord: #3b1d82;
+  --chord: #62366e;
   --danger: #a3281c;
-  --danger-soft: #f0d4d8;
-  --key-white: #faf7ff;
-  --key-black: #2e1a5c;
-  --key-edge: #8a7cb8;
-  --key-lit: #6c3fc8;
+  --danger-soft: #e3c8cc;
+  --key-white: #fcf8fb;
+  --key-black: #3d2a44;
+  --key-edge: #8d7f90;
+  --key-lit: #8a5a96;
   --on-lit: #ffffff;
-  --ok: #3d7a4f;
+  --ok: #3d7a3f;
+  --accent-ink: #865892;
   --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
 :root[data-palette="sacrifice"][data-mode="night"] {
-  --bg: #1c1033;
-  --surface: #26174a;
-  --surface-2: #311f5c;
-  --text: #e6dcff;
-  --lyric: #d0c3f0;
-  --muted: #9c8cc6;
-  --line: #3d2a6e;
-  --accent: #b794ff;
-  --accent-soft: #2f1f56;
-  --accent-line: #6a4fb0;
-  --on-accent: #1c1033;
-  --chord: #cdb3ff;
-  --danger: #ff8f9a;
-  --danger-soft: #3a1a28;
-  --key-white: #4d3a80;
-  --key-black: #0d0620;
-  --key-edge: #9c8cc6;
-  --key-lit: #b794ff;
-  --on-lit: #1c1033;
+  --bg: #231a27;
+  --surface: #2e2233;
+  --surface-2: #3c3040;
+  --text: #efe3f2;
+  --lyric: #d7cbda;
+  --muted: #a69ba9;
+  --line: #403643;
+  --accent: #c093ce;
+  --accent-soft: #46354c;
+  --accent-line: #795d83;
+  --on-accent: #231a27;
+  --chord: #dcbbe6;
+  --danger: #ff8f87;
+  --danger-soft: #422a34;
+  --key-white: #584e5c;
+  --key-black: #100c12;
+  --key-edge: #938997;
+  --key-lit: #c093ce;
+  --on-lit: #231a27;
   --ok: #7fd1a0;
+  --accent-ink: #c093ce;
   --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
@@ -458,7 +473,7 @@ h1, h2, h3, p { margin: 0; }
 .song-card:active { transform: scale(.99); }
 .keybadge {
   display: grid; place-items: center; width: 52px; height: 52px; border-radius: 12px; background: var(--accent-soft);
-  color: var(--accent); font-family: var(--display); font-weight: 700; font-size: 1.15rem; letter-spacing: -.02em;
+  color: var(--accent-ink); font-family: var(--display); font-weight: 700; font-size: 1.15rem; letter-spacing: -.02em;
 }
 .keybadge.none { color: var(--muted); background: var(--surface-2); }
 .song-card .t { display: block; font-weight: 650; font-size: 1.02rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -479,7 +494,7 @@ h1, h2, h3, p { margin: 0; }
 .fab:active { transform: scale(.97); }
 .empty { display: grid; justify-items: center; gap: 12px; text-align: center; padding: 56px 16px; color: var(--muted); }
 .empty h2 { color: var(--text); font-family: var(--display); font-size: 1.3rem; }
-.empty .art { width: 72px; height: 72px; display: grid; place-items: center; border-radius: 22px; background: var(--accent-soft); color: var(--accent); }
+.empty .art { width: 72px; height: 72px; display: grid; place-items: center; border-radius: 22px; background: var(--accent-soft); color: var(--accent-ink); }
 
 /* ==========================================================================
    Reader
@@ -493,11 +508,11 @@ h1, h2, h3, p { margin: 0; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 50; background: var(--bg); }
 .titles { min-width: 0; flex: 1; }
 .titles h1 { font-family: var(--display); font-weight: 700; font-size: 1.1rem; line-height: 1.2; letter-spacing: -.015em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
-.slotname { display: block; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--accent); line-height: 1.3; }
+.slotname { display: block; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--accent-ink); line-height: 1.3; }
 .titles p { color: var(--muted); font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 6px; }
 .tag { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: .8rem; font-weight: 600; }
-.tag b { color: var(--accent); font-family: var(--display); }
+.tag b { color: var(--accent-ink); font-family: var(--display); }
 .tag.changed { border-color: var(--accent-line); background: var(--accent-soft); }
 .edit-btn .lbl { display: none; }
 @media (min-width: 600px) { .edit-btn .lbl { display: inline; } .edit-btn { padding: 0 16px; } }
@@ -525,7 +540,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .stepbtn:hover, .stepval:hover { background: var(--accent-soft); }
 .stepbtn:active { background: var(--accent-line); }
 .stepval { min-width: 48px; font-variant-numeric: tabular-nums; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
-.stepval.on { color: var(--accent); }
+.stepval.on { color: var(--accent-ink); }
 .aa { font-family: var(--display); font-weight: 700; line-height: 1; }
 .aa.sm { font-size: .95rem; }
 .aa.lg { font-size: 1.35rem; }
@@ -677,7 +692,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 }
 .echip.sel { background: var(--accent); color: var(--on-accent); border-color: var(--accent); z-index: 2; }
 .echip.odd { border: 1px dashed var(--danger); }
-.echip.ghost { background: transparent; border: 2px dashed var(--accent); color: var(--accent); pointer-events: none; z-index: 1; }
+.echip.ghost { background: transparent; border: 2px dashed var(--accent); color: var(--accent-ink); pointer-events: none; z-index: 1; }
 .le-guide { position: absolute; width: 0; height: 100%; border-left: 2px solid var(--accent); pointer-events: none; z-index: 1; opacity: .85; }
 .le-guide.ghost { border-left-style: dashed; }
 .le-input {
@@ -727,7 +742,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; padding: 10px 2px 6px;
   background: var(--bg); border-bottom: 1px solid var(--line); scroll-margin-top: env(safe-area-inset-top, 0px);
 }
-.letter { font-family: var(--display); font-weight: 700; font-size: 1.35rem; letter-spacing: -.01em; color: var(--accent); min-width: 1ch; }
+.letter { font-family: var(--display); font-weight: 700; font-size: 1.35rem; letter-spacing: -.01em; color: var(--accent-ink); min-width: 1ch; }
 .letter-count { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
 .letter-group .lib-list { margin-bottom: 14px; }
 
@@ -737,7 +752,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); scrollbar-width: none;
 }
 .letter-rail::-webkit-scrollbar { display: none; }
-.letter-rail button { width: 26px; min-height: 22px; flex: none; padding: 0; border: 0; background: none; color: var(--accent); font-family: var(--display); font-weight: 700; font-size: .72rem; }
+.letter-rail button { width: 26px; min-height: 22px; flex: none; padding: 0; border: 0; background: none; color: var(--accent-ink); font-family: var(--display); font-weight: 700; font-size: .72rem; }
 .letter-rail button:hover { background: var(--accent-soft); border-radius: 8px; }
 @media (max-width: 1000px) {
   .library.has-rail { padding-right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 26px); }
@@ -786,7 +801,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .lineup-card:hover { border-color: var(--accent); }
 .lineup-card:active { transform: scale(.99); }
 .lineup-card.pressing { animation: hold .55s linear forwards; }
-.datebadge { display: grid; justify-items: center; align-content: center; width: 62px; height: 66px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); line-height: 1.05; }
+.datebadge { display: grid; justify-items: center; align-content: center; width: 62px; height: 66px; border-radius: 12px; background: var(--accent-soft); color: var(--accent-ink); line-height: 1.05; }
 .datebadge .dow { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
 .datebadge .dnum { font-family: var(--display); font-weight: 700; font-size: 1.55rem; }
 .datebadge .dmon { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
@@ -794,7 +809,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .lineup-body .t { font-weight: 650; font-size: 1rem; }
 .lineup-body .a { color: var(--muted); font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .progress { font-size: .78rem; font-weight: 700; color: var(--muted); letter-spacing: .02em; }
-.progress.done { color: var(--accent); }
+.progress.done { color: var(--accent-ink); }
 .lineup-card .chev { color: var(--muted); }
 
 /* line up form */
@@ -820,11 +835,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .slot-empty { border-style: dashed; color: var(--muted); background: transparent; }
 .slot-empty:hover { border-color: var(--accent); color: var(--text); }
 .slot-text, .slot-empty > span { display: grid; min-width: 0; }
-.slot-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--accent); }
+.slot-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--accent-ink); }
 .slot-main .t, .slot-empty .t { font-weight: 650; line-height: 1.25; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .slot-main .a { color: var(--muted); font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .keybadge.sm { width: 40px; height: 40px; border-radius: 10px; font-size: .95rem; flex: none; }
-.used-tag { padding: 2px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: .75rem; font-weight: 700; white-space: nowrap; }
+.used-tag { padding: 2px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); font-size: .75rem; font-weight: 700; white-space: nowrap; }
 
 /* song picker (full screen) */
 .picker { position: fixed; inset: 0; z-index: 80; display: flex; flex-direction: column; background: var(--bg); }
@@ -851,7 +866,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
    Keep-screen-on setting
    ========================================================================== */
 .awake-btn { color: var(--muted); }
-.awake-btn.on { color: var(--accent); }
+.awake-btn.on { color: var(--accent-ink); }
 .drawer-setting { margin-top: auto; display: flex; align-items: center; gap: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
 .drawer-setting-text { flex: 1; display: grid; gap: 2px; }
 .drawer-setting-title { font-weight: 650; }
