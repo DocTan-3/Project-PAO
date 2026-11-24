@@ -3,31 +3,42 @@ import {
   FONTS,
   FONT_MAX,
   FONT_MIN,
-  THEMES,
+  MODES,
+  PALETTES,
   type FontFace,
-  type Theme,
+  type Mode,
+  type Palette,
   applyFontFace,
-  applyTheme,
+  applyLook,
   fontInfo,
   loadFontFace,
   loadFontPx,
-  loadTheme,
+  loadMode,
+  loadPalette,
   saveFontFace,
   saveFontPx,
-  saveTheme,
+  saveMode,
+  savePalette,
+  swatchOf,
 } from './appearance';
 import { Icon } from './icons';
 
-/** Settings: how the app and the songs look. Every change applies at once and is remembered. */
+/** Settings: how the app looks. Every change applies at once and is remembered. */
 export function SettingsPage({ onMenu }: { onMenu: () => void }) {
-  const [theme, setTheme] = useState<Theme>(loadTheme);
+  const [palette, setPalette] = useState<Palette>(loadPalette);
+  const [mode, setMode] = useState<Mode>(loadMode);
   const [face, setFace] = useState<FontFace>(loadFontFace);
   const [px, setPx] = useState(loadFontPx);
 
-  const pickTheme = (t: Theme) => {
-    setTheme(t);
-    applyTheme(t);
-    saveTheme(t);
+  const pickPalette = (p: Palette) => {
+    setPalette(p);
+    applyLook(p, mode);
+    savePalette(p);
+  };
+  const pickMode = (m: Mode) => {
+    setMode(m);
+    applyLook(palette, m);
+    saveMode(m);
   };
   const pickFace = (f: FontFace) => {
     setFace(f);
@@ -51,25 +62,46 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
         </div>
       </div>
 
-      <section class="set-sec" aria-labelledby="set-theme">
-        <h2 id="set-theme">Color theme</h2>
-        <div class="theme-grid" role="radiogroup" aria-label="Color theme">
-          {THEMES.map((t) => (
+      <section class="set-sec" aria-labelledby="set-mode">
+        <h2 id="set-mode">Day or Night</h2>
+        <div class="seg mode-seg" role="radiogroup" aria-label="Day or Night">
+          {MODES.map((m) => (
             <button
-              key={t.id}
+              key={m.id}
               role="radio"
-              aria-checked={theme === t.id}
-              class={`theme-card${theme === t.id ? ' on' : ''}`}
-              onClick={() => pickTheme(t.id)}
+              aria-checked={mode === m.id}
+              class={`seg-btn${mode === m.id ? ' on' : ''}`}
+              onClick={() => pickMode(m.id)}
             >
-              <span class="swatch" style={{ background: t.swatch[0], color: t.swatch[1] }} aria-hidden="true">
-                <b style={{ color: t.swatch[2] }}>G</b>
-                <i>Aa</i>
-              </span>
-              <span class="theme-name">{t.label}</span>
-              {theme === t.id && <span class="theme-check" aria-hidden="true"><Icon name="check" size={16} /></span>}
+              <Icon name={m.id === 'day' ? 'sun' : 'sparkles'} size={18} />
+              {m.label}
             </button>
           ))}
+        </div>
+      </section>
+
+      <section class="set-sec" aria-labelledby="set-theme">
+        <h2 id="set-theme">Color palette</h2>
+        <div class="theme-grid" role="radiogroup" aria-label="Color palette">
+          {PALETTES.map((p) => {
+            const [bg, fg, accent] = swatchOf(p.id, mode);
+            return (
+              <button
+                key={p.id}
+                role="radio"
+                aria-checked={palette === p.id}
+                class={`theme-card${palette === p.id ? ' on' : ''}`}
+                onClick={() => pickPalette(p.id)}
+              >
+                <span class="swatch" style={{ background: bg, color: fg }} aria-hidden="true">
+                  <b style={{ color: accent }}>G</b>
+                  <i>Aa</i>
+                </span>
+                <span class="theme-name">{p.label}</span>
+                {palette === p.id && <span class="theme-check" aria-hidden="true"><Icon name="check" size={16} /></span>}
+              </button>
+            );
+          })}
         </div>
       </section>
 

@@ -1,7 +1,8 @@
 /* ==========================================================================
    Songbook
-   Colour themes, chosen in Settings (never from the phone's setting): Light, Dark, BPCG, Paper (notebook),
-   Midnight, Forest and Rose. The button at the top right flips between a light and a dark one.
+   Colour palettes, chosen in Settings (never from the phone's setting): Classic, BPCG, Devotion (notebook paper),
+   Deep, Freedom, Grace and Sacrifice. Each has a Day look and a darker Night look; the button at the top
+   right flips between the two. The font (one for the whole app) is also chosen in Settings.
    Chords are bold and the lyrics a touch softer, so they stay distinct without colour.
    Layout: one column on a phone; on a tablet (>= 900px) a sticky sidebar (chords, notes) sits beside the lyrics.
    ========================================================================== */
@@ -9,12 +10,12 @@
 :root {
   --radius: 14px;
   --radius-sm: 10px;
-  --display: "Space Grotesk Variable", "Inter Variable", system-ui, sans-serif;
+  --display: "Inter Variable", system-ui, sans-serif; /* all three fonts are replaced by the font chosen in Settings */
   --sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
   --song-font: "Inter Variable", system-ui, sans-serif; /* the song text; changed in Settings */
   --gutter: 16px;
 
-  /* Light (the default) */
+  /* Classic Day (the default until a palette is chosen) */
   --bg: #ffffff;
   --surface: #ffffff;
   --surface-2: #f2f2f2;
@@ -35,10 +36,35 @@
   --key-lit: #6b6b6b;
   --on-lit: #ffffff;
   --ok: #2fa66a;
-  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .1);
+  --rule: transparent;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
-:root[data-theme="dark"] {
+:root[data-palette="classic"][data-mode="day"] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f2f2f2;
+  --text: #000000;
+  --lyric: #262626;
+  --muted: #5c5c5c;
+  --line: #d6d6d6;
+  --accent: #000000;
+  --accent-soft: #ececec;
+  --accent-line: #b5b5b5;
+  --on-accent: #ffffff;
+  --chord: #000000;
+  --danger: #c0352b;
+  --danger-soft: #fdecea;
+  --key-white: #ffffff;
+  --key-black: #1a1a1a;
+  --key-edge: #8a8a8a;
+  --key-lit: #6b6b6b;
+  --on-lit: #ffffff;
+  --ok: #2fa66a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
+  color-scheme: light;
+}
+:root[data-palette="classic"][data-mode="night"] {
   --bg: #000000;
   --surface: #0e0e0e;
   --surface-2: #181818;
@@ -59,10 +85,10 @@
   --key-lit: #ffffff;
   --on-lit: #000000;
   --ok: #ffffff;
-  --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .7);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
-:root[data-theme="bpcg"] {
+:root[data-palette="bpcg"][data-mode="day"] {
   --bg: #e6d3b3;
   --surface: #efe0c6;
   --surface-2: #dcc7a2;
@@ -83,11 +109,34 @@
   --key-lit: #8a5a2b;
   --on-lit: #ffffff;
   --ok: #4f7a2a;
-  --shadow: 0 1px 2px rgba(59, 36, 18, .1), 0 8px 24px rgba(59, 36, 18, .16);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
-
-:root[data-theme="paper"] {
+:root[data-palette="bpcg"][data-mode="night"] {
+  --bg: #26170c;
+  --surface: #301d10;
+  --surface-2: #3b2616;
+  --text: #f0dfc0;
+  --lyric: #dcc8a4;
+  --muted: #a58b66;
+  --line: #50351f;
+  --accent: #e0b878;
+  --accent-soft: #43291a;
+  --accent-line: #7d5a35;
+  --on-accent: #26170c;
+  --chord: #f6d9a4;
+  --danger: #ff8f7d;
+  --danger-soft: #3a1c16;
+  --key-white: #6b5237;
+  --key-black: #1a0e06;
+  --key-edge: #a58b66;
+  --key-lit: #e0b878;
+  --on-lit: #26170c;
+  --ok: #9bc77a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+:root[data-palette="devotion"][data-mode="day"] {
   --bg: #fbf6e6;
   --surface: #fffbef;
   --surface-2: #f1e9d2;
@@ -108,10 +157,60 @@
   --key-lit: #2f4a8a;
   --on-lit: #ffffff;
   --ok: #3d7a3f;
-  --shadow: 0 1px 2px rgba(34,48,77,.08), 0 8px 24px rgba(34,48,77,.12);
+  --rule: #c5d2ee;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
-:root[data-theme="midnight"] {
+:root[data-palette="devotion"][data-mode="night"] {
+  --bg: #1a2133;
+  --surface: #212a40;
+  --surface-2: #2a3550;
+  --text: #e9e4d2;
+  --lyric: #cfcab8;
+  --muted: #98a2bd;
+  --line: #35405c;
+  --accent: #8fb0ff;
+  --accent-soft: #26324f;
+  --accent-line: #4d6296;
+  --on-accent: #121828;
+  --chord: #ff9d8f;
+  --danger: #ff8f87;
+  --danger-soft: #3a1e22;
+  --key-white: #44506f;
+  --key-black: #0e1424;
+  --key-edge: #98a2bd;
+  --key-lit: #8fb0ff;
+  --on-lit: #121828;
+  --ok: #7fd1a0;
+  --rule: #2b3550;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+:root[data-palette="deep"][data-mode="day"] {
+  --bg: #e4eefb;
+  --surface: #f0f6fe;
+  --surface-2: #d3e3f7;
+  --text: #0e2a52;
+  --lyric: #17365f;
+  --muted: #51698c;
+  --line: #b3c9e6;
+  --accent: #1f5fbf;
+  --accent-soft: #cfe0f7;
+  --accent-line: #7fa3d6;
+  --on-accent: #ffffff;
+  --chord: #0e2a52;
+  --danger: #a3281c;
+  --danger-soft: #f0d4cc;
+  --key-white: #f6faff;
+  --key-black: #0e2a52;
+  --key-edge: #6f8bb3;
+  --key-lit: #2f6fcf;
+  --on-lit: #ffffff;
+  --ok: #2f7a4f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
+  color-scheme: light;
+}
+:root[data-palette="deep"][data-mode="night"] {
   --bg: #0d1626;
   --surface: #142036;
   --surface-2: #1b2a45;
@@ -132,10 +231,10 @@
   --key-lit: #7fb0ff;
   --on-lit: #0d1626;
   --ok: #6fd1a0;
-  --shadow: 0 1px 2px rgba(0,0,0,.6), 0 10px 30px rgba(0,0,0,.6);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
-:root[data-theme="forest"] {
+:root[data-palette="freedom"][data-mode="day"] {
   --bg: #e8f0e2;
   --surface: #f1f6ec;
   --surface-2: #d9e6d0;
@@ -156,10 +255,34 @@
   --key-lit: #3f8a52;
   --on-lit: #ffffff;
   --ok: #2f6b3f;
-  --shadow: 0 1px 2px rgba(29,51,34,.1), 0 8px 24px rgba(29,51,34,.14);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
-:root[data-theme="rose"] {
+:root[data-palette="freedom"][data-mode="night"] {
+  --bg: #0f1c13;
+  --surface: #162619;
+  --surface-2: #1e3323;
+  --text: #dcebd5;
+  --lyric: #c3d9bb;
+  --muted: #86a58b;
+  --line: #2a4430;
+  --accent: #7fd18f;
+  --accent-soft: #1c3322;
+  --accent-line: #3f7a4f;
+  --on-accent: #0f1c13;
+  --chord: #a8e6b2;
+  --danger: #ff8f87;
+  --danger-soft: #331c19;
+  --key-white: #3f5a45;
+  --key-black: #08120b;
+  --key-edge: #86a58b;
+  --key-lit: #7fd18f;
+  --on-lit: #0f1c13;
+  --ok: #7fd18f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+:root[data-palette="grace"][data-mode="day"] {
   --bg: #fbeaee;
   --surface: #fff4f6;
   --surface-2: #f4d6de;
@@ -180,16 +303,88 @@
   --key-lit: #c04870;
   --on-lit: #ffffff;
   --ok: #3d7a3f;
-  --shadow: 0 1px 2px rgba(71,32,44,.1), 0 8px 24px rgba(71,32,44,.14);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
+:root[data-palette="grace"][data-mode="night"] {
+  --bg: #2b0f19;
+  --surface: #371522;
+  --surface-2: #451c2c;
+  --text: #fbd9e2;
+  --lyric: #efc0cd;
+  --muted: #b98796;
+  --line: #5a2639;
+  --accent: #ff8fb0;
+  --accent-soft: #4a1a2c;
+  --accent-line: #8f3f5b;
+  --on-accent: #2b0f19;
+  --chord: #ffb3c9;
+  --danger: #ffa08f;
+  --danger-soft: #3d1a1a;
+  --key-white: #6a3a4a;
+  --key-black: #1a0810;
+  --key-edge: #b98796;
+  --key-lit: #ff8fb0;
+  --on-lit: #2b0f19;
+  --ok: #8fd1a0;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+:root[data-palette="sacrifice"][data-mode="day"] {
+  --bg: #ece6fa;
+  --surface: #f5f1fd;
+  --surface-2: #ddd2f5;
+  --text: #2e1a5c;
+  --lyric: #3d2a70;
+  --muted: #6f5fa0;
+  --line: #cbbfe8;
+  --accent: #5b2fb5;
+  --accent-soft: #dcd0f4;
+  --accent-line: #a490d8;
+  --on-accent: #ffffff;
+  --chord: #3b1d82;
+  --danger: #a3281c;
+  --danger-soft: #f0d4d8;
+  --key-white: #faf7ff;
+  --key-black: #2e1a5c;
+  --key-edge: #8a7cb8;
+  --key-lit: #6c3fc8;
+  --on-lit: #ffffff;
+  --ok: #3d7a4f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
+  color-scheme: light;
+}
+:root[data-palette="sacrifice"][data-mode="night"] {
+  --bg: #1c1033;
+  --surface: #26174a;
+  --surface-2: #311f5c;
+  --text: #e6dcff;
+  --lyric: #d0c3f0;
+  --muted: #9c8cc6;
+  --line: #3d2a6e;
+  --accent: #b794ff;
+  --accent-soft: #2f1f56;
+  --accent-line: #6a4fb0;
+  --on-accent: #1c1033;
+  --chord: #cdb3ff;
+  --danger: #ff8f9a;
+  --danger-soft: #3a1a28;
+  --key-white: #4d3a80;
+  --key-black: #0d0620;
+  --key-edge: #9c8cc6;
+  --key-lit: #b794ff;
+  --on-lit: #1c1033;
+  --ok: #7fd1a0;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
 
-/* Paper: notebook paper with ruled lines and chords in red pen */
-html[data-theme="paper"] {
-  background-image: linear-gradient(to bottom, transparent 27px, #c5d2ee 27px 28px);
+/* Devotion: notebook paper with ruled lines (and chords in red pen by day) */
+html[data-palette="devotion"] {
+  background-image: linear-gradient(to bottom, transparent 27px, var(--rule) 27px 28px);
   background-size: 100% 28px;
 }
-html[data-theme="paper"] body { background: transparent; }
+html[data-palette="devotion"] body { background: transparent; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text); }
@@ -680,7 +875,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .lib-pinned.page-pinned { padding-bottom: 10px; }
 .chords-controls { display: grid; gap: 10px; margin-top: 12px; }
 .chords-controls .seg { width: 100%; }
-.chords-controls .seg-btn { flex: 1; }
+.chords-controls .seg-btn, .mode-seg .seg-btn { flex: 1; }
+.mode-seg { width: 100%; }
+.mode-seg .seg-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; }
 .root-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 .root-btn { min-height: 42px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-family: var(--display); font-weight: 700; }
 .root-btn:hover { border-color: var(--accent); }

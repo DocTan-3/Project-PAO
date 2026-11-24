@@ -1,28 +1,27 @@
 import { useState } from 'preact/hooks';
-import { applyTheme, loadTheme, oppositeTheme, saveTheme, themeInfo } from './appearance';
+import { applyLook, loadMode, loadPalette, otherMode, saveMode } from './appearance';
 import { Icon } from './icons';
 
 /**
- * The quick button at the top right: an icon only. It flips between a light and a dark look
- * (the sun shows on a light theme, the moon on a dark one). The full choice of colours is in Settings.
+ * The quick button at the top right: an icon only. It flips the chosen colour palette between its
+ * Day look (sun) and its darker Night look (sparkles). The palette itself is picked in Settings.
  */
 export function ThemeToggle() {
-  const [theme, setTheme] = useState(loadTheme);
+  const [mode, setMode] = useState(loadMode);
   const flip = () => {
-    const next = oppositeTheme(theme);
-    setTheme(next);
-    applyTheme(next);
-    saveTheme(next);
+    const next = otherMode(mode);
+    setMode(next);
+    applyLook(loadPalette(), next);
+    saveMode(next);
   };
-  const dark = themeInfo(theme).dark;
   return (
     <button
       class="btn icon ghost"
       onClick={flip}
-      aria-label={dark ? 'Switch to a light theme' : 'Switch to a dark theme'}
-      title={`Theme: ${themeInfo(theme).label}`}
+      aria-label={mode === 'night' ? 'Switch to Day' : 'Switch to Night'}
+      title={mode === 'night' ? 'Night' : 'Day'}
     >
-      <Icon name={dark ? 'moon' : 'sun'} />
+      <Icon name={mode === 'night' ? 'sparkles' : 'sun'} />
     </button>
   );
 }
