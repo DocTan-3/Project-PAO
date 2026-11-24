@@ -14,14 +14,14 @@ export const SWATCHES: Record<string, Record<"day" | "night", [string, string, s
   },
   "bpcg": {
     "day": [
-      "#efe2cf",
-      "#4a3020",
-      "#8a5a35"
+      "#d8c5ad",
+      "#2a1a10",
+      "#5a3a22"
     ],
     "night": [
-      "#2d1f16",
-      "#f3e4cd",
-      "#d9a066"
+      "#1a1009",
+      "#e6d3b8",
+      "#b88a5a"
     ]
   },
   "devotion": {
