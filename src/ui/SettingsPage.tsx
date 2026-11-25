@@ -188,6 +188,15 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
         </div>
       </section>
 
+      <section class="set-sec" aria-labelledby="set-share">
+        <h2 id="set-share">Share with a friend</h2>
+        <p class="set-hint">Send or receive songs as a file, for example by Quick Share or Bluetooth.</p>
+        <a class="btn" id="share-link" href="#share">
+          <Icon name="share" size={20} />
+          Send or receive songs
+        </a>
+      </section>
+
       {adminAvailable && (
         <section class="set-sec" aria-labelledby="set-admin">
           <h2 id="set-admin">Admin</h2>

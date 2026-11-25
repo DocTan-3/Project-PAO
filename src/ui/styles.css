@@ -982,3 +982,9 @@ label.btn.big.disabled { opacity: .5; }
 .pin-row { display: flex; gap: 10px; }
 .pin-row input { flex: 1; min-width: 0; min-height: 52px; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); font-size: 1.4rem; letter-spacing: .4em; text-align: center; }
 .pin-row .btn { min-height: 52px; }
+
+.team-bar { display: grid; gap: 8px; margin: 12px 0 6px; }
+.team-btn { min-height: 56px; width: 100%; font-size: 1.05rem; border-radius: var(--radius); gap: 10px; }
+.team-btn .badge { margin-left: 4px; background: var(--on-accent); color: var(--accent); }
+.team-status { margin: 0; color: var(--muted); font-size: .9rem; text-align: center; }
+a.btn { text-decoration: none; }

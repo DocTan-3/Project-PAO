@@ -255,11 +255,11 @@ export function App() {
         {route.kind === 'chords' ? (
           <ChordsPage onMenu={() => setMenuOpen(true)} />
         ) : route.kind === 'share' ? (
-          <SharePage songs={songs} onMenu={() => setMenuOpen(true)} onImport={importSongs} onUpdate={updateFromTeam} />
+          <SharePage songs={songs} onMenu={() => setMenuOpen(true)} onImport={importSongs} />
         ) : (
           <SettingsPage onMenu={() => setMenuOpen(true)} />
         )}
-        {drawer(route.kind)}
+        {drawer(route.kind === 'share' ? 'settings' : route.kind)}
       </>
     );
   }
@@ -297,6 +297,7 @@ export function App() {
         onMenu={() => setMenuOpen(true)}
         onOpen={(id) => go(`#song-${id}`)}
         onDelete={deleteSong}
+        onUpdate={updateFromTeam}
         onNew={async (language: Language) => {
           const s = { ...newSong(), language };
           await store.put(s);

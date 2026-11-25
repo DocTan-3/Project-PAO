@@ -37,25 +37,27 @@ Every push (without a tag) also builds an APK: open the **Actions** tab, choose 
 
 ## Team updates (admin phone and Update button)
 
-One phone is the **admin**. When it taps **Publish songs**, everyone else gets those songs by tapping **Update songs**
-(Menu, then **Share & Update**). Songs a person made or edited on their own phone are never replaced or removed.
+One phone is the **admin**. When it taps **Publish songs** on the Songs screen, everyone else gets those songs by tapping
+**Update songs** on the same screen. Songs a person made or edited on their own phone are never replaced or removed.
 There is no server of your own: the songs live in a GitHub **Gist** (one file hosted by GitHub).
+Sending songs to a friend as a file is in Settings, under **Share with a friend**.
 
 **Set it up once**
 
 1. Go to <https://gist.github.com>. Name the file `songs.json`, type `{}` as its content, and choose **Create secret gist**.
-   Copy the long id at the end of the page's address.
+   Copy the long id at the end of the page's address and paste it into `GIST_ID_IN_CODE` in `src/admin/config.ts`
+   (or set it as an Actions variable called `GIST_ID`).
 2. Go to <https://github.com/settings/tokens> and choose **Generate new token (classic)**. Tick only **gist**. Copy the token.
-3. In this repository open **Settings, Secrets and variables, Actions**.
-   - On **Secrets**, add `ADMIN_TOKEN` (the token) and `ADMIN_PIN` (any 6 digits you choose).
-   - On **Variables**, add `GIST_ID` (the id from step 1).
+3. In this repository open **Settings, Secrets and variables, Actions**, and on **Secrets** add `ADMIN_TOKEN` (the token).
 4. Build a new release (Actions, **Android APK**, Run workflow, type a version). Install it on every phone.
+
+The admin PIN is built into the app (`ADMIN_PIN` in `src/admin/config.ts`).
 
 **Using it**
 
-- On the admin phone: Settings, scroll to **Admin**, enter the PIN. Then Menu, **Share & Update**, **Publish songs**.
-- Only one phone is the admin: the phone that enters the PIN last. An older admin phone switches itself off the next time it opens Settings or Share & Update.
-- On any other phone: Menu, **Share & Update**, **Update songs**.
+- On the admin phone: Settings, scroll to **Admin**, enter the PIN. Then on the Songs screen tap **Publish songs**.
+- Only one phone is the admin: the phone that enters the PIN last. An older admin phone switches itself off the next time it opens the Songs screen or Settings.
+- On any other phone: on the Songs screen, tap **Update songs**.
 - A song the admin deletes disappears from other phones on their next update, unless that person has edited it. Sample songs and a person's own songs stay.
 
 The PIN and token are inside the app file, so treat the PIN as a gentle lock and not as strong security. The token can only change that one Gist,

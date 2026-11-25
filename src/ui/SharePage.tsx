@@ -1,9 +1,5 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
-import { hasUnpublishedChanges, lastPublished, lastUpdateAt, markUpdated, publishSongs, stillAdmin, useAdmin, whenText } from '../admin/admin';
-import { updatesAvailable } from '../admin/config';
-import { fetchPackText, packErrorText } from '../admin/github';
+import { useMemo, useState } from 'preact/hooks';
 import { groupSongs } from '../model/library';
-import type { UpdatePlan } from '../model/pack';
 import { type MergePlan, exportFileName, exportSongs, parseSongsFile } from '../model/share';
 import type { Song } from '../model/types';
 import { Icon } from './icons';
@@ -23,84 +19,16 @@ export function receivedMessage(plan: MergePlan, invalid: number): string {
   return parts.join(' ');
 }
 
-/** The message after an update from the team, in plain words. */
-export function updatedMessage(plan: UpdatePlan): string {
-  const parts: string[] = [];
-  if (plan.added) parts.push(`${plural(plan.added, 'new song was', 'new songs were')} added.`);
-  if (plan.updated) parts.push(`${plural(plan.updated, 'song was', 'songs were')} updated.`);
-  if (plan.removed) parts.push(`${plural(plan.removed, 'song was', 'songs were')} removed because the team no longer uses ${plan.removed === 1 ? 'it' : 'them'}.`);
-  if (plan.keptMine) parts.push(`${plural(plan.keptMine, 'song you changed was', 'songs you changed were')} kept as yours.`);
-  if (!plan.added && !plan.updated && !plan.removed) parts.unshift('You already have the latest songs.');
-  else parts.unshift('Done!');
-  parts.push('Your own songs were not changed.');
-  return parts.join(' ');
-}
-
-/** Update from the team (everyone), publish to the team (the admin phone), and send or receive songs by file. */
+/** Send songs to a friend, or receive songs from one, as a file. Two big buttons, in plain words. */
 export function SharePage({
   songs,
   onMenu,
   onImport,
-  onUpdate,
 }: {
   songs: Song[];
   onMenu: () => void;
   onImport: (incoming: Song[]) => Promise<MergePlan>;
-  onUpdate: (pack: Song[]) => Promise<UpdatePlan>;
 }) {
-  const admin = useAdmin();
-  const [upd, setUpd] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pub, setPub] = useState<{ ok: boolean; text: string } | null>(null);
-  const [lost, setLost] = useState(false);
-  const [lastUpd, setLastUpd] = useState<number | null>(lastUpdateAt);
-  const [, bump] = useState(0);
-
-  // an admin phone checks that it is still the admin (another phone may have taken over)
-  useEffect(() => {
-    if (!admin) return;
-    stillAdmin()
-      .then((ok) => {
-        if (!ok) setLost(true);
-      })
-      .catch(() => undefined);
-  }, [admin]);
-
-  const update = async () => {
-    setUpd(null);
-    setBusy(true);
-    try {
-      const parsed = parseSongsFile(await fetchPackText());
-      if (!parsed.ok) setUpd({ ok: false, text: 'The team songs are not ready yet. Ask the admin to publish them.' });
-      else if (parsed.songs.length === 0) setUpd({ ok: false, text: 'The team has not published any songs yet.' });
-      else {
-        const plan = await onUpdate(parsed.songs);
-        markUpdated();
-        setLastUpd(Date.now());
-        setUpd({ ok: true, text: updatedMessage(plan) });
-      }
-    } catch (e) {
-      setUpd({ ok: false, text: packErrorText(e) });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const publish = async () => {
-    setPub(null);
-    setBusy(true);
-    try {
-      const r = await publishSongs(songs);
-      if (r.ok) setPub({ ok: true, text: `Published ${plural(r.count, 'song', 'songs')}. Everyone gets them when they tap Update songs.` });
-      else if (r.reason === 'empty') setPub({ ok: false, text: 'There are no songs to publish.' });
-      else setLost(true);
-    } catch (e) {
-      setPub({ ok: false, text: packErrorText(e) });
-    } finally {
-      setBusy(false);
-      bump((n) => n + 1);
-    }
-  };
-
   const [busy, setBusy] = useState(false);
   const [choosing, setChoosing] = useState(false);
   const [picked, setPicked] = useState<Set<string>>(() => new Set());
@@ -169,45 +97,11 @@ export function SharePage({
         <div class="lib-top">
           <div class="brand">
             <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
-            Share &amp; Update
+            Share by file
           </div>
           <ThemeToggle />
         </div>
       </div>
-
-      {lost && !admin && (
-        <p class="share-note bad" role="alert" id="lost-note">Another phone is now the admin. This phone is back to normal.</p>
-      )}
-
-      {updatesAvailable && !admin && (
-        <section class="share-card" aria-labelledby="upd-h">
-          <h2 id="upd-h">Update songs</h2>
-          <p class="share-lead">Get the latest songs from the team.</p>
-          <button class="btn primary big" id="update-btn" onClick={update} disabled={busy}>
-            <Icon name="download" size={24} />
-            Update songs
-          </button>
-          <p class="muted small-print">You need internet. {lastUpd ? `Last updated ${whenText(lastUpd)}.` : 'You have not updated yet.'}</p>
-          {upd && <p class={`share-note ${upd.ok ? 'ok' : 'bad'}`} role={upd.ok ? 'status' : 'alert'} id="update-note">{upd.text}</p>}
-        </section>
-      )}
-
-      {admin && (
-        <section class="share-card admin-card" aria-labelledby="pub-h">
-          <h2 id="pub-h">Publish songs <span class="badge">Admin</span></h2>
-          <p class="share-lead">You are the admin. Everyone gets your {plural(songs.length, 'song', 'songs')} when they tap Update songs.</p>
-          <button class="btn primary big" id="publish-btn" onClick={publish} disabled={busy || songs.length === 0}>
-            <Icon name="share" size={24} />
-            Publish songs
-          </button>
-          <p class="muted small-print" id="publish-status">
-            {lastPublished() ? `Last published ${whenText(lastPublished()!.at)}.` : 'You have not published yet.'}
-            {lastPublished() && hasUnpublishedChanges(songs) ? ' You have changes that are not published yet.' : ''}
-            {!lastPublished() ? '' : !hasUnpublishedChanges(songs) ? ' Everything is published.' : ''}
-          </p>
-          {pub && <p class={`share-note ${pub.ok ? 'ok' : 'bad'}`} role={pub.ok ? 'status' : 'alert'} id="publish-note">{pub.text}</p>}
-        </section>
-      )}
 
       <section class="share-card" aria-labelledby="send-h">
         <h2 id="send-h">Send my songs</h2>

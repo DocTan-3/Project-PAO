@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { LANGUAGES, countByLanguage, groupSongs } from '../model/library';
 import type { Language, Song } from '../model/types';
+import type { UpdatePlan } from '../model/pack';
 import { Icon } from './icons';
+import { TeamBar } from './TeamBar';
 import { ThemeToggle } from './theme';
 import { useHold } from './useHold';
 
@@ -19,12 +21,14 @@ export function Library({
   onNew,
   onDelete,
   onMenu,
+  onUpdate,
 }: {
   songs: Song[];
   onOpen: (id: string) => void;
   onNew: (language: Language) => void;
   onDelete: (id: string) => void;
   onMenu: () => void;
+  onUpdate: (pack: Song[]) => Promise<UpdatePlan>;
 }) {
   const [lang, setLangState] = useState<Language>(loadLang);
   const [query, setQuery] = useState('');
@@ -115,6 +119,8 @@ export function Library({
       </div>
 
       </div>
+
+      <TeamBar songs={songs} onUpdate={onUpdate} />
 
       {groups.length === 0 && (
         <div class="empty" role="tabpanel">
