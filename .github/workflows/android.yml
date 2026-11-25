@@ -36,6 +36,11 @@ jobs:
           npm test
 
       - name: Build the web app and copy it into the Android project
+        env:
+          # team updates and admin mode (all optional; see README, "Team updates")
+          VITE_GIST_ID: ${{ vars.GIST_ID }}
+          VITE_ADMIN_PIN: ${{ secrets.ADMIN_PIN }}
+          VITE_ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
         run: |
           npm run build
           npx cap sync android

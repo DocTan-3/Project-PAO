@@ -33,6 +33,8 @@ export interface Song {
   /** key the chords are written in, e.g. "G" or "F#m"; null = unknown */
   key: string | null;
   sections: Section[];
+  /** 'admin' = this copy came from the team's published songs; anything else is the person's own song */
+  source?: 'admin';
   createdAt: number;
   updatedAt: number;
 }

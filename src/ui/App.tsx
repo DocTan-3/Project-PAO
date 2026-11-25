@@ -9,6 +9,7 @@ import {
   nextSunday,
   removeSongFromLineup,
 } from '../model/lineup';
+import { planUpdate } from '../model/pack';
 import { planMerge } from '../model/share';
 import { IndexedDbStore, type Store } from '../model/store';
 import type { Language, Song } from '../model/types';
@@ -131,6 +132,21 @@ export function App() {
     return plan;
   };
 
+  /** The team's published songs arrived: refresh the team's songs; the person's own songs are never touched. */
+  const updateFromTeam = async (pack: Song[]) => {
+    const plan = planUpdate(songs, pack);
+    for (const s of plan.puts) await store.put(s);
+    for (const id of plan.removes) await store.delete(id);
+    if (plan.removes.length > 0) {
+      for (const l of await store.listLineups()) {
+        const cleaned = plan.removes.reduce((acc, id) => removeSongFromLineup(acc, id), l);
+        if (cleaned !== l) await store.putLineup(cleaned);
+      }
+    }
+    await refresh();
+    return plan;
+  };
+
   const pickSection = (s: Section) => {
     setMenuOpen(false);
     go(s === 'songs' ? '' : `#${s}`);
@@ -239,7 +255,7 @@ export function App() {
         {route.kind === 'chords' ? (
           <ChordsPage onMenu={() => setMenuOpen(true)} />
         ) : route.kind === 'share' ? (
-          <SharePage songs={songs} onMenu={() => setMenuOpen(true)} onImport={importSongs} />
+          <SharePage songs={songs} onMenu={() => setMenuOpen(true)} onImport={importSongs} onUpdate={updateFromTeam} />
         ) : (
           <SettingsPage onMenu={() => setMenuOpen(true)} />
         )}

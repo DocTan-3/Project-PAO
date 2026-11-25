@@ -93,7 +93,11 @@ export function reorderChord(line: Line, id: string, dir: 1 | -1): Line {
 
 // ---- song-level operations (all immutable) ----
 
-const touch = (song: Song): Song => ({ ...song, updatedAt: Date.now() });
+/** Any edit makes the song the person's own: an update from the admin will no longer replace or remove it. */
+const touch = (song: Song): Song => {
+  const { source: _fromAdmin, ...mine } = song;
+  return { ...mine, updatedAt: Date.now() };
+};
 
 export function newSong(): Song {
   return mkSong({ title: '', sections: [mkSection('Intro', mkLine(''))] });

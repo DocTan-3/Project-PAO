@@ -1,0 +1,135 @@
+/**
+ * Admin mode. A phone becomes the admin by entering the PIN in Settings. Only one phone is the admin at a time:
+ * the phone that entered the PIN last. Its id is written into the published file, and an older admin phone notices
+ * (when it next checks) that it is no longer the admin and goes back to normal.
+ */
+import { useEffect, useState } from 'preact/hooks';
+import { packSignature } from '../model/pack';
+import { exportSongs, parseSongsFile, readAdmin } from '../model/share';
+import type { Song } from '../model/types';
+import { ADMIN_PIN, adminAvailable } from './config';
+import { fetchPackText, writePackText } from './github';
+
+const KEY_ADMIN = 'pao:admin';
+const KEY_DEVICE = 'pao:deviceid';
+const KEY_PUBLISHED = 'pao:published';
+const KEY_UPDATED = 'pao:lastupdate';
+const EVENT = 'pao:admin-changed';
+
+function read(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function write(key: string, value: string | null): void {
+  try {
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, value);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** A random id for this phone, made once. */
+export function deviceId(): string {
+  let id = read(KEY_DEVICE);
+  if (!id) {
+    id = globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    write(KEY_DEVICE, id);
+  }
+  return id;
+}
+
+export const isAdmin = (): boolean => adminAvailable && read(KEY_ADMIN) === '1';
+
+function setAdmin(on: boolean): void {
+  write(KEY_ADMIN, on ? '1' : null);
+  dispatchEvent(new Event(EVENT));
+}
+
+export function useAdmin(): boolean {
+  const [on, setOn] = useState(isAdmin);
+  useEffect(() => {
+    const h = () => setOn(isAdmin());
+    addEventListener(EVENT, h);
+    return () => removeEventListener(EVENT, h);
+  }, []);
+  return on;
+}
+
+export type ActivateResult = { ok: true; tookOver: boolean } | { ok: false; reason: 'pin' | 'unavailable' };
+
+/** Enter the PIN: this phone becomes the admin and any earlier admin phone is replaced. */
+export async function activateAdmin(pin: string): Promise<ActivateResult> {
+  if (!adminAvailable) return { ok: false, reason: 'unavailable' };
+  if (pin.trim() !== ADMIN_PIN) return { ok: false, reason: 'pin' };
+  const text = await fetchPackText().catch((e) => {
+    // a Gist that has no songs file yet is fine: this phone starts it
+    if ((e as { kind?: string }).kind === 'missing') return '';
+    throw e;
+  });
+  const parsed = text ? parseSongsFile(text) : null;
+  const current: Song[] = parsed && parsed.ok ? parsed.songs : [];
+  const before = text ? readAdmin(text) : null;
+  await writePackText(exportSongs(current, Date.now(), { deviceId: deviceId(), since: Date.now() }));
+  setAdmin(true);
+  return { ok: true, tookOver: !!before && before.deviceId !== deviceId() };
+}
+
+export function turnOffAdmin(): void {
+  setAdmin(false);
+}
+
+/** Ask the published file whether this phone is still the admin; if not, go back to normal. */
+export async function stillAdmin(): Promise<boolean> {
+  if (!isAdmin()) return false;
+  const a = readAdmin(await fetchPackText());
+  if (a && a.deviceId === deviceId()) return true;
+  setAdmin(false);
+  return false;
+}
+
+export type PublishResult = { ok: true; count: number } | { ok: false; reason: 'not-admin' | 'empty' };
+
+/** Publish this phone's songs as the team's songs. */
+export async function publishSongs(songs: Song[]): Promise<PublishResult> {
+  if (songs.length === 0) return { ok: false, reason: 'empty' };
+  const text = await fetchPackText();
+  const a = readAdmin(text);
+  if (!a || a.deviceId !== deviceId()) {
+    setAdmin(false);
+    return { ok: false, reason: 'not-admin' };
+  }
+  await writePackText(exportSongs(songs, Date.now(), { deviceId: a.deviceId, since: a.since }));
+  write(KEY_PUBLISHED, JSON.stringify({ at: Date.now(), sig: packSignature(songs) }));
+  return { ok: true, count: songs.length };
+}
+
+export interface PublishedInfo {
+  at: number;
+  sig: string;
+}
+export function lastPublished(): PublishedInfo | null {
+  try {
+    const v = JSON.parse(read(KEY_PUBLISHED) ?? 'null') as PublishedInfo | null;
+    return v && typeof v.at === 'number' && typeof v.sig === 'string' ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** True when this phone's songs differ from what it last published. */
+export const hasUnpublishedChanges = (songs: Song[]): boolean => lastPublished()?.sig !== packSignature(songs);
+
+export const lastUpdateAt = (): number | null => {
+  const n = Number(read(KEY_UPDATED));
+  return n > 0 ? n : null;
+};
+export const markUpdated = (): void => write(KEY_UPDATED, String(Date.now()));
+
+/** "today at 3:15 PM" style date for the messages. */
+export function whenText(ms: number): string {
+  return new Date(ms).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}

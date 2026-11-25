@@ -1,4 +1,7 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
+import { activateAdmin, stillAdmin, turnOffAdmin, useAdmin } from '../admin/admin';
+import { adminAvailable } from '../admin/config';
+import { packErrorText } from '../admin/github';
 import {
   FONTS,
   FONT_MAX,
@@ -29,6 +32,37 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
   const [mode, setMode] = useState<Mode>(loadMode);
   const [face, setFace] = useState<FontFace>(loadFontFace);
   const [px, setPx] = useState(loadFontPx);
+  const admin = useAdmin();
+  const [pin, setPin] = useState('');
+  const [adminMsg, setAdminMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [adminBusy, setAdminBusy] = useState(false);
+
+  // an admin phone checks that no other phone has taken over
+  useEffect(() => {
+    if (!admin) return;
+    stillAdmin()
+      .then((ok) => {
+        if (!ok) setAdminMsg({ ok: false, text: 'Another phone is now the admin. This phone is back to normal.' });
+      })
+      .catch(() => undefined);
+  }, [admin]);
+
+  const unlock = async () => {
+    setAdminMsg(null);
+    setAdminBusy(true);
+    try {
+      const r = await activateAdmin(pin);
+      if (!r.ok) setAdminMsg({ ok: false, text: r.reason === 'pin' ? 'That PIN is not right.' : 'Admin mode is not set up in this app.' });
+      else {
+        setPin('');
+        setAdminMsg({ ok: true, text: r.tookOver ? 'Admin mode is on. The phone that was the admin before has been switched off.' : 'Admin mode is on.' });
+      }
+    } catch (e) {
+      setAdminMsg({ ok: false, text: packErrorText(e) });
+    } finally {
+      setAdminBusy(false);
+    }
+  };
 
   const pickPalette = (p: Palette) => {
     setPalette(p);
@@ -153,6 +187,36 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
           </p>
         </div>
       </section>
+
+      {adminAvailable && (
+        <section class="set-sec" aria-labelledby="set-admin">
+          <h2 id="set-admin">Admin</h2>
+          {admin ? (
+            <div class="admin-box">
+              <p class="share-lead">This phone is the <b>admin</b>. Use <b>Share &amp; Update</b> in the menu to publish songs for everyone.</p>
+              <button class="btn" id="admin-off" onClick={() => { turnOffAdmin(); setAdminMsg(null); }}>Turn off admin mode</button>
+            </div>
+          ) : (
+            <form class="admin-box" onSubmit={(e) => { e.preventDefault(); if (pin.length === 6 && !adminBusy) void unlock(); }}>
+              <label for="admin-pin" class="admin-label">For the team admin only. Enter the 6-digit PIN.</label>
+              <div class="pin-row">
+                <input
+                  id="admin-pin"
+                  type="password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  autoComplete="off"
+                  value={pin}
+                  onInput={(e) => setPin((e.currentTarget as HTMLInputElement).value.replace(/\D/g, '').slice(0, 6))}
+                />
+                <button class="btn primary" id="admin-unlock" type="submit" disabled={pin.length !== 6 || adminBusy}>Unlock</button>
+              </div>
+            </form>
+          )}
+          {adminMsg && <p class={`share-note ${adminMsg.ok ? 'ok' : 'bad'}`} role={adminMsg.ok ? 'status' : 'alert'} id="admin-note">{adminMsg.text}</p>}
+        </section>
+      )}
     </main>
   );
 }

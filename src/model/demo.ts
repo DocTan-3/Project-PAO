@@ -3,8 +3,17 @@ import type { Song } from './types';
 
 /** Public-domain songs used to seed an empty library. */
 export function demoSongs(): Song[] {
-  return [...englishDemoSongs(), ...tagalogDemoSongs()];
+  return [...englishDemoSongs(), ...tagalogDemoSongs()].map(fixed);
 }
+
+/** Every phone gets the same id and time for a sample song, so a team update never shows one twice. */
+const DEMO_TIME = Date.UTC(2026, 0, 1);
+const fixed = (s: Song): Song => ({
+  ...s,
+  id: `demo-${s.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`,
+  createdAt: DEMO_TIME,
+  updatedAt: DEMO_TIME,
+});
 
 function englishDemoSongs(): Song[] {
   return [
@@ -79,6 +88,10 @@ function englishDemoSongs(): Song[] {
 
 /** Traditional Filipino folk songs (public domain). */
 export function tagalogDemoSongs(): Song[] {
+  return tagalogRaw().map(fixed);
+}
+
+function tagalogRaw(): Song[] {
   return [
     mkSong({
       title: 'Bahay Kubo',

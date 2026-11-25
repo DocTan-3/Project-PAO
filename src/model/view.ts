@@ -62,8 +62,9 @@ export function applyTranspose(song: Song, semitones: number): Song {
   const k = songKeyOf(song);
   const nk = k ? transposeKey(k, semitones) : null;
   const target = nk ?? songSpelling(song);
+  const { source: _fromAdmin, ...mine } = song; // an edit makes the song the person's own
   return {
-    ...song,
+    ...mine,
     key: nk ? formatKey(nk) : song.key,
     updatedAt: Date.now(),
     sections: song.sections.map((s) => ({

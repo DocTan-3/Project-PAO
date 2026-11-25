@@ -35,6 +35,32 @@ git tag v0.1.0 && git push origin v0.1.0
 Every push (without a tag) also builds an APK: open the **Actions** tab, choose the run, and download
 **Songbook-apk** from its Artifacts. You can start a build by hand with **Run workflow**.
 
+## Team updates (admin phone and Update button)
+
+One phone is the **admin**. When it taps **Publish songs**, everyone else gets those songs by tapping **Update songs**
+(Menu, then **Share & Update**). Songs a person made or edited on their own phone are never replaced or removed.
+There is no server of your own: the songs live in a GitHub **Gist** (one file hosted by GitHub).
+
+**Set it up once**
+
+1. Go to <https://gist.github.com>. Name the file `songs.json`, type `{}` as its content, and choose **Create secret gist**.
+   Copy the long id at the end of the page's address.
+2. Go to <https://github.com/settings/tokens> and choose **Generate new token (classic)**. Tick only **gist**. Copy the token.
+3. In this repository open **Settings, Secrets and variables, Actions**.
+   - On **Secrets**, add `ADMIN_TOKEN` (the token) and `ADMIN_PIN` (any 6 digits you choose).
+   - On **Variables**, add `GIST_ID` (the id from step 1).
+4. Build a new release (Actions, **Android APK**, Run workflow, type a version). Install it on every phone.
+
+**Using it**
+
+- On the admin phone: Settings, scroll to **Admin**, enter the PIN. Then Menu, **Share & Update**, **Publish songs**.
+- Only one phone is the admin: the phone that enters the PIN last. An older admin phone switches itself off the next time it opens Settings or Share & Update.
+- On any other phone: Menu, **Share & Update**, **Update songs**.
+- A song the admin deletes disappears from other phones on their next update, unless that person has edited it. Sample songs and a person's own songs stay.
+
+The PIN and token are inside the app file, so treat the PIN as a gentle lock and not as strong security. The token can only change that one Gist,
+and GitHub keeps the Gist's history, so an older version can always be restored.
+
 ### Build it yourself
 
 Needs Node 22, JDK 21 and the Android SDK (Android Studio installs both SDK and JDK).

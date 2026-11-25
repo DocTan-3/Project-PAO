@@ -10,8 +10,31 @@ export const SHARE_APP = 'bpcg-paw-songs';
 export const SHARE_VERSION = 1;
 const MAX_SONGS = 5000;
 
-export function exportSongs(songs: Song[], now = Date.now()): string {
-  return JSON.stringify({ app: SHARE_APP, version: SHARE_VERSION, exportedAt: now, songs }, null, 1);
+/** Who published the team's songs last. Only one phone is the admin at a time. */
+export interface AdminInfo {
+  deviceId: string;
+  since: number;
+}
+
+/** `source` marks where a copy came from on one phone; it is never written to a file. */
+const forFile = (s: Song): Song => {
+  const { source: _source, ...rest } = s;
+  return rest;
+};
+
+export function exportSongs(songs: Song[], now = Date.now(), admin?: AdminInfo): string {
+  return JSON.stringify({ app: SHARE_APP, version: SHARE_VERSION, exportedAt: now, ...(admin ? { admin } : {}), songs: songs.map(forFile) }, null, 1);
+}
+
+/** The admin recorded in a songs file, if any. */
+export function readAdmin(text: string): AdminInfo | null {
+  try {
+    const a = (JSON.parse(text) as { admin?: unknown }).admin;
+    if (isObj(a) && typeof a.deviceId === 'string' && a.deviceId) return { deviceId: a.deviceId, since: num(a.since, 0) };
+  } catch {
+    /* not JSON */
+  }
+  return null;
 }
 
 /** "BPCG-PAW-songs-2026-11-24.json" */
