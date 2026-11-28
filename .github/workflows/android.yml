@@ -62,12 +62,12 @@ jobs:
           ./gradlew assembleDebug --no-daemon
 
       - name: Name the APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Songbook.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk PAW.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Songbook-apk
-          path: Songbook.apk
+          name: PAW-apk
+          path: PAW.apk
           if-no-files-found: error
 
       - name: Publish a GitHub Release (version tag or manual version)
@@ -80,7 +80,7 @@ jobs:
           if [[ -n "$INPUT_VERSION" ]]; then TAG="v${INPUT_VERSION#v}"; fi
           cat > install-notes.md <<'NOTES'
           ## Install BPCG - PAW on Android
-          1. On the phone, open this page and download **Songbook.apk** (that is the app file), then tap it to open it.
+          1. On the phone, open this page and download **PAW.apk** (that is the app file), then tap it to open it.
           2. Android will ask to allow installs from this browser. Allow it, then tap **Install**.
           3. A newer version installs over the old one and **keeps your songs and line ups**.
 
@@ -88,7 +88,7 @@ jobs:
 
           ---
           NOTES
-          gh release create "$TAG" Songbook.apk --target "$GITHUB_SHA" \
+          gh release create "$TAG" PAW.apk --target "$GITHUB_SHA" \
             --title "BPCG - PAW ${TAG}" \
             --notes-file install-notes.md \
             --generate-notes

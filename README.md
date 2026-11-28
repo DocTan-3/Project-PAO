@@ -18,14 +18,14 @@ The web app is wrapped with [Capacitor](https://capacitorjs.com). App name `BPCG
 
 ### Install it on a phone
 
-Open the repository's **Releases** page, download **Songbook.apk** from the latest release, and open it on the
+Open the repository's **Releases** page, download **PAW.apk** from the latest release, and open it on the
 phone (Android will ask to allow installs from that source). Every release is signed with the same key, so a new
 version installs over the old one and keeps the songs and line ups stored in the app.
 
 ### Make a release
 
 Either push a version tag, or open the **Actions** tab, choose **Android APK**, press **Run workflow**, pick the
-branch and type a version such as `0.1.0`. The workflow builds the app and attaches `Songbook.apk` to a new release
+branch and type a version such as `0.1.0`. The workflow builds the app and attaches `PAW.apk` to a new release
 (creating the tag for you).
 
 ```bash
@@ -33,7 +33,7 @@ git tag v0.1.0 && git push origin v0.1.0
 ```
 
 Every push (without a tag) also builds an APK: open the **Actions** tab, choose the run, and download
-**Songbook-apk** from its Artifacts. You can start a build by hand with **Run workflow**.
+**PAW-apk** from its Artifacts. You can start a build by hand with **Run workflow**.
 
 ## Team updates (admin phone and Update button)
 
