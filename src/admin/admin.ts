@@ -1,13 +1,13 @@
 /**
- * Admin mode. A phone becomes the admin by entering the PIN in Settings. Only one phone is the admin at a time:
- * the phone that entered the PIN last. Its id is written into the published file, and an older admin phone notices
+ * Admin mode. A phone becomes the admin by entering the admin password in Settings. Only one phone is the admin at a time:
+ * the phone that entered the password last. Its id is written into the published file, and an older admin phone notices
  * (when it next checks) that it is no longer the admin and goes back to normal.
  */
 import { useEffect, useState } from 'preact/hooks';
 import { adminVerdict, packSignature } from '../model/pack';
 import { exportSongs, parseSongsFile, readAdmin } from '../model/share';
 import type { Song } from '../model/types';
-import { ADMIN_PIN, adminAvailable } from './config';
+import { ADMIN_PASSWORD, adminAvailable } from './config';
 import { fetchPackText, writePackText } from './github';
 
 const KEY_ADMIN = 'pao:admin';
@@ -60,12 +60,12 @@ export function useAdmin(): boolean {
   return on;
 }
 
-export type ActivateResult = { ok: true; tookOver: boolean } | { ok: false; reason: 'pin' | 'unavailable' };
+export type ActivateResult = { ok: true; tookOver: boolean } | { ok: false; reason: 'password' | 'unavailable' };
 
-/** Enter the PIN: this phone becomes the admin and any earlier admin phone is replaced. */
-export async function activateAdmin(pin: string): Promise<ActivateResult> {
+/** Enter the password: this phone becomes the admin and any earlier admin phone is replaced. */
+export async function activateAdmin(password: string): Promise<ActivateResult> {
   if (!adminAvailable) return { ok: false, reason: 'unavailable' };
-  if (pin.trim() !== ADMIN_PIN) return { ok: false, reason: 'pin' };
+  if (password.trim() !== ADMIN_PASSWORD) return { ok: false, reason: 'password' };
   const text = await fetchPackText().catch((e) => {
     // a Gist that has no songs file yet is fine: this phone starts it
     if ((e as { kind?: string }).kind === 'missing') return '';

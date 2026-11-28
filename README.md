@@ -51,16 +51,16 @@ Sending songs to a friend as a file is in Settings, under **Share with a friend*
 3. In this repository open **Settings, Secrets and variables, Actions**, and on **Secrets** add `ADMIN_TOKEN` (the token).
 4. Build a new release (Actions, **Android APK**, Run workflow, type a version). Install it on every phone.
 
-The admin PIN is built into the app (`ADMIN_PIN` in `src/admin/config.ts`).
+The admin password is built into the app (`ADMIN_PASSWORD` in `src/admin/config.ts`).
 
 **Using it**
 
-- On the admin phone: Settings, scroll to **Admin**, enter the PIN. Then on the Songs screen tap **Publish songs**.
-- Only one phone is the admin: the phone that enters the PIN last. An older admin phone switches itself off the next time it opens the Songs screen or Settings.
+- On the admin phone: Settings, scroll to **Admin**, enter the admin password. Then on the Songs screen tap **Publish songs**.
+- Only one phone is the admin: the phone that enters the password last. An older admin phone switches itself off the next time it opens the Songs screen or Settings.
 - On any other phone: on the Songs screen, tap **Update songs**.
 - A song the admin deletes disappears from other phones on their next update, unless that person has edited it. Sample songs and a person's own songs stay.
 
-The PIN and token are inside the app file, so treat the PIN as a gentle lock and not as strong security. The token can only change that one Gist,
+The password and token are inside the app file, and the password is also in this repository's code, so treat the password as a gentle lock and not as strong security. The token can only change that one Gist,
 and GitHub keeps the Gist's history, so an older version can always be restored.
 
 ### Build it yourself

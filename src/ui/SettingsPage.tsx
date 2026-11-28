@@ -34,7 +34,8 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
   const [face, setFace] = useState<FontFace>(loadFontFace);
   const [px, setPx] = useState(loadFontPx);
   const admin = useAdmin();
-  const [pin, setPin] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [adminMsg, setAdminMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [adminBusy, setAdminBusy] = useState(false);
 
@@ -48,14 +49,24 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
       .catch(() => undefined);
   }, [admin]);
 
+  const passwordField = {
+    id: 'admin-password',
+    autoComplete: 'off',
+    autoCapitalize: 'off' as const,
+    autoCorrect: 'off',
+    spellcheck: false,
+    value: password,
+    onInput: (e: Event) => setPassword((e.currentTarget as HTMLInputElement).value),
+  };
+
   const unlock = async () => {
     setAdminMsg(null);
     setAdminBusy(true);
     try {
-      const r = await activateAdmin(pin);
-      if (!r.ok) setAdminMsg({ ok: false, text: r.reason === 'pin' ? 'That PIN is not right.' : 'Admin mode is not set up in this app.' });
+      const r = await activateAdmin(password);
+      if (!r.ok) setAdminMsg({ ok: false, text: r.reason === 'password' ? 'That password is not right.' : 'Admin mode is not set up in this app.' });
       else {
-        setPin('');
+        setPassword('');
         setAdminMsg({ ok: true, text: r.tookOver ? 'Admin mode is on. The phone that was the admin before has been switched off.' : 'Admin mode is on.' });
       }
     } catch (e) {
@@ -204,25 +215,19 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
           <h2 id="set-admin">Admin</h2>
           {admin ? (
             <div class="admin-box">
-              <p class="share-lead">This phone is the <b>admin</b>. Use <b>Share &amp; Update</b> in the menu to publish songs for everyone.</p>
+              <p class="share-lead">This phone is the <b>admin</b>. Use <b>Publish songs</b> on the Songs screen to share your songs with everyone.</p>
               <button class="btn" id="admin-off" onClick={() => { turnOffAdmin(); setAdminMsg(null); }}>Turn off admin mode</button>
             </div>
           ) : (
-            <form class="admin-box" onSubmit={(e) => { e.preventDefault(); if (pin.length === 6 && !adminBusy) void unlock(); }}>
-              <label for="admin-pin" class="admin-label">For the team admin only. Enter the 6-digit PIN.</label>
+            <form class="admin-box" onSubmit={(e) => { e.preventDefault(); if (password.length > 0 && !adminBusy) void unlock(); }}>
+              <label for="admin-password" class="admin-label">For the team admin only. Enter the admin password.</label>
               <div class="pin-row">
-                <input
-                  id="admin-pin"
-                  type="password"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={6}
-                  autoComplete="off"
-                  value={pin}
-                  onInput={(e) => setPin((e.currentTarget as HTMLInputElement).value.replace(/\D/g, '').slice(0, 6))}
-                />
-                <button class="btn primary" id="admin-unlock" type="submit" disabled={pin.length !== 6 || adminBusy}>Unlock</button>
+                {showPassword ? <input type="text" {...passwordField} /> : <input type="password" {...passwordField} />}
+                <button class="btn" id="admin-show" type="button" aria-pressed={showPassword} onClick={() => setShowPassword((v) => !v)}>
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
               </div>
+              <button class="btn primary" id="admin-unlock" type="submit" disabled={password.length === 0 || adminBusy}>Unlock</button>
             </form>
           )}
           {adminMsg && <p class={`share-note ${adminMsg.ok ? 'ok' : 'bad'}`} role={adminMsg.ok ? 'status' : 'alert'} id="admin-note">{adminMsg.text}</p>}
