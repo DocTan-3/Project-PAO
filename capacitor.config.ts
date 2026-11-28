@@ -5,10 +5,11 @@ const config: CapacitorConfig = {
   appName: 'BPCG - PAW',
   webDir: 'dist',
   plugins: {
-    // Android 15+ draws apps edge to edge. The page already pads itself with env(safe-area-inset-*),
-    // so let Capacitor report the real insets (and pad the webview itself on older Android).
+    // The app draws behind the status and navigation bars, so its own background colour shows there (not the phone's
+    // light or dark setting) and the bar icons can always be chosen to contrast with it. The page pads itself with the
+    // --safe-area-inset-* values that Capacitor injects.
     SystemBars: {
-      insetsHandling: 'native',
+      insetsHandling: 'css',
       initialViewportFitValueHint: 'cover',
     },
   },

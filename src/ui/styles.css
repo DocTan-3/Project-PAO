@@ -13,6 +13,12 @@
   --display: "Inter Variable", system-ui, sans-serif; /* all three fonts are replaced by the font chosen in Settings */
   --sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
   --song-font: "Inter Variable", system-ui, sans-serif; /* the song text; changed in Settings */
+  /* The app draws behind the phone's status and navigation bars and keeps its content clear of them with these four
+     values. The Android app injects --safe-area-inset-*; a browser or newer WebView reports env(safe-area-inset-*). */
+  --sai-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --sai-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --sai-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --sai-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
   --gutter: 18px; /* the page margin on every screen; the letter index on the Songs screen sits inside it */
 
   /* Servant Day (the default until a palette is chosen) */
@@ -427,8 +433,8 @@ h1, h2, h3, p { margin: 0; }
 
 /* page gutters honour phone safe areas */
 .library, .reader, .editor {
-  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
-  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+  padding-left: max(var(--gutter), var(--sai-left));
+  padding-right: max(var(--gutter), var(--sai-right));
 }
 
 /* ---------- buttons ---------- */
@@ -453,7 +459,7 @@ h1, h2, h3, p { margin: 0; }
 /* ==========================================================================
    Library
    ========================================================================== */
-.library { max-width: 720px; margin: 0 auto; padding-block: 18px 128px; }
+.library { max-width: 720px; margin: 0 auto; padding-block: 18px calc(128px + var(--sai-bottom)); }
 .lib-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 1.55rem; letter-spacing: -.025em; }
 .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: var(--accent); color: var(--on-accent); }
@@ -496,7 +502,7 @@ h1, h2, h3, p { margin: 0; }
 }
 .confirm span { flex: 1 1 100%; font-weight: 600; }
 .fab {
-  position: fixed; z-index: 30; right: max(18px, env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  position: fixed; z-index: 30; right: max(18px, var(--sai-right)); bottom: calc(18px + var(--sai-bottom));
   display: grid; place-items: center; width: 60px; height: 60px; padding: 0; border: 0; border-radius: 50%;
   background: var(--accent); color: var(--on-accent); box-shadow: var(--shadow);
   transition: transform .08s, filter .12s;
@@ -510,13 +516,14 @@ h1, h2, h3, p { margin: 0; }
 /* ==========================================================================
    Reader
    ========================================================================== */
-.reader { max-width: 1120px; margin: 0 auto; padding-block: 0 64px; }
+.reader { max-width: 1120px; margin: 0 auto; padding-block: 0 calc(64px + var(--sai-bottom)); }
 /* the title row and the controls stay pinned together while the lyrics scroll */
-.reader-head { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); padding-bottom: 6px; border-bottom: 1px solid transparent; }
+.reader-head { position: sticky; top: var(--sai-top); z-index: 20; background: var(--bg); padding-bottom: 6px; border-bottom: 1px solid transparent; }
 .topbar { display: flex; align-items: center; gap: 2px; padding: 6px 0 4px; }
 .topbar .btn.icon { width: 38px; min-width: 38px; }
 .topbar .edit-btn { min-width: 38px; padding: 0 10px; }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 50; background: var(--bg); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: var(--sai-top); z-index: 50; background: var(--bg); }
+body::after { content: ""; position: fixed; inset: auto 0 0; height: var(--sai-bottom); z-index: 34; background: var(--bg); pointer-events: none; }
 .titles { min-width: 0; flex: 1; }
 .titles h1 { font-family: var(--display); font-weight: 700; font-size: 1.1rem; line-height: 1.2; letter-spacing: -.015em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
 .slotname { display: block; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--accent-ink); line-height: 1.3; }
@@ -534,7 +541,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .reader-main { min-width: 0; }
 @media (min-width: 900px) {
   .reader-layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 36px; align-items: start; margin-top: 8px; }
-  .reader-side { position: sticky; top: calc(var(--head-h, 110px) + env(safe-area-inset-top, 0px) + 8px); max-height: calc(100vh - var(--head-h, 110px) - 32px); overflow-y: auto; padding: 2px 4px 16px 2px; scrollbar-width: thin; }
+  .reader-side { position: sticky; top: calc(var(--head-h, 110px) + var(--sai-top) + 8px); max-height: calc(100vh - var(--head-h, 110px) - 32px); overflow-y: auto; padding: 2px 4px 16px 2px; scrollbar-width: thin; }
 }
 
 .ctl { display: grid; gap: 4px; }
@@ -643,7 +650,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .sheet-backdrop { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; background: rgba(5, 8, 14, .55); }
 .sheet {
   position: relative; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; display: grid; gap: 14px; justify-items: center;
-  padding: 22px max(18px, env(safe-area-inset-left, 0px)) calc(20px + env(safe-area-inset-bottom, 0px));
+  padding: 22px max(18px, var(--sai-left)) calc(20px + var(--sai-bottom));
   background: var(--surface); color: var(--text); border-radius: 22px 22px 0 0; box-shadow: var(--shadow);
 }
 .sheet::before { content: ""; position: absolute; top: 8px; left: 50%; width: 38px; height: 4px; border-radius: 2px; background: var(--line); transform: translateX(-50%); }
@@ -660,10 +667,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 /* ==========================================================================
    Editor
    ========================================================================== */
-.editor { max-width: 860px; margin: 0 auto; padding-block: 0 56px; }
+.editor { max-width: 860px; margin: 0 auto; padding-block: 0 calc(56px + var(--sai-bottom)); }
 .editor.has-toolbar { padding-bottom: 300px; }
 .ed-bar {
-  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; align-items: center; gap: 8px; padding: 10px 0; background: var(--bg);
+  position: sticky; top: var(--sai-top); z-index: 20; display: flex; align-items: center; gap: 8px; padding: 10px 0; background: var(--bg);
 }
 .status { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: .85rem; }
 .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
@@ -717,7 +724,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .ctb-wrap {
   position: fixed; z-index: 35; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--line); border-radius: 20px 20px 0 0;
   box-shadow: 0 -10px 30px rgba(16, 24, 40, .14);
-  padding: 14px max(var(--gutter), env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding: 14px max(var(--gutter), var(--sai-right)) calc(12px + var(--sai-bottom)) max(var(--gutter), var(--sai-left));
 }
 .ctb { max-width: 860px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .ctb-row { display: flex; align-items: center; gap: 8px; }
@@ -750,15 +757,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 .letter-group { margin-bottom: 6px; }
 .letter-head {
-  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; padding: 10px 2px 6px;
-  background: var(--bg); border-bottom: 1px solid var(--line); scroll-margin-top: env(safe-area-inset-top, 0px);
+  position: sticky; top: var(--sai-top); z-index: 6; display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; padding: 10px 2px 6px;
+  background: var(--bg); border-bottom: 1px solid var(--line); scroll-margin-top: var(--sai-top);
 }
 .letter { font-family: var(--display); font-weight: 700; font-size: 1.35rem; letter-spacing: -.01em; color: var(--accent-ink); min-width: 1ch; }
 .letter-count { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
 .letter-group .lib-list { margin-bottom: 14px; }
 
 .letter-rail {
-  position: fixed; z-index: 28; right: max(1px, env(safe-area-inset-right, 0px)); top: 50%; transform: translateY(-50%);
+  position: fixed; z-index: 28; right: max(1px, var(--sai-right)); top: 50%; transform: translateY(-50%);
   display: flex; flex-direction: column; max-height: calc(100vh - 170px); overflow-y: auto; padding: 4px 0; border-radius: 10px;
   background: color-mix(in srgb, var(--surface) 88%, transparent); border: 0; scrollbar-width: none;
 }
@@ -781,7 +788,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .drawer-wrap.open .drawer-backdrop { opacity: 1; }
 .drawer {
   position: absolute; top: 0; bottom: 0; left: 0; width: min(84vw, 320px); display: flex; flex-direction: column; gap: 10px;
-  padding: calc(14px + env(safe-area-inset-top, 0px)) 14px calc(14px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px));
+  padding: calc(14px + var(--sai-top)) 14px calc(14px + var(--sai-bottom)) max(14px, var(--sai-left));
   background: var(--surface); border-right: 1px solid var(--line); box-shadow: var(--shadow); transform: translateX(-102%); transition: transform .22s ease-out;
 }
 .drawer-wrap.open .drawer { transform: none; }
@@ -819,9 +826,17 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .lineup-card .chev { color: var(--muted); }
 
 /* line up form */
-.lineup-page { max-width: 720px; margin: 0 auto; padding-block: 0 56px;
-  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px)); padding-right: max(var(--gutter), env(safe-area-inset-right, 0px)); display: grid; gap: 12px; align-content: start; }
+.lineup-page { max-width: 720px; margin: 0 auto; padding-block: 0 calc(56px + var(--sai-bottom));
+  padding-left: max(var(--gutter), var(--sai-left)); padding-right: max(var(--gutter), var(--sai-right)); display: grid; gap: 12px; align-content: start; }
 .lineup-page .topbar { margin-bottom: 0; }
+/* the header stays pinned under the status bar, with the title centred between the back arrow and Start */
+.lineup-head { position: sticky; top: var(--sai-top); z-index: 20; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 6px 0; background: var(--bg); }
+.lineup-head .titles { flex: none; text-align: center; max-width: 52vw; }
+.lineup-head .titles h1, .lineup-head .titles p { text-align: center; }
+.lineup-head .lh-left { justify-self: start; display: flex; }
+.lineup-head .lh-right { justify-self: end; display: flex; }
+.slot-readonly { flex: 1; display: grid; min-width: 0; padding: 12px 14px; border: 1px dashed var(--line); border-radius: var(--radius); color: var(--muted); }
+.slot-readonly .t { font-weight: 600; }
 .start-btn { gap: 8px; padding: 0 16px; }
 .start-btn .lbl { display: inline; }
 .date-card { display: grid; gap: 6px; }
@@ -849,9 +864,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 /* song picker (full screen) */
 .picker { position: fixed; inset: 0; z-index: 80; display: flex; flex-direction: column; background: var(--bg); }
-.picker-bar { display: flex; align-items: center; gap: 8px; padding: calc(10px + env(safe-area-inset-top, 0px)) max(var(--gutter), env(safe-area-inset-right, 0px)) 10px max(8px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); background: var(--bg); }
+.picker-bar { display: flex; align-items: center; gap: 8px; padding: calc(10px + var(--sai-top)) max(var(--gutter), var(--sai-right)) 10px max(8px, var(--sai-left)); border-bottom: 1px solid var(--line); background: var(--bg); }
 .picker-bar h1 { font-family: var(--display); font-size: 1.15rem; font-weight: 700; }
-.picker-body { flex: 1; overflow-y: auto; max-width: 720px; width: 100%; margin: 0 auto; padding: 14px max(var(--gutter), env(safe-area-inset-right, 0px)) 40px max(var(--gutter), env(safe-area-inset-left, 0px)); }
+.picker-body { flex: 1; overflow-y: auto; max-width: 720px; width: 100%; margin: 0 auto; padding: 14px max(var(--gutter), var(--sai-right)) 40px max(var(--gutter), var(--sai-left)); }
 .picker .search { margin: 2px 0 16px; }
 .picker .letter-head { top: 0; }
 
@@ -863,7 +878,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @keyframes slide-in-next { from { transform: translateX(48px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes slide-in-prev { from { transform: translateX(-48px); opacity: 0; } to { transform: none; opacity: 1; } }
 .toast {
-  position: fixed; z-index: 55; left: 50%; bottom: calc(28px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); max-width: calc(100vw - 32px);
+  position: fixed; z-index: 55; left: 50%; bottom: calc(28px + var(--sai-bottom)); transform: translateX(-50%); max-width: calc(100vw - 32px);
   padding: 10px 18px; border-radius: 999px; white-space: nowrap; background: var(--text); color: var(--bg); font-weight: 600; font-size: .9rem; box-shadow: var(--shadow); animation: toast-in .18s ease-out;
 }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
@@ -884,11 +899,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 
 /* Songs list: the title, search and English/Tagalog switch stay pinned while the songs scroll beneath */
-.lib-pinned { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 26; margin-inline: -4px; padding: 0 4px 8px; background: var(--bg); }
+.lib-pinned { position: sticky; top: var(--sai-top); z-index: 26; margin-inline: -4px; padding: 0 4px 8px; background: var(--bg); }
 .lib-pinned .search { margin: 12px 0 10px; }
 .lib-pinned .lang-tabs { margin: 0; }
-.library .letter-head { top: calc(var(--lib-head-h, 0px) + env(safe-area-inset-top, 0px)); scroll-margin-top: calc(var(--lib-head-h, 0px) + env(safe-area-inset-top, 0px) + 2px); }
-.library.lineups .letter-head { top: env(safe-area-inset-top, 0px); scroll-margin-top: env(safe-area-inset-top, 0px); }
+.library .letter-head { top: calc(var(--lib-head-h, 0px) + var(--sai-top)); scroll-margin-top: calc(var(--lib-head-h, 0px) + var(--sai-top) + 2px); }
+.library.lineups .letter-head { top: var(--sai-top); scroll-margin-top: var(--sai-top); }
 
 /* ==========================================================================
    Chords and Settings pages
@@ -986,3 +1001,11 @@ label.btn.big.disabled { opacity: .5; }
 a.btn { text-decoration: none; }
 
 .library.lineups .lib-pinned .lang-tabs { margin-top: 6px; }
+
+/* reference video link: shown between the notes and the chords, only when a song has one */
+.video { padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); display: grid; gap: 8px; }
+.video h2 { margin: 0; font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.video-link { justify-self: start; text-decoration: none; min-height: 44px; }
+.video-host { margin: 0; color: var(--muted); font-size: .85rem; }
+.field-hint.bad { color: var(--danger); font-size: .85rem; }
+.notes-field input { min-height: 46px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); }

@@ -10,6 +10,7 @@ import {
   removeSongFromLineup,
 } from '../model/lineup';
 import { planUpdate } from '../model/pack';
+import { planLineupUpdate } from '../model/lineupShare';
 import { planMerge } from '../model/share';
 import { IndexedDbStore, type Store } from '../model/store';
 import type { Language, Song } from '../model/types';
@@ -19,6 +20,9 @@ import { ChordsPage } from './ChordsPage';
 import { Library } from './Library';
 import { LineupList } from './LineupList';
 import { LineupPage } from './LineupPage';
+import { useAdmin } from '../admin/admin';
+import { updatesAvailable } from '../admin/config';
+import { startNoticeChecks } from '../admin/notice';
 import { useKeepAwakeSetting } from './keepAwake';
 import { Reader, type ReaderNav } from './Reader';
 import { SettingsPage } from './SettingsPage';
@@ -75,6 +79,9 @@ export function App() {
   const [route, setRoute] = useState<Route>(parseRoute);
   const [menuOpen, setMenuOpen] = useState(false);
   const [keepAwake, setKeepAwake] = useKeepAwakeSetting();
+  const admin = useAdmin();
+  /** Only the admin phone can create or change line ups when team updates are set up; everyone else views them. */
+  const canEditLineups = !updatesAvailable || admin;
 
   const refresh = useCallback(async () => {
     setSongs(await store.list());
@@ -82,6 +89,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    startNoticeChecks();
     (async () => {
       let all = await store.list();
       if (all.length === 0 && !flag('pao:seeded')) {
@@ -143,6 +151,15 @@ export function App() {
         if (cleaned !== l) await store.putLineup(cleaned);
       }
     }
+    await refresh();
+    return plan;
+  };
+
+  /** The admin's published line ups arrived: this phone's line ups become the same as the admin's. */
+  const updateLineupsFromTeam = async (pack: Lineup[]) => {
+    const plan = planLineupUpdate(lineups, pack);
+    for (const l of plan.puts) await store.putLineup(l);
+    for (const id of plan.removes) await store.deleteLineup(id);
     await refresh();
     return plan;
   };
@@ -237,6 +254,7 @@ export function App() {
           lineup={lineup}
           songs={songs}
           onChange={saveLineup}
+          readOnly={!canEditLineups}
           onBack={() => go('#lineups')}
           onOpenSong={(index) => go(`#set-${lineup.id}-${index}`)}
           onDelete={async () => {
@@ -283,6 +301,8 @@ export function App() {
             await store.deleteLineup(id);
             await refresh();
           }}
+          onUpdate={updateLineupsFromTeam}
+          canEdit={canEditLineups}
         />
         {drawer('lineups')}
       </>

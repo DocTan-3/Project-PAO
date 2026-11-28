@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { type Lineup, formatDate, groupLineups, isComplete, lineupEntries, progressLabel, todayISO } from '../model/lineup';
+import { type Lineup, formatDate, groupLineups, isComplete, lineupEntries, lineupMatches, progressLabel, todayISO } from '../model/lineup';
+import type { LineupUpdatePlan } from '../model/lineupShare';
 import type { Song } from '../model/types';
 import { Icon } from './icons';
+import { LineupPublish, LineupUpdate } from './TeamBar';
 import { ThemeToggle } from './theme';
 import { useHold } from './useHold';
 
@@ -12,6 +14,8 @@ export function LineupList({
   onOpen,
   onCreate,
   onDelete,
+  onUpdate,
+  canEdit,
 }: {
   lineups: Lineup[];
   songs: Song[];
@@ -19,6 +23,10 @@ export function LineupList({
   onOpen: (id: string) => void;
   onCreate: () => void;
   onDelete: (id: string) => void;
+  /** replace this phone's line ups with the admin's published ones */
+  onUpdate: (pack: Lineup[]) => Promise<LineupUpdatePlan>;
+  /** only the admin phone can create, change or delete line ups; everyone else views them */
+  canEdit: boolean;
 }) {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const hold = useHold((id) => setConfirmId(id));
@@ -43,7 +51,9 @@ export function LineupList({
       removeEventListener('focus', refresh);
     };
   }, []);
-  const { upcoming, finished } = useMemo(() => groupLineups(lineups, today), [lineups, today]);
+  const [query, setQuery] = useState('');
+  const shownLineups = useMemo(() => lineups.filter((l) => lineupMatches(l, songs, query)), [lineups, songs, query]);
+  const { upcoming, finished } = useMemo(() => groupLineups(shownLineups, today), [shownLineups, today]);
   const [tab, setTabState] = useState<'upcoming' | 'finished'>(() => {
     try {
       return localStorage.getItem('pao:lineuptab') === 'finished' ? 'finished' : 'upcoming';
@@ -75,17 +85,17 @@ export function LineupList({
         ) : (
           <button
             class={`lineup-card${hold.pressing === l.id ? ' pressing' : ''}${isFinished ? ' finished' : ''}`}
-            {...hold.bind(l.id)}
+            {...(canEdit ? hold.bind(l.id) : {})}
             onKeyDown={(e) => {
-              if (e.key === 'Delete' || e.key === 'Backspace') {
+              if (canEdit && (e.key === 'Delete' || e.key === 'Backspace')) {
                 e.preventDefault();
                 setConfirmId(l.id);
               }
             }}
             onClick={() => {
-              if (!hold.consumeClick()) onOpen(l.id);
+              if (!canEdit || !hold.consumeClick()) onOpen(l.id);
             }}
-            aria-label={`${formatDate(l.date, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}, ${progressLabel(entries)}. Press and hold, or press Delete, to delete.`}
+            aria-label={`${formatDate(l.date, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}, ${progressLabel(entries)}.${canEdit ? ' Press and hold, or press Delete, to delete.' : ''}`}
           >
             <span class="datebadge">
               <span class="dow">{formatDate(l.date, { weekday: 'short' })}</span>
@@ -106,6 +116,10 @@ export function LineupList({
     );
   };
 
+  const searching = query.trim().length > 0;
+  const otherTab = tab === 'upcoming' ? 'finished' : 'upcoming';
+  const otherCount = (tab === 'upcoming' ? finished : upcoming).length;
+
   return (
     <main class="library lineups">
       <div class="lib-pinned">
@@ -118,39 +132,60 @@ export function LineupList({
         </div>
 
         {lineups.length > 0 && (
-          <div class="lang-tabs" role="tablist" aria-label="Line ups">
-            {(
-              [
-                ['upcoming', 'Upcoming', upcoming.length],
-                ['finished', 'Finished', finished.length],
-              ] as const
-            ).map(([id, label, n]) => (
-              <button
-                key={id}
-                role="tab"
-                id={`tab-${id}`}
-                aria-selected={tab === id}
-                class={`lang-tab${tab === id ? ' on' : ''}`}
-                onClick={() => setTab(id)}
-              >
-                {label}
-                <span class="lang-count">{n}</span>
-              </button>
-            ))}
-          </div>
+          <>
+            <label class="search">
+              <Icon name="search" size={20} />
+              <input
+                id="lineup-search"
+                type="search"
+                placeholder="Search a song or a date"
+                value={query}
+                autocomplete="off"
+                onInput={(e) => setQuery((e.currentTarget as HTMLInputElement).value)}
+                aria-label="Search line ups by song or date"
+              />
+            </label>
+            <div class="lang-tabs" role="tablist" aria-label="Line ups">
+              {(
+                [
+                  ['upcoming', 'Upcoming', upcoming.length],
+                  ['finished', 'Finished', finished.length],
+                ] as const
+              ).map(([id, label, n]) => (
+                <button
+                  key={id}
+                  role="tab"
+                  id={`tab-${id}`}
+                  aria-selected={tab === id}
+                  class={`lang-tab${tab === id ? ' on' : ''}`}
+                  onClick={() => setTab(id)}
+                >
+                  {label}
+                  <span class="lang-count">{n}</span>
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
-      <button class="btn primary create-btn" onClick={onCreate}>
-        <Icon name="plus" size={22} />
-        Create new line up
-      </button>
+      {canEdit ? (
+        <>
+          <button class="btn primary create-btn" onClick={onCreate}>
+            <Icon name="plus" size={22} />
+            Create new line up
+          </button>
+          <LineupPublish lineups={lineups} onPublished={() => { setQuery(''); setTab('upcoming'); scrollTo({ top: 0 }); }} />
+        </>
+      ) : (
+        <LineupUpdate songs={songs} onUpdate={onUpdate} />
+      )}
 
       {lineups.length === 0 && (
         <div class="empty">
           <div class="art"><Icon name="calendar" size={34} /></div>
           <h2>No line ups yet</h2>
-          <p>Plan a service: pick the date, then the opening, welcome, praise and worship songs.</p>
+          <p>{canEdit ? 'Plan a service: pick the date, then the opening, welcome, praise and worship songs.' : 'Tap Update line ups to get the line up from the admin.'}</p>
         </div>
       )}
 
@@ -158,6 +193,15 @@ export function LineupList({
         <div role="tabpanel" aria-labelledby={`tab-${tab}`} id="lineups-panel">
           {shown.length > 0 ? (
             <ul class="lib-list">{shown.map((l) => card(l, tab === 'finished'))}</ul>
+          ) : searching ? (
+            <div class="section-empty" id="lineup-no-match">
+              <p>No {tab} line ups match “{query.trim()}”.</p>
+              {otherCount > 0 && (
+                <button class="btn" id="show-other" onClick={() => setTab(otherTab)}>
+                  Show {otherCount} in {otherTab === 'upcoming' ? 'Upcoming' : 'Finished'}
+                </button>
+              )}
+            </div>
           ) : (
             <p class="section-empty">{tab === 'upcoming' ? 'No upcoming line ups' : 'No finished line ups'}</p>
           )}

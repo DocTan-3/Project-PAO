@@ -1,4 +1,4 @@
-import { ADMIN_TOKEN, GIST_FILE, GIST_ID } from './config';
+import { ADMIN_TOKEN, GIST_FILE, GIST_ID, LINEUPS_FILE } from './config';
 
 export type PackErrorKind = 'offline' | 'missing' | 'busy' | 'auth' | 'other';
 
@@ -46,12 +46,9 @@ async function request(init?: RequestInit): Promise<Response> {
   return res;
 }
 
-/** The text of the published songs file. Anyone can read it; no sign-in is needed. */
-export async function fetchPackText(): Promise<string> {
-  const res = await request({ headers: { Accept: 'application/vnd.github+json' } });
-  const json = (await res.json()) as { files?: Record<string, { content?: string; truncated?: boolean; raw_url?: string }> };
-  const file = json.files?.[GIST_FILE];
-  if (!file) throw new PackError('missing');
+type GistFiles = Record<string, { content?: string; truncated?: boolean; raw_url?: string }>;
+
+async function readFile(file: { content?: string; truncated?: boolean; raw_url?: string }): Promise<string> {
   if (file.truncated && file.raw_url) {
     try {
       return await (await fetch(`${file.raw_url}${file.raw_url.includes('?') ? '&' : '?'}t=${Date.now()}`, { cache: 'no-store' })).text();
@@ -62,11 +59,38 @@ export async function fetchPackText(): Promise<string> {
   return file.content ?? '';
 }
 
-/** Replace the published songs file. Only a phone built with the admin token can do this. */
-export async function writePackText(text: string): Promise<void> {
+async function fetchGist(): Promise<GistFiles> {
+  const res = await request({ headers: { Accept: 'application/vnd.github+json' } });
+  const json = (await res.json()) as { files?: GistFiles };
+  return json.files ?? {};
+}
+
+/** The text of one published file. Anyone can read it; no sign-in is needed. */
+export async function fetchFileText(name: string): Promise<string> {
+  const file = (await fetchGist())[name];
+  if (!file) throw new PackError('missing');
+  return readFile(file);
+}
+
+/** The published songs file. */
+export const fetchPackText = (): Promise<string> => fetchFileText(GIST_FILE);
+
+/** Both published files in one request; a file that is not there yet is null. */
+export async function fetchBoth(): Promise<{ songs: string | null; lineups: string | null }> {
+  const files = await fetchGist();
+  return {
+    songs: files[GIST_FILE] ? await readFile(files[GIST_FILE]) : null,
+    lineups: files[LINEUPS_FILE] ? await readFile(files[LINEUPS_FILE]) : null,
+  };
+}
+
+/** Replace one published file. Only a phone built with the admin token can do this. */
+export async function writeFileText(name: string, text: string): Promise<void> {
   await request({
     method: 'PATCH',
     headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${ADMIN_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ files: { [GIST_FILE]: { content: text } } }),
+    body: JSON.stringify({ files: { [name]: { content: text } } }),
   });
 }
+
+export const writePackText = (text: string): Promise<void> => writeFileText(GIST_FILE, text);

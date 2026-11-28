@@ -4,6 +4,7 @@
  * Receiving merges the songs into the library: a song the receiver does not have is added, and when they
  * already have it the newer version wins.
  */
+import { webUrl } from './url';
 import type { Language, Line, PlacedChord, Section, Song } from './types';
 
 export const SHARE_APP = 'bpcg-paw-songs';
@@ -99,6 +100,8 @@ export function cleanSong(v: unknown): Song | null {
   };
   if (language) song.language = language;
   if (typeof v.notes === 'string' && v.notes) song.notes = v.notes;
+  const video = typeof v.videoUrl === 'string' ? webUrl(v.videoUrl) : null;
+  if (video) song.videoUrl = video;
   return song;
 }
 

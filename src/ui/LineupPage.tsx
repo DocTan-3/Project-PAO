@@ -24,6 +24,7 @@ export function LineupPage({
   onBack,
   onOpenSong,
   onDelete,
+  readOnly = false,
 }: {
   lineup: Lineup;
   songs: Song[];
@@ -32,6 +33,8 @@ export function LineupPage({
   /** open the song at this position of the line up (its service order) */
   onOpenSong: (index: number) => void;
   onDelete: () => void;
+  /** view only: no changing the date or songs, no delete (phones that are not the admin) */
+  readOnly?: boolean;
 }) {
   const [picking, setPicking] = useState<SlotKey | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -52,12 +55,13 @@ export function LineupPage({
 
   return (
     <div class="lineup-page">
-      <header class="topbar">
-        <button class="btn icon ghost" onClick={onBack} aria-label="Back to line ups"><Icon name="back" /></button>
+      <header class="topbar lineup-head">
+        <span class="lh-left"><button class="btn icon ghost" onClick={onBack} aria-label="Back to line ups"><Icon name="back" /></button></span>
         <div class="titles">
           <h1>Line up</h1>
           <p>{progressLabel(entries)}</p>
         </div>
+        <span class="lh-right">
         <button
           class="btn primary start-btn"
           disabled={entries.length === 0}
@@ -67,25 +71,30 @@ export function LineupPage({
           <Icon name="play" size={20} />
           <span class="lbl">Start</span>
         </button>
+        </span>
       </header>
 
       <section class="card date-card">
-        <label class="date-field">
+        {readOnly ? (
           <span class="ctl-label on">Service date</span>
-          <input
-            id="lineup-date"
-            type="date"
-            value={isISODate(lineup.date) ? lineup.date : ''}
-            onInput={(e) => {
-              const v = (e.currentTarget as HTMLInputElement).value;
-              if (isISODate(v)) onChange(setLineupDate(lineup, v));
-            }}
-          />
-        </label>
+        ) : (
+          <label class="date-field">
+            <span class="ctl-label on">Service date</span>
+            <input
+              id="lineup-date"
+              type="date"
+              value={isISODate(lineup.date) ? lineup.date : ''}
+              onInput={(e) => {
+                const v = (e.currentTarget as HTMLInputElement).value;
+                if (isISODate(v)) onChange(setLineupDate(lineup, v));
+              }}
+            />
+          </label>
+        )}
         <p class="date-long">{formatDate(lineup.date, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
       </section>
 
-      {SLOT_GROUPS.map((g) => (
+      {SLOT_GROUPS.filter((g) => !(readOnly && g.optional && g.slots.every((s) => !lineup.slots[s.key]))).map((g) => (
         <section class="card slot-group" key={g.title} aria-label={g.title}>
           <h2>
             {g.title}
@@ -107,13 +116,22 @@ export function LineupPage({
                         <span class="a">{song.artist || 'No artist'}</span>
                       </span>
                     </button>
-                    <button class="btn icon ghost" onClick={() => setPicking(slot.key)} aria-label={`Change ${slot.label}`} title="Change song">
-                      <Icon name="swap" size={20} />
-                    </button>
-                    <button class="btn icon ghost" onClick={() => onChange(assignSlot(lineup, slot.key, null))} aria-label={`Remove ${slot.label}`} title="Remove song">
-                      <Icon name="close" size={20} />
-                    </button>
+                    {!readOnly && (
+                      <>
+                        <button class="btn icon ghost" onClick={() => setPicking(slot.key)} aria-label={`Change ${slot.label}`} title="Change song">
+                          <Icon name="swap" size={20} />
+                        </button>
+                        <button class="btn icon ghost" onClick={() => onChange(assignSlot(lineup, slot.key, null))} aria-label={`Remove ${slot.label}`} title="Remove song">
+                          <Icon name="close" size={20} />
+                        </button>
+                      </>
+                    )}
                   </>
+                ) : readOnly ? (
+                  <div class="slot-readonly">
+                    {g.slots.length > 1 && <span class="slot-label">{slot.label}</span>}
+                    <span class="t">{missing ? 'This song is not on your phone yet. Tap Update songs.' : 'No song chosen yet'}</span>
+                  </div>
                 ) : (
                   <button class="slot-empty" onClick={() => setPicking(slot.key)} aria-label={`Choose ${slot.label}`}>
                     <Icon name="plus" size={20} />
@@ -129,6 +147,7 @@ export function LineupPage({
         </section>
       ))}
 
+      {!readOnly && (
       <div class="danger-zone">
         {confirmDelete ? (
           <div class="confirm" role="alertdialog" aria-label="Confirm delete">
@@ -140,8 +159,9 @@ export function LineupPage({
           <button class="btn danger" onClick={() => setConfirmDelete(true)}>Delete this line up</button>
         )}
       </div>
+      )}
 
-      {picking && (
+      {picking && !readOnly && (
         <SongPicker
           title={`Choose ${slotLabel(picking)}`}
           songs={songs}

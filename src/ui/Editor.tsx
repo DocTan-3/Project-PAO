@@ -17,6 +17,7 @@ import {
   wordStep,
 } from '../model/edit';
 import type { SongStore } from '../model/store';
+import { webUrl } from '../model/url';
 import type { Line, Song } from '../model/types';
 import { LANGUAGES, languageOf } from '../model/library';
 import { applyTranspose, songKeyOf } from '../model/view';
@@ -262,6 +263,24 @@ export function Editor({
             value={song.notes ?? ''}
             onInput={(e) => commit(setMeta(song, { notes: (e.currentTarget as HTMLTextAreaElement).value }), 'notes')}
           />
+        </label>
+        <label class="notes-field">
+          <span class="lbl">Reference video link (optional)</span>
+          <input
+            id="song-video"
+            type="url"
+            inputMode="url"
+            autoComplete="off"
+            autoCapitalize="off"
+            spellcheck={false}
+            placeholder="Paste a YouTube or other web link"
+            value={song.videoUrl ?? ''}
+            onInput={(e) => {
+              const v = (e.currentTarget as HTMLInputElement).value.trim();
+              commit(setMeta(song, { videoUrl: v || undefined }), 'video');
+            }}
+          />
+          {song.videoUrl && !webUrl(song.videoUrl) && <span class="field-hint bad" id="video-hint">That does not look like a web link.</span>}
         </label>
         <div class="meta-row">
           <label class="ctl">

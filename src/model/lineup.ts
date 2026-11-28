@@ -142,3 +142,36 @@ export function progressLabel(entries: LineupEntry[]): string {
 
 export const isComplete = (entries: LineupEntry[]): boolean =>
   REQUIRED_SLOTS.every((k) => entries.some((e) => e.key === k));
+
+// ---- search ----
+
+const plain = (s: string): string => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+/**
+ * Does this line up match what was typed? Every word typed must appear in the title or artist of one of its songs,
+ * or in its date (for example "nov 29", "sunday" or "2026-11-29"). Capital letters and accents do not matter.
+ */
+export function lineupMatches(l: Lineup, songs: Song[], query: string): boolean {
+  const words = plain(query).split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true;
+  const hay = plain(
+    [
+      ...lineupEntries(l, songs).flatMap((e) => [e.song.title, e.song.artist]),
+      formatDate(l.date, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
+      formatDate(l.date, { month: 'short', day: 'numeric' }),
+      l.date,
+    ].join(' | '),
+  );
+  return words.every((w) => hay.includes(w));
+}
+
+/** Song ids that line ups point at but that are not in the library. */
+export function missingSongIds(lineups: Lineup[], songs: Song[]): string[] {
+  const have = new Set(songs.map((s) => s.id));
+  const out = new Set<string>();
+  for (const l of lineups) for (const k of SLOT_ORDER) {
+    const id = l.slots[k];
+    if (id && !have.has(id)) out.add(id);
+  }
+  return [...out];
+}

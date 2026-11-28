@@ -55,10 +55,12 @@ The admin password is built into the app (`ADMIN_PASSWORD` in `src/admin/config.
 
 **Using it**
 
-- On the admin phone: Settings, scroll to **Admin**, enter the admin password. Then on the Songs screen tap **Publish songs**.
+- On the admin phone: Settings, scroll to **Admin**, enter the admin password. The Songs screen then has **Publish songs**, and the Line up screen has **Create new line up** and **Publish line ups**. Songs and line ups are published (and updated) separately; they are two files in the Gist.
 - Only one phone is the admin: the phone that enters the password last. An older admin phone switches itself off the next time it opens the Songs screen or Settings.
-- On any other phone: on the Songs screen, tap **Update songs**.
+- On any other phone: **Update songs** on the Songs screen, and **Update line ups** on the Line up screen (it takes the place of Create new line up). Line ups are view-only there: only the admin phone creates or changes them, and Update makes a phone's line ups the same as the admin's.
+- When the admin has published something new, a notice ("New songs are ready" or "New line ups are ready") appears on the matching screen when the app is opened.
 - A song the admin deletes disappears from other phones on their next update, unless that person has edited it. Sample songs and a person's own songs stay.
+- Songs can have an optional reference video link (shown between Notes and Chords only when there is one).
 
 The password and token are inside the app file, and the password is also in this repository's code, so treat the password as a gentle lock and not as strong security. The token can only change that one Gist,
 and GitHub keeps the Gist's history, so an older version can always be restored.

@@ -65,7 +65,7 @@ export function adminVerdict(inFile: { deviceId: string; since: number } | null,
 }
 
 /** A short fingerprint of a library (which songs, and when each was last changed), to tell if it differs from what was published. */
-export function packSignature(songs: Song[]): string {
+export function packSignature(songs: { id: string; updatedAt: number }[]): string {
   const parts = songs.map((s) => `${s.id}:${s.updatedAt}`).sort().join('|');
   let h = 5381;
   for (let i = 0; i < parts.length; i++) h = ((h * 33) ^ parts.charCodeAt(i)) >>> 0;

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Instrument } from '../instruments';
 import { layoutLine } from '../layout/layoutLine';
 import type { Song, ViewSettings } from '../model/types';
+import { webHost, webUrl } from '../model/url';
 import { displayChord, semitonesToKey, songKeyOf, viewKey } from '../model/view';
 import { type Key, formatKey, keySpelling, transposeKey } from '../theory';
 import { ChordPanel } from './ChordPanel';
@@ -119,6 +120,7 @@ export function Reader({
     return () => ro.disconnect();
   }, []);
 
+  const video = webUrl(song.videoUrl);
   const chordPx = Math.round(fontPx * 0.9);
   const measureLyric = useMemo(() => makeMeasure(`400 ${fontPx}px ${songFamily()}`), [fontPx, fontsReady]);
   const measureChord = useMemo(() => makeMeasure(`700 ${chordPx}px ${songFamily()}`), [chordPx, fontsReady]);
@@ -255,6 +257,17 @@ export function Reader({
             <section class="notes" aria-label="Notes">
               <h2>Notes</h2>
               <p>{song.notes}</p>
+            </section>
+          )}
+
+          {video && (
+            <section class="video" aria-label="Reference video">
+              <h2>Reference video</h2>
+              <a class="btn video-link" id="video-link" href={video} target="_blank" rel="noopener noreferrer">
+                <Icon name="play" size={18} />
+                Watch reference video
+              </a>
+              <p class="video-host">{webHost(video)}</p>
             </section>
           )}
 

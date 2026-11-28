@@ -5,16 +5,22 @@
  */
 import { useEffect, useState } from 'preact/hooks';
 import { adminVerdict, packSignature } from '../model/pack';
+import type { Lineup } from '../model/lineup';
+import { exportLineups } from '../model/lineupShare';
 import { exportSongs, parseSongsFile, readAdmin } from '../model/share';
 import type { Song } from '../model/types';
 import { ADMIN_PASSWORD, adminAvailable } from './config';
-import { fetchPackText, writePackText } from './github';
+import { LINEUPS_FILE } from './config';
+import { fetchPackText, writeFileText, writePackText } from './github';
 
 const KEY_ADMIN = 'pao:admin';
 const KEY_DEVICE = 'pao:deviceid';
 const KEY_SINCE = 'pao:adminsince';
 const KEY_PUBLISHED = 'pao:published';
 const KEY_UPDATED = 'pao:lastupdate';
+const KEY_PUBLISHED_LINEUPS = 'pao:published-lineups';
+const KEY_UPDATED_LINEUPS = 'pao:lastupdate-lineups';
+const KEY_SEEN = 'pao:seen:';
 const EVENT = 'pao:admin-changed';
 
 function read(key: string): string | null {
@@ -137,4 +143,58 @@ export const markUpdated = (): void => write(KEY_UPDATED, String(Date.now()));
 /** "today at 3:15 PM" style date for the messages. */
 export function whenText(ms: number): string {
   return new Date(ms).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+
+// ---- line ups: published and updated on their own, separately from songs ----
+
+/** Publish this phone's line ups as the team's line ups (songs are not touched). */
+export async function publishLineups(lineups: Lineup[]): Promise<PublishResult> {
+  const a = readAdmin(await fetchPackText().catch((e) => {
+    if ((e as { kind?: string }).kind === 'missing') return '';
+    throw e;
+  }));
+  if (adminVerdict(a, deviceId(), mySince()) === 'lost') {
+    setAdmin(false);
+    return { ok: false, reason: 'not-admin' };
+  }
+  await writeFileText(LINEUPS_FILE, exportLineups(lineups, Date.now(), { deviceId: deviceId(), since: mySince() || a?.since || Date.now() }));
+  write(KEY_PUBLISHED_LINEUPS, JSON.stringify({ at: Date.now(), sig: packSignature(lineups) }));
+  return { ok: true, count: lineups.length };
+}
+
+export function lastPublishedLineups(): PublishedInfo | null {
+  try {
+    const v = JSON.parse(read(KEY_PUBLISHED_LINEUPS) ?? 'null') as PublishedInfo | null;
+    return v && typeof v.at === 'number' && typeof v.sig === 'string' ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+export const hasUnpublishedLineupChanges = (lineups: Lineup[]): boolean => lastPublishedLineups()?.sig !== packSignature(lineups);
+
+export const lastLineupsUpdateAt = (): number | null => {
+  const n = Number(read(KEY_UPDATED_LINEUPS));
+  return n > 0 ? n : null;
+};
+export const markLineupsUpdated = (): void => write(KEY_UPDATED_LINEUPS, String(Date.now()));
+
+/** Remember which published version this phone has seen (so a newer one can be announced). */
+export const seenSignature = (kind: 'songs' | 'lineups'): string | null => read(KEY_SEEN + kind);
+export const setSeenSignature = (kind: 'songs' | 'lineups', sig: string): void => write(KEY_SEEN + kind, sig);
+
+/** True (once) when another phone has taken over as admin, so the screen can say so. */
+export function useLostAdminNotice(): boolean {
+  const admin = useAdmin();
+  const [lost, setLost] = useState(false);
+  useEffect(() => {
+    if (!admin) return;
+    stillAdmin()
+      .then((ok) => {
+        if (!ok) setLost(true);
+      })
+      .catch(() => undefined);
+  }, [admin]);
+  return lost && !admin;
 }

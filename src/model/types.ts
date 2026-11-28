@@ -30,6 +30,8 @@ export interface Song {
   language?: Language;
   /** free-text details for other players (tuning, strumming, who plays what...) */
   notes?: string;
+  /** a web link to a reference video (optional) */
+  videoUrl?: string;
   /** key the chords are written in, e.g. "G" or "F#m"; null = unknown */
   key: string | null;
   sections: Section[];

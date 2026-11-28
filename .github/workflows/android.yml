@@ -79,16 +79,12 @@ jobs:
           TAG="$GITHUB_REF_NAME"
           if [[ -n "$INPUT_VERSION" ]]; then TAG="v${INPUT_VERSION#v}"; fi
           cat > install-notes.md <<'NOTES'
-          ## Install on Android
-          1. On the phone, open this page and download **Songbook.apk**, then open it.
-          2. Android will ask to allow installs from this source. Allow it, then tap **Install**.
-          3. Later versions install over this one and **keep your songs and line ups**.
+          ## Install BPCG - PAW on Android
+          1. On the phone, open this page and download **Songbook.apk** (that is the app file), then tap it to open it.
+          2. Android will ask to allow installs from this browser. Allow it, then tap **Install**.
+          3. A newer version installs over the old one and **keeps your songs and line ups**.
 
-          > **Installed an earlier test build?** Uninstall it once before installing this one (this is the first build
-          > with a fixed signing key, so Android treats it as a different app). Songs saved in the old copy are removed
-          > with it. From here on, updates install over the top without losing anything.
-
-          This is a sideload build (signed with the shared debug key), not a Play Store release.
+          This app file is installed by hand, not from the Play Store. Android may show a warning about that; it is expected.
 
           ---
           NOTES

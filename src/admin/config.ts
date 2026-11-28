@@ -9,8 +9,12 @@ export const ADMIN_PASSWORD: string = import.meta.env.VITE_ADMIN_PASSWORD || 'BP
 export const ADMIN_TOKEN: string = import.meta.env.VITE_ADMIN_TOKEN ?? '';
 /** The id of the Gist that holds the team's songs (not secret). Paste it here, or set VITE_GIST_ID when building. */
 const GIST_ID_IN_CODE = '2af8613f377bf2efb93a31cbcd87ced5';
-export const GIST_ID: string = import.meta.env.VITE_GIST_ID || GIST_ID_IN_CODE;
+/** VITE_TEAM=off builds an app without any team features (used for testing the single-phone behaviour). */
+const TEAM_OFF = import.meta.env.VITE_TEAM === 'off';
+export const GIST_ID: string = TEAM_OFF ? '' : import.meta.env.VITE_GIST_ID || GIST_ID_IN_CODE;
+/** The two published files in the Gist: songs and line ups are published and updated separately. */
 export const GIST_FILE = 'songs.json';
+export const LINEUPS_FILE = 'lineups.json';
 
 /** Phones can tap "Update songs". */
 export const updatesAvailable = GIST_ID !== '';
