@@ -3,7 +3,6 @@ import { CATEGORIES, LANGUAGES, countByLanguage, groupSongs, isCategory } from '
 import type { Category, Language, Song } from '../model/types';
 import type { UpdatePlan } from '../model/pack';
 import { Icon } from './icons';
-import { LetterEdge } from './LetterEdge';
 import { AdminBadge, SongsPill, SongsStatus, useSongsTeam } from './TeamBar';
 import { ThemeToggle } from './theme';
 import { useHold } from './useHold';
@@ -100,19 +99,6 @@ export function Library({
     set();
     return () => ro.disconnect();
   }, []);
-
-  const jump = (letter: string) =>
-    document.getElementById(`letter-${lang}-${letter}`)?.scrollIntoView({ block: 'start', behavior: 'auto' });
-  /** the letter group at the top of the screen, just under the pinned header */
-  const currentLetter = (): string | null => {
-    const top = (pinRef.current?.getBoundingClientRect().bottom ?? 0) + 4;
-    let cur: string | null = null;
-    for (const g of groups) {
-      const h = document.getElementById(`letter-${lang}-${g.letter}`);
-      if (h && h.getBoundingClientRect().top <= top + 40) cur = g.letter;
-    }
-    return cur;
-  };
 
   return (
     <main class={`library${showRail ? ' has-rail' : ''}`} ref={rootRef}>
@@ -259,8 +245,6 @@ export function Library({
           </section>
         ))}
       </div>
-
-      {showRail && <LetterEdge letters={groups.map((g) => g.letter)} onJump={jump} currentLetter={currentLetter} />}
 
       <button class="fab" onClick={() => onNew(lang)} aria-label={`New ${langLabel} song`} title={`New ${langLabel} song`}>
         <Icon name="plus" size={26} />

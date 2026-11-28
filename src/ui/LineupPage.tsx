@@ -156,20 +156,21 @@ export function LineupPage({
         </div>
         <span class="lh-right">
           {publish && !readOnly && (
-            <button class="btn publish-btn" id="publish-lineup-header" onClick={doPublish} disabled={pubBusy} aria-label="Update line ups for everyone">
-              <Icon name="share" size={18} />
-              <span class="lbl">{pubBusy ? 'Updating…' : 'Update'}</span>
+            <button class="hbtn" id="publish-lineup-header" onClick={doPublish} disabled={pubBusy} aria-label="Update line ups for everyone" title="Update line ups for everyone">
+              <Icon name="upload" size={22} />
+              <span class="hlbl">{pubBusy ? 'Updating' : 'Update'}</span>
             </button>
           )}
-        <button
-          class="btn primary start-btn"
-          disabled={entries.length === 0}
-          onClick={() => onOpenSong(0)}
-          aria-label="Open the first song"
-        >
-          <Icon name="play" size={20} />
-          <span class="lbl">Start</span>
-        </button>
+          <button
+            class="hbtn primary start-btn"
+            disabled={entries.length === 0}
+            onClick={() => onOpenSong(0)}
+            aria-label="Open the first song"
+            title="Open the first song"
+          >
+            <Icon name="play" size={22} />
+            <span class="hlbl">Start</span>
+          </button>
         </span>
       </header>
 

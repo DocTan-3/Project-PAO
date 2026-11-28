@@ -124,7 +124,7 @@ export function SongsPill({ team }: { team: SongsTeam }) {
   if (!updatesAvailable) return null;
   return team.admin ? (
     <button class="btn update-bar primary" id="publish-btn" onClick={team.publish} disabled={team.busy || team.songs.length === 0} aria-label="Update songs for everyone">
-      <Icon name="share" size={18} />
+      <Icon name="upload" size={18} />
       <span class="lbl">{team.busy ? 'Updating…' : 'Update'}</span>
     </button>
   ) : (
@@ -230,7 +230,7 @@ export function LineupPills({ team, canEdit }: { team: LineupsTeam; canEdit: boo
   if (canEdit) {
     return updatesAvailable ? (
       <button class="btn update-bar primary" id="publish-lineups-btn" onClick={team.publish} disabled={team.busy || team.lineups.length === 0} aria-label="Update line ups for everyone">
-        <Icon name="share" size={18} />
+        <Icon name="upload" size={18} />
         <span class="lbl">{team.busy ? 'Updating…' : 'Update'}</span>
       </button>
     ) : null;
