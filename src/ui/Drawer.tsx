@@ -2,11 +2,12 @@ import { useEffect, useRef } from 'preact/hooks';
 import { Icon, type IconName } from './icons';
 import { Logo } from './logo';
 
-export type Section = 'songs' | 'lineups' | 'chords' | 'settings';
+export type Section = 'songs' | 'lineups' | 'favorites' | 'chords' | 'settings';
 
 const ITEMS: { id: Section; label: string; icon: IconName }[] = [
   { id: 'songs', label: 'Songs', icon: 'note' },
   { id: 'lineups', label: 'Line up', icon: 'list' },
+  { id: 'favorites', label: 'Favorites', icon: 'heart' },
   { id: 'chords', label: 'Chords', icon: 'chord' },
   { id: 'settings', label: 'Settings', icon: 'settings' },
 ];

@@ -4,20 +4,28 @@
  * has already updated from. The Songs and Line up screens show the notice and an emphasised Update button.
  */
 import { useEffect, useState } from 'preact/hooks';
-import { packSignature } from '../model/pack';
-import { parseLineupsFile } from '../model/lineupShare';
+import type { Lineup } from '../model/lineup';
+import { packSignature, planUpdate } from '../model/pack';
+import type { Song } from '../model/types';
+import { parseLineupsFile, planLineupUpdate } from '../model/lineupShare';
 import { parseSongsFile } from '../model/share';
 import { isAdmin, seenSignature } from './admin';
 import { updatesAvailable } from './config';
 import { fetchBoth } from './github';
 
 export type NoticeKind = 'songs' | 'lineups';
-type State = Record<NoticeKind, boolean>;
+type State = Record<NoticeKind, boolean> & { songsCount: number; lineupsCount: number };
 
-let state: State = { songs: false, lineups: false };
+let state: State = { songs: false, lineups: false, songsCount: 0, lineupsCount: 0 };
+
+/** How the app reads this phone's own songs and line ups, so a notice can say how many are new. */
+let local: (() => Promise<{ songs: Song[]; lineups: Lineup[] }>) | null = null;
+export const setLocalSource = (fn: () => Promise<{ songs: Song[]; lineups: Lineup[] }>): void => {
+  local = fn;
+};
 const EVENT = 'pao:notice-changed';
 const set = (next: State) => {
-  if (next.songs === state.songs && next.lineups === state.lineups) return;
+  if (next.songs === state.songs && next.lineups === state.lineups && next.songsCount === state.songsCount && next.lineupsCount === state.lineupsCount) return;
   state = next;
   dispatchEvent(new Event(EVENT));
 };
@@ -33,7 +41,7 @@ export function useUpdateNotice(): State {
   return s;
 }
 
-export const clearNotice = (kind: NoticeKind): void => set({ ...state, [kind]: false });
+export const clearNotice = (kind: NoticeKind): void => set({ ...state, [kind]: false, [`${kind}Count`]: 0 });
 
 let last = 0;
 /** Look at what is published and set the notices. Quiet: any problem (no internet, nothing published) is ignored. */
@@ -45,10 +53,24 @@ export async function checkForUpdates(force = false): Promise<void> {
     const { songs, lineups } = await fetchBoth();
     const s = songs ? parseSongsFile(songs) : null;
     const l = lineups ? parseLineupsFile(lineups) : null;
-    set({
-      songs: !!s && s.ok && s.songs.length > 0 && packSignature(s.songs) !== seenSignature('songs'),
-      lineups: !!l && l.ok && l.lineups.length > 0 && packSignature(l.lineups) !== seenSignature('lineups'),
-    });
+    const newSongs = !!s && s.ok && s.songs.length > 0 && packSignature(s.songs) !== seenSignature('songs');
+    const newLineups = !!l && l.ok && l.lineups.length > 0 && packSignature(l.lineups) !== seenSignature('lineups');
+    let songsCount = 0;
+    let lineupsCount = 0;
+    try {
+      const mine = local ? await local() : null;
+      if (mine && newSongs && s && s.ok) {
+        const plan = planUpdate(mine.songs, s.songs);
+        songsCount = plan.added + plan.updated;
+      }
+      if (mine && newLineups && l && l.ok) {
+        const plan = planLineupUpdate(mine.lineups, l.lineups);
+        lineupsCount = plan.added + plan.updated;
+      }
+    } catch {
+      /* no count: the notice then says the admin has updated them */
+    }
+    set({ songs: newSongs, lineups: newLineups, songsCount, lineupsCount });
   } catch {
     /* offline or not published: say nothing */
   }

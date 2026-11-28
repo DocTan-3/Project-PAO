@@ -6,6 +6,9 @@ import { webHost, webUrl } from '../model/url';
 import { displayChord, semitonesToKey, songKeyOf, viewKey } from '../model/view';
 import { type Key, formatKey, keySpelling, transposeKey } from '../theory';
 import { ChordPanel } from './ChordPanel';
+import { Fold } from './Fold';
+import { toggleFavorite } from '../model/favorites';
+import { useFavorites } from './favorites';
 import { ChordSheet } from './ChordSheet';
 import { loadInstrument, saveInstrument } from './ChordView';
 import { loadFontPx, saveFontPx, useFontsReady } from './font';
@@ -61,6 +64,7 @@ export function Reader({
   useScreenAwake(awake);
   const [width, setWidth] = useState(0);
   const fontsReady = useFontsReady();
+  const favorite = useFavorites().includes(song.id);
 
   const auto = useAutoscroll({ speed, fontPx });
   const openSheet = (text: string) => {
@@ -172,6 +176,16 @@ export function Reader({
           >
             <Icon name={awake ? 'eye' : 'eyeoff'} />
           </button>
+          <button
+            class={`btn icon ghost fav-btn${favorite ? ' on' : ''}`}
+            id="fav-btn"
+            aria-pressed={favorite}
+            aria-label={favorite ? 'Remove from Favorites' : 'Add to Favorites'}
+            title={favorite ? 'In your Favorites' : 'Add to Favorites'}
+            onClick={() => setToast(toggleFavorite(song.id) ? 'Added to Favorites' : 'Removed from Favorites')}
+          >
+            <Icon name="heart" />
+          </button>
           <ThemeToggle />
           <button class="btn edit-btn" onClick={onEdit} aria-label="Edit song">
             <Icon name="edit" size={20} />
@@ -254,21 +268,19 @@ export function Reader({
       <div class="reader-layout" ref={swipeRef}>
         <aside class="reader-side">
           {song.notes?.trim() && (
-            <section class="notes" aria-label="Notes">
-              <h2>Notes</h2>
+            <Fold title="Notes" id="notes-fold" className="notes">
               <p>{song.notes}</p>
-            </section>
+            </Fold>
           )}
 
           {video && (
-            <section class="video" aria-label="Reference video">
-              <h2>Reference video</h2>
+            <Fold title="Reference video" id="video-fold" className="video">
               <a class="btn video-link" id="video-link" href={video} target="_blank" rel="noopener noreferrer">
                 <Icon name="play" size={18} />
                 Watch reference video
               </a>
               <p class="video-host">{webHost(video)}</p>
-            </section>
+            </Fold>
           )}
 
           <ChordPanel chords={songChords} instrument={instrument} onInstrument={setInstrument} onOpen={openSheet} />

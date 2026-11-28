@@ -13,7 +13,7 @@ import {
   setSeenSignature,
   useAdmin,
   useLostAdminNotice,
-  whenText,
+  whenLong,
 } from '../admin/admin';
 import { GIST_FILE, LINEUPS_FILE, updatesAvailable } from '../admin/config';
 import { fetchFileText, packErrorText } from '../admin/github';
@@ -55,7 +55,7 @@ export function updatedLineupsMessage(plan: LineupUpdatePlan, missingSongs: numb
 type Note = { ok: boolean; text: string } | null;
 
 // =====================================================================================================
-// Songs: a small Update (or, on the admin phone, Publish) button in the top row, and a status line under the tabs.
+// Songs: an Update button and a centred status line under the tabs.
 // =====================================================================================================
 
 export function useSongsTeam(songs: Song[], onUpdate: (pack: Song[]) => Promise<UpdatePlan>) {
@@ -72,8 +72,8 @@ export function useSongsTeam(songs: Song[], onUpdate: (pack: Song[]) => Promise<
     setBusy(true);
     try {
       const parsed = parseSongsFile(await fetchFileText(GIST_FILE));
-      if (!parsed.ok) setNote({ ok: false, text: 'The team songs are not ready yet. Ask the admin to publish them.' });
-      else if (parsed.songs.length === 0) setNote({ ok: false, text: 'The team has not published any songs yet.' });
+      if (!parsed.ok) setNote({ ok: false, text: 'The team songs are not ready yet. Ask the admin to update them.' });
+      else if (parsed.songs.length === 0) setNote({ ok: false, text: 'The admin has not added any songs yet.' });
       else {
         const plan = await onUpdate(parsed.songs);
         markUpdated();
@@ -94,8 +94,8 @@ export function useSongsTeam(songs: Song[], onUpdate: (pack: Song[]) => Promise<
     setBusy(true);
     try {
       const r = await publishSongs(songs);
-      if (r.ok) setNote({ ok: true, text: `Published ${plural(r.count, 'song', 'songs')}. Everyone gets them when they tap Update.` });
-      else if (r.reason === 'empty') setNote({ ok: false, text: 'There are no songs to publish.' });
+      if (r.ok) setNote({ ok: true, text: `Updated ${plural(r.count, 'song', 'songs')}. Everyone gets them when they tap Update.` });
+      else if (r.reason === 'empty') setNote({ ok: false, text: 'There are no songs to update.' });
     } catch (e) {
       setNote({ ok: false, text: packErrorText(e) });
     } finally {
@@ -108,23 +108,34 @@ export function useSongsTeam(songs: Song[], onUpdate: (pack: Song[]) => Promise<
 }
 export type SongsTeam = ReturnType<typeof useSongsTeam>;
 
-/** The small button in the top row of the Songs screen. */
+/** The ✨ADMIN✨ badge, shown at the right of the screen title on the admin phone. */
+export function AdminBadge() {
+  const admin = useAdmin();
+  if (!updatesAvailable || !admin) return null;
+  return <span class="badge admin-badge" id="admin-badge">✨ADMIN✨</span>;
+}
+
+/** The Update button under the language tabs (on the admin phone it sends the songs to everyone). */
 export function SongsPill({ team }: { team: SongsTeam }) {
   if (!updatesAvailable) return null;
   return team.admin ? (
-    <button class="pill-btn primary" id="publish-btn" onClick={team.publish} disabled={team.busy || team.songs.length === 0} aria-label="Publish songs to everyone">
+    <button class="btn update-bar primary" id="publish-btn" onClick={team.publish} disabled={team.busy || team.songs.length === 0} aria-label="Update songs for everyone">
       <Icon name="share" size={18} />
-      <span class="lbl">{team.busy ? 'Publishing…' : 'Publish'}</span>
+      <span class="lbl">{team.busy ? 'Updating…' : 'Update'}</span>
     </button>
   ) : (
-    <button class={`pill-btn${team.notice.songs ? ' primary' : ''}`} id="update-btn" onClick={team.update} disabled={team.busy} aria-label="Update songs from the team">
+    <button class={`btn update-bar${team.notice.songs ? ' primary' : ''}`} id="update-btn" onClick={team.update} disabled={team.busy} aria-label="Update songs from the team">
       <Icon name="download" size={18} />
-      <span class="lbl lbl-upd">{team.busy ? 'Updating…' : 'Update'}</span>
+      <span class="lbl">{team.busy ? 'Updating…' : 'Update'}</span>
     </button>
   );
 }
 
-/** The small status line under the tabs: when songs were last updated or published, notices and results. */
+/** What the notice says: how many songs or line ups the admin has added. */
+const addedText = (n: number, one: string, many: string, fallback: string): string =>
+  n > 0 ? `The admin has added ${plural(n, one, many)} to the app.` : fallback;
+
+/** The centred status line under the tabs: what is new, when things were last updated, and results. */
 export function SongsStatus({ team }: { team: SongsTeam }) {
   if (!updatesAvailable) return null;
   const published = lastPublished();
@@ -133,15 +144,15 @@ export function SongsStatus({ team }: { team: SongsTeam }) {
       {team.lost && <p class="share-note bad" role="alert" id="lost-note">Another phone is now the admin. This phone is back to normal.</p>}
       {team.admin ? (
         <p class="team-status" id="publish-status">
-          <span class="badge">Admin</span>
-          {published ? `Songs last published ${whenText(published.at)}. ` : 'Songs not published yet. '}
-          {published && (hasUnpublishedChanges(team.songs) ? 'Changes not published yet.' : 'Everything is published.')}
+          {published ? `Songs are updated last ${whenLong(published.at)}. ` : 'Songs not yet updated.'}
+          {published && (hasUnpublishedChanges(team.songs) ? 'Changes not updated yet.' : 'Everything is updated.')}
         </p>
+      ) : team.notice.songs ? (
+        <p class="share-note ok notice" role="status" id="songs-notice">{addedText(team.notice.songsCount, 'song', 'songs', 'The admin has updated the songs.')}</p>
       ) : (
-        <>
-          {team.notice.songs && <p class="share-note ok notice" role="status" id="songs-notice">New songs are ready.</p>}
-          <p class="team-status">{team.lastUpd ? `Last updated ${whenText(team.lastUpd)}.` : 'Tap Update to get the latest songs from the team (needs internet).'}</p>
-        </>
+        <p class="team-status" id="songs-updated">
+          {team.lastUpd ? `Songs are updated last ${whenLong(team.lastUpd)}. Everything is updated.` : 'Tap Update to get the latest songs from the team (needs internet).'}
+        </p>
       )}
       {team.note && <p class={`share-note ${team.note.ok ? 'ok' : 'bad'}`} role={team.note.ok ? 'status' : 'alert'} id={team.admin ? 'publish-note' : 'update-note'}>{team.note.text}</p>}
     </div>
@@ -149,7 +160,7 @@ export function SongsStatus({ team }: { team: SongsTeam }) {
 }
 
 // =====================================================================================================
-// Line ups: Create + Publish (admin) or Update (everyone else) in the top row, a status line under the tabs.
+// Line ups: an Update button and a centred status line under the tabs (the admin's New button floats bottom right).
 // =====================================================================================================
 
 export function useLineupsTeam(
@@ -172,7 +183,7 @@ export function useLineupsTeam(
     try {
       const parsed = parseLineupsFile(await fetchFileText(LINEUPS_FILE));
       if (!parsed.ok) setNote({ ok: false, text: parsed.error });
-      else if (parsed.lineups.length === 0) setNote({ ok: false, text: 'The admin has not published any line ups yet.' });
+      else if (parsed.lineups.length === 0) setNote({ ok: false, text: 'The admin has not added any line ups yet.' });
       else {
         const plan = await onUpdate(parsed.lineups);
         markLineupsUpdated();
@@ -183,7 +194,7 @@ export function useLineupsTeam(
       }
     } catch (e) {
       const kind = (e as { kind?: string })?.kind;
-      setNote({ ok: false, text: kind === 'missing' ? 'The admin has not published any line ups yet.' : packErrorText(e) });
+      setNote({ ok: false, text: kind === 'missing' ? 'The admin has not added any line ups yet.' : packErrorText(e) });
     } finally {
       setBusy(false);
     }
@@ -195,9 +206,9 @@ export function useLineupsTeam(
     try {
       const r = await publishLineups(lineups);
       if (r.ok) {
-        setNote({ ok: true, text: `Published ${plural(r.count, 'line up', 'line ups')}. Everyone gets them when they tap Update.` });
+        setNote({ ok: true, text: `Updated ${plural(r.count, 'line up', 'line ups')}. Everyone gets them when they tap Update.` });
         onPublished();
-      } else if (r.reason === 'empty') setNote({ ok: false, text: 'There are no line ups to publish.' });
+      } else if (r.reason === 'empty') setNote({ ok: false, text: 'There are no line ups to update.' });
     } catch (e) {
       setNote({ ok: false, text: packErrorText(e) });
     } finally {
@@ -210,37 +221,25 @@ export function useLineupsTeam(
 }
 export type LineupsTeam = ReturnType<typeof useLineupsTeam>;
 
-/**
- * The small buttons in the top row of the Line up screen. The admin phone (or any phone when team updates are
- * not set up) gets "New", and the admin also gets "Publish". Every other phone gets "Update" instead.
- */
-export function LineupPills({ team, canEdit, onCreate }: { team: LineupsTeam; canEdit: boolean; onCreate: () => void }) {
+/** The Update button under the Line up tabs (on the admin phone it sends the line ups to everyone). */
+export function LineupPills({ team, canEdit }: { team: LineupsTeam; canEdit: boolean }) {
+  if (canEdit) {
+    return updatesAvailable ? (
+      <button class="btn update-bar primary" id="publish-lineups-btn" onClick={team.publish} disabled={team.busy || team.lineups.length === 0} aria-label="Update line ups for everyone">
+        <Icon name="share" size={18} />
+        <span class="lbl">{team.busy ? 'Updating…' : 'Update'}</span>
+      </button>
+    ) : null;
+  }
   return (
-    <>
-      {canEdit ? (
-        <>
-          <button class="pill-btn primary create-btn" onClick={onCreate} aria-label="Create new line up">
-            <Icon name="plus" size={18} />
-            <span class="lbl lbl-new">New</span>
-          </button>
-          {updatesAvailable && (
-            <button class="pill-btn" id="publish-lineups-btn" onClick={team.publish} disabled={team.busy || team.lineups.length === 0} aria-label="Publish line ups to everyone">
-              <Icon name="share" size={18} />
-              <span class="lbl lbl-pub">{team.busy ? 'Publishing…' : 'Publish'}</span>
-            </button>
-          )}
-        </>
-      ) : (
-        <button class="pill-btn primary" id="update-lineups-btn" onClick={team.update} disabled={team.busy} aria-label="Update line ups from the admin">
-          <Icon name="download" size={18} />
-          <span class="lbl lbl-upd">{team.busy ? 'Updating…' : 'Update'}</span>
-        </button>
-      )}
-    </>
+    <button class={`btn update-bar${team.notice.lineups ? ' primary' : ''}`} id="update-lineups-btn" onClick={team.update} disabled={team.busy} aria-label="Update line ups from the admin">
+      <Icon name="download" size={18} />
+      <span class="lbl">{team.busy ? 'Updating…' : 'Update'}</span>
+    </button>
   );
 }
 
-/** The small status line under the Line up tabs. */
+/** The centred status line under the Line up tabs. */
 export function LineupStatus({ team, canEdit }: { team: LineupsTeam; canEdit: boolean }) {
   if (!updatesAvailable) return null;
   const published = lastPublishedLineups();
@@ -249,15 +248,15 @@ export function LineupStatus({ team, canEdit }: { team: LineupsTeam; canEdit: bo
       {team.lost && <p class="share-note bad" role="alert" id="lost-note">Another phone is now the admin. This phone is back to normal.</p>}
       {canEdit ? (
         <p class="team-status" id="publish-lineups-status">
-          <span class="badge">Admin</span>
-          {published ? `Line ups last published ${whenText(published.at)}. ` : 'Line ups not published yet. '}
-          {published && (hasUnpublishedLineupChanges(team.lineups) ? 'Changes not published yet.' : 'Everything is published.')}
+          {published ? `Line ups are updated last ${whenLong(published.at)}. ` : 'Line ups not yet updated.'}
+          {published && (hasUnpublishedLineupChanges(team.lineups) ? 'Changes not updated yet.' : 'Everything is updated.')}
         </p>
+      ) : team.notice.lineups ? (
+        <p class="share-note ok notice" role="status" id="lineups-notice">{addedText(team.notice.lineupsCount, 'line up', 'line ups', 'The admin has updated the line ups.')}</p>
       ) : (
-        <>
-          {team.notice.lineups && <p class="share-note ok notice" role="status" id="lineups-notice">New line ups are ready.</p>}
-          <p class="team-status">{team.last ? `Last updated ${whenText(team.last)}.` : 'Tap Update to get the latest line ups from the admin (needs internet).'}</p>
-        </>
+        <p class="team-status" id="lineups-updated">
+          {team.last ? `Line ups are updated last ${whenLong(team.last)}. Everything is updated.` : 'Tap Update to get the latest line ups from the admin (needs internet).'}
+        </p>
       )}
       {team.note && <p class={`share-note ${team.note.ok ? 'ok' : 'bad'}`} role={team.note.ok ? 'status' : 'alert'} id="lineups-note">{team.note.text}</p>}
     </div>

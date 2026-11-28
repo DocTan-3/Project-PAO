@@ -3,7 +3,7 @@ import { LANGUAGES, countByLanguage, groupSongs } from '../model/library';
 import type { Language, Song } from '../model/types';
 import type { UpdatePlan } from '../model/pack';
 import { Icon } from './icons';
-import { SongsPill, SongsStatus, useSongsTeam } from './TeamBar';
+import { AdminBadge, SongsPill, SongsStatus, useSongsTeam } from './TeamBar';
 import { ThemeToggle } from './theme';
 import { useHold } from './useHold';
 
@@ -84,9 +84,9 @@ export function Library({
         <div class="brand">
           <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
           Songs
+          <AdminBadge />
         </div>
         <div class="lib-actions">
-          <SongsPill team={team} />
           <ThemeToggle />
         </div>
       </div>
@@ -122,6 +122,7 @@ export function Library({
         ))}
       </div>
 
+      <SongsPill team={team} />
       </div>
 
       <SongsStatus team={team} />
@@ -176,7 +177,7 @@ export function Library({
                         }
                       }}
                       onClick={() => {
-                        if (!hold.consumeClick()) onOpen(s.id); // the press that opened the delete prompt must not also open the song
+                        if (!hold.consumeClick()) { try { sessionStorage.setItem('pao:from', ''); } catch { /* ignore */ } onOpen(s.id); } // the press that opened the delete prompt must not also open the song
                       }}
                       aria-label={`${s.title || 'Untitled'}${s.artist ? `, ${s.artist}` : ''}. Press and hold, or press Delete, to delete.`}
                     >

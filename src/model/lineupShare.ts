@@ -35,10 +35,10 @@ export function parseLineupsFile(text: string): ParsedLineups {
   try {
     data = JSON.parse(text);
   } catch {
-    return { ok: false, error: 'The line ups are not ready yet. Ask the admin to publish them.' };
+    return { ok: false, error: 'The line ups are not ready yet. Ask the admin to update them.' };
   }
   if (!isObj(data) || data.app !== LINEUPS_APP || !Array.isArray(data.lineups)) {
-    return { ok: false, error: 'The line ups are not ready yet. Ask the admin to publish them.' };
+    return { ok: false, error: 'The line ups are not ready yet. Ask the admin to update them.' };
   }
   if (num(data.version, 0) > LINEUPS_VERSION) return { ok: false, error: 'Please update the app to get the new line ups.' };
   const lineups: Lineup[] = [];

@@ -38,7 +38,7 @@ export function LineupPage({
   onDelete: () => void;
   /** view only: no changing the date or songs, no delete (phones that are not the admin) */
   readOnly?: boolean;
-  /** the admin's Publish button next to Start: publishes all line ups, then calls onDone */
+  /** the admin's Update button next to Start: publishes all line ups, then calls onDone */
   publish?: { lineups: Lineup[]; onDone: (count: number) => void };
 }) {
   const [picking, setPicking] = useState<SlotKey | null>(null);
@@ -52,7 +52,7 @@ export function LineupPage({
     try {
       const r = await publishLineups(publish.lineups);
       if (r.ok) publish.onDone(r.count);
-      else setPubError(r.reason === 'empty' ? 'There are no line ups to publish.' : 'Another phone is now the admin. This phone is back to normal.');
+      else setPubError(r.reason === 'empty' ? 'There are no line ups to update.' : 'Another phone is now the admin. This phone is back to normal.');
     } catch (e) {
       setPubError(packErrorText(e));
     } finally {
@@ -84,9 +84,9 @@ export function LineupPage({
         </div>
         <span class="lh-right">
           {publish && !readOnly && (
-            <button class="btn publish-btn" id="publish-lineup-header" onClick={doPublish} disabled={pubBusy} aria-label="Publish line ups to everyone">
+            <button class="btn publish-btn" id="publish-lineup-header" onClick={doPublish} disabled={pubBusy} aria-label="Update line ups for everyone">
               <Icon name="share" size={18} />
-              <span class="lbl">{pubBusy ? 'Publishing…' : 'Publish'}</span>
+              <span class="lbl">{pubBusy ? 'Updating…' : 'Update'}</span>
             </button>
           )}
         <button

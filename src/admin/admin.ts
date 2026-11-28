@@ -140,10 +140,12 @@ export const lastUpdateAt = (): number | null => {
 };
 export const markUpdated = (): void => write(KEY_UPDATED, String(Date.now()));
 
-/** "today at 3:15 PM" style date for the messages. */
-export function whenText(ms: number): string {
-  return new Date(ms).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+/** "Saturday, Nov 28, 3:15 PM": day, date and time for the status lines. */
+export function whenLong(ms: number): string {
+  const d = new Date(ms);
+  return `${d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}, ${d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
 }
+
 
 
 // ---- line ups: published and updated on their own, separately from songs ----

@@ -3,7 +3,7 @@ import { type Lineup, formatDate, groupLineups, isComplete, lineupEntries, lineu
 import type { LineupUpdatePlan } from '../model/lineupShare';
 import type { Song } from '../model/types';
 import { Icon } from './icons';
-import { LineupPills, LineupStatus, useLineupsTeam } from './TeamBar';
+import { AdminBadge, LineupPills, LineupStatus, useLineupsTeam } from './TeamBar';
 import { ThemeToggle } from './theme';
 import { useHold } from './useHold';
 
@@ -142,9 +142,9 @@ export function LineupList({
           <div class="brand">
             <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
             Line up
+            <AdminBadge />
           </div>
           <div class="lib-actions">
-            <LineupPills team={team} canEdit={canEdit} onCreate={onCreate} />
             <ThemeToggle />
           </div>
         </div>
@@ -185,6 +185,8 @@ export function LineupList({
             </div>
           </>
         )}
+
+        <LineupPills team={team} canEdit={canEdit} />
       </div>
 
       <LineupStatus team={team} canEdit={canEdit} />
@@ -194,7 +196,7 @@ export function LineupList({
         <div class="empty">
           <div class="art"><Icon name="calendar" size={34} /></div>
           <h2>No line ups yet</h2>
-          <p>{canEdit ? 'Plan a service: pick the date, then the opening, welcome, praise and worship songs.' : 'Tap Update at the top to get the line up from the admin.'}</p>
+          <p>{canEdit ? 'Plan a service: pick the date, then the opening, welcome, praise and worship songs.' : 'Tap Update to get the line up from the admin.'}</p>
         </div>
       )}
 
@@ -215,6 +217,11 @@ export function LineupList({
             <p class="section-empty">{tab === 'upcoming' ? 'No upcoming line ups' : 'No finished line ups'}</p>
           )}
         </div>
+      )}
+      {canEdit && (
+        <button class="fab create-btn" onClick={onCreate} aria-label="Create new line up" title="New line up">
+          <Icon name="plus" size={26} />
+        </button>
       )}
     </main>
   );

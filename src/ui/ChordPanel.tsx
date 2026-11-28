@@ -33,30 +33,16 @@ export function ChordPanel({
   onInstrument: (i: Instrument) => void;
   onOpen: (text: string) => void;
 }) {
-  const [open, setOpen] = useState(() => {
-    try {
-      return localStorage.getItem('pao:chordpanel') !== 'closed';
-    } catch {
-      return true;
-    }
-  });
-  const toggle = () => {
-    setOpen((o) => {
-      try {
-        localStorage.setItem('pao:chordpanel', o ? 'closed' : 'open');
-      } catch {
-        /* ignore */
-      }
-      return !o;
-    });
-  };
+  // closed every time a song opens
+  const [open, setOpen] = useState(false);
+  const toggle = () => setOpen((o) => !o);
   if (chords.length === 0) return null;
   const w = instrument === 'piano' ? 132 : 68;
   return (
     <section class="cpanel" aria-label="Chords in this song">
       <div class="cpanel-head">
         <button class="cpanel-toggle" onClick={toggle} aria-expanded={open}>
-          <span class={`caret${open ? ' open' : ''}`} aria-hidden="true"><Icon name="next" size={18} /></span>
+          <span class={`caret${open ? ' open' : ''}`} aria-hidden="true"><Icon name="next" size={16} /></span>
           Chords <span class="muted">({chords.length})</span>
         </button>
         {open && <InstrumentSwitch value={instrument} onChange={onInstrument} />}

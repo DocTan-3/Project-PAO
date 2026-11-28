@@ -11,22 +11,22 @@ import {
 } from '../model/lineup';
 import { planUpdate } from '../model/pack';
 import { planLineupUpdate } from '../model/lineupShare';
-import { planMerge } from '../model/share';
 import { IndexedDbStore, type Store } from '../model/store';
 import type { Language, Song } from '../model/types';
 import { Drawer, type Section } from './Drawer';
 import { Editor, type ExitTarget } from './Editor';
 import { ChordsPage } from './ChordsPage';
+import { favoriteIds } from '../model/favorites';
+import { FavoritesPage } from './FavoritesPage';
 import { Library } from './Library';
 import { LineupList } from './LineupList';
 import { LineupPage } from './LineupPage';
 import { useAdmin } from '../admin/admin';
 import { updatesAvailable } from '../admin/config';
-import { startNoticeChecks } from '../admin/notice';
+import { setLocalSource, startNoticeChecks } from '../admin/notice';
 import { useKeepAwakeSetting } from './keepAwake';
 import { Reader, type ReaderNav } from './Reader';
 import { SettingsPage } from './SettingsPage';
-import { SharePage } from './SharePage';
 
 const store: Store = new IndexedDbStore();
 
@@ -35,7 +35,7 @@ type Route =
   | { kind: 'lineups' }
   | { kind: 'chords' }
   | { kind: 'settings' }
-  | { kind: 'share' }
+  | { kind: 'favorites' }
   | { kind: 'lineup'; id: string }
   | { kind: 'set'; id: string; index: number }
   | { kind: 'song' | 'edit'; id: string };
@@ -47,7 +47,7 @@ function parseRoute(): Route {
   if (h === '#lineups') return { kind: 'lineups' };
   if (h === '#chords') return { kind: 'chords' };
   if (h === '#settings') return { kind: 'settings' };
-  if (h === '#share') return { kind: 'share' };
+  if (h === '#favorites') return { kind: 'favorites' };
   let m = /^#lineup-([A-Za-z0-9-]+)$/.exec(h);
   if (m) return { kind: 'lineup', id: m[1]! };
   m = /^#set-([A-Za-z0-9-]+)-(\d+)$/.exec(h);
@@ -66,6 +66,15 @@ function flag(key: string, set?: string): string | null {
     return null;
   }
 }
+
+/** True when the open song was reached from the Favorites screen, so Back returns there. */
+const openedFromFavorites = (): boolean => {
+  try {
+    return sessionStorage.getItem('pao:from') === 'favorites';
+  } catch {
+    return false;
+  }
+};
 
 const go = (hash: string) => {
   location.hash = hash;
@@ -89,6 +98,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    setLocalSource(async () => ({ songs: await store.list(), lineups: await store.listLineups() }));
     startNoticeChecks();
     (async () => {
       let all = await store.list();
@@ -135,13 +145,6 @@ export function App() {
     await refresh();
   };
 
-  const importSongs = async (incoming: Song[]) => {
-    const plan = planMerge(songs, incoming);
-    for (const s of plan.puts) await store.put(s);
-    await refresh();
-    return plan;
-  };
-
   /** The team's published songs arrived: refresh the team's songs; the person's own songs are never touched. */
   const updateFromTeam = async (pack: Song[]) => {
     const plan = planUpdate(songs, pack);
@@ -174,7 +177,7 @@ export function App() {
     <Drawer
       open={menuOpen}
       active={active}
-      counts={{ songs: songs.length, lineups: lineups.length }}
+      counts={{ songs: songs.length, lineups: lineups.length, favorites: favoriteIds().filter((id) => songs.some((s) => s.id === id)).length }}
       keepAwake={keepAwake}
       onKeepAwake={setKeepAwake}
       onPick={pickSection}
@@ -213,7 +216,7 @@ export function App() {
           key={song.id}
           song={song}
           nav={nav}
-          onBack={() => go('')}
+          onBack={() => go(openedFromFavorites() ? '#favorites' : '')}
           onEdit={() => go(`#edit-${song.id}`)}
         />
       );
@@ -264,7 +267,7 @@ export function App() {
                   onDone: (count) => {
                     try {
                       localStorage.setItem('pao:lineuptab', 'upcoming');
-                      sessionStorage.setItem('pao:flash', `Published ${count} ${count === 1 ? 'line up' : 'line ups'}. Everyone gets them when they tap Update.`);
+                      sessionStorage.setItem('pao:flash', `Updated ${count} ${count === 1 ? 'line up' : 'line ups'}. Everyone gets them when they tap Update.`);
                     } catch {
                       /* ignore */
                     }
@@ -285,17 +288,17 @@ export function App() {
   }
 
   // ---- chords and settings ----
-  if (route.kind === 'chords' || route.kind === 'settings' || route.kind === 'share') {
+  if (route.kind === 'chords' || route.kind === 'settings' || route.kind === 'favorites') {
     return (
       <>
         {route.kind === 'chords' ? (
           <ChordsPage onMenu={() => setMenuOpen(true)} />
-        ) : route.kind === 'share' ? (
-          <SharePage songs={songs} onMenu={() => setMenuOpen(true)} onImport={importSongs} />
+        ) : route.kind === 'favorites' ? (
+          <FavoritesPage songs={songs} onMenu={() => setMenuOpen(true)} onOpen={(id) => { try { sessionStorage.setItem('pao:from', 'favorites'); } catch { /* ignore */ } go(`#song-${id}`); }} />
         ) : (
           <SettingsPage onMenu={() => setMenuOpen(true)} />
         )}
-        {drawer(route.kind === 'share' ? 'settings' : route.kind)}
+        {drawer(route.kind)}
       </>
     );
   }

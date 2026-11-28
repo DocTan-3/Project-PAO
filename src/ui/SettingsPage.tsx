@@ -201,21 +201,12 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
         </div>
       </section>
 
-      <section class="set-sec" aria-labelledby="set-share">
-        <h2 id="set-share">Share with a friend</h2>
-        <p class="set-hint">Send or receive songs as a file, for example by Quick Share or Bluetooth.</p>
-        <a class="btn" id="share-link" href="#share">
-          <Icon name="share" size={20} />
-          Send or receive songs
-        </a>
-      </section>
-
       {adminAvailable && (
         <section class="set-sec" aria-labelledby="set-admin">
           <h2 id="set-admin">Admin</h2>
           {admin ? (
             <div class="admin-box">
-              <p class="share-lead">This phone is the <b>admin</b>. Use <b>Publish songs</b> on the Songs screen to share your songs with everyone.</p>
+              <p class="share-lead">This phone is the <b>admin</b>. Use <b>Update</b> on the Songs and Line up screens to share your songs and line ups with everyone.</p>
               <button class="btn" id="admin-off" onClick={() => { turnOffAdmin(); setAdminMsg(null); }}>Turn off admin mode</button>
             </div>
           ) : (
@@ -234,6 +225,7 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
         </section>
       )}
 
+      <p class="verse" id="verse">Psalms 34:3 - Glorify the Lord with me; let us exalt His name forever.</p>
       <p class="about" id="app-version">BPCG - PAW · version {__APP_VERSION__}</p>
     </main>
   );

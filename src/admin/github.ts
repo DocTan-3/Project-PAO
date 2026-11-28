@@ -15,11 +15,11 @@ export function packErrorText(e: unknown): string {
     case 'offline':
       return 'No internet. Please connect to Wi-Fi or mobile data and try again.';
     case 'missing':
-      return 'The team songs could not be found. Ask the admin to publish them.';
+      return 'The team songs could not be found. Ask the admin to update them.';
     case 'busy':
       return 'The song service is busy. Please try again in a few minutes.';
     case 'auth':
-      return 'This phone is not allowed to publish. Ask for a new app version.';
+      return 'This phone is not allowed to update the team. Ask for a new app version.';
     default:
       return 'Sorry, that did not work. Please try again.';
   }
