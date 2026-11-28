@@ -1080,3 +1080,30 @@ a.btn { text-decoration: none; }
 .splash.fade { opacity: 0; }
 .splash p { margin: 0; max-width: 28em; font-family: var(--display); font-size: 1.35rem; font-weight: 600; line-height: 1.5; text-wrap: balance; }
 @media (prefers-reduced-motion: reduce) { .splash { transition: none; } }
+
+/* ---- Song Leader, musicians and backup singers under each song of a line up ---- */
+.slot-wrap { display: grid; gap: 6px; min-width: 0; }
+.people { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 8px; padding: 8px 2px 4px; }
+.pf { display: grid; gap: 2px; min-width: 0; }
+.pf.wide, .people > .copy-btn { grid-column: 1 / -1; }
+.pf label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.pf input { min-width: 0; min-height: 40px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text); font-size: .95rem; }
+.copy-btn { min-height: 38px; padding: 0 10px; border: 1px dashed var(--accent-line); border-radius: var(--radius-sm); background: transparent; color: var(--text); font-weight: 650; font-size: .85rem; text-align: left; }
+.copy-btn.done { border-style: solid; border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.people.ro { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 4px 4px 6px 52px; font-size: .88rem; }
+.people.ro div { display: flex; gap: 8px; min-width: 0; }
+.people.ro dt { flex: none; width: 96px; color: var(--muted); font-weight: 600; font-size: .8rem; }
+.people.ro dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+/* ---- category choice in the song editor: three joined buttons ---- */
+.cat-ctl { display: grid; gap: 4px; }
+.cat-seg { display: flex; border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; }
+.cat-seg button { flex: 1; min-height: 44px; border: 0; border-right: 1px solid var(--line); background: var(--surface); color: var(--text); font-weight: 650; font-size: .95rem; }
+.cat-seg button:last-child { border-right: 0; }
+.cat-seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+
+/* very narrow phones: keep "Line Ups" + ADMIN + the theme button on one row */
+@media (max-width: 359px) {
+  .lib-top .brand .admin-badge { padding: 2px 6px; gap: 0; }
+  .admin-badge .icon { display: none; }
+}

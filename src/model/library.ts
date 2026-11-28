@@ -1,4 +1,4 @@
-import type { Language, Song } from './types';
+import type { Category, Language, Song } from './types';
 
 export const LANGUAGES: { id: Language; label: string }[] = [
   { id: 'en', label: 'English' },
@@ -6,6 +6,13 @@ export const LANGUAGES: { id: Language; label: string }[] = [
 ];
 
 /** Songs saved before languages existed have none: they are English. */
+export const CATEGORIES: { id: Category; label: string }[] = [
+  { id: 'praise', label: 'Praise' },
+  { id: 'worship', label: 'Worship' },
+  { id: 'welcome', label: 'Welcome' },
+];
+export const isCategory = (v: unknown): v is Category => CATEGORIES.some((c) => c.id === v);
+
 export const languageOf = (song: Song): Language => (song.language === 'tl' ? 'tl' : 'en');
 
 const ENYE = ''; // stand-in for "ñ" while accents are stripped

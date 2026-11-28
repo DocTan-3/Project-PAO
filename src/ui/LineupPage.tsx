@@ -5,18 +5,87 @@ import {
   type Lineup,
   SLOT_GROUPS,
   type SlotKey,
+  PEOPLE_FIELDS,
   assignSlot,
+  copyPeople,
+  copySource,
+  hasPeople,
+  isCopied,
+  peopleOf,
+  setPerson,
   formatDate,
   isISODate,
   lineupEntries,
   progressLabel,
   setLineupDate,
   slotLabel,
+  type CopyKind,
 } from '../model/lineup';
 import { languageOf } from '../model/library';
 import type { Song } from '../model/types';
 import { Icon } from './icons';
 import { SongPicker } from './SongPicker';
+
+/**
+ * Song Leader, musicians and backup singers of one song. The admin types the names; everyone else just reads them.
+ * From the second song on, the musicians (and, separately, the backup singers) can be copied from an earlier song.
+ */
+function People({ lineup, slot, readOnly, onChange }: { lineup: Lineup; slot: SlotKey; readOnly: boolean; onChange: (l: Lineup) => void }) {
+  const p = peopleOf(lineup, slot);
+  if (readOnly) {
+    if (!hasPeople(lineup, slot)) return null;
+    return (
+      <dl class="people ro" id={`people-${slot}`}>
+        {PEOPLE_FIELDS.filter((f) => p[f.key].trim() !== '').map((f) => (
+          <div key={f.key}>
+            <dt>{f.label}</dt>
+            <dd>{p[f.key]}</dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+  const copyBtn = (kind: CopyKind, noun: string) => {
+    const from = copySource(lineup, slot, kind);
+    if (!from) return null;
+    const done = isCopied(lineup, slot, kind);
+    return (
+      <button
+        type="button"
+        class={`copy-btn${done ? ' done' : ''}`}
+        id={`copy-${kind}-${slot}`}
+        aria-pressed={done}
+        onClick={() => onChange(copyPeople(lineup, slot, kind))}
+      >
+        {done ? `${noun} copied from ${slotLabel(from)}` : `Copy ${noun.toLowerCase()} from ${slotLabel(from)}`}
+      </button>
+    );
+  };
+  const field = (key: (typeof PEOPLE_FIELDS)[number], wide = false) => (
+    <div class={`pf${wide ? ' wide' : ''}`} key={key.key}>
+      <label for={`ppl-${slot}-${key.key}`}>{key.label}</label>
+      <input
+        id={`ppl-${slot}-${key.key}`}
+        type="text"
+        value={p[key.key]}
+        maxLength={80}
+        placeholder="Type a name"
+        autocomplete="off"
+        onInput={(e) => onChange(setPerson(lineup, slot, key.key, (e.currentTarget as HTMLInputElement).value))}
+      />
+    </div>
+  );
+  const [leader, keys, guitar, bass, drums, backup] = PEOPLE_FIELDS;
+  return (
+    <div class="people" id={`people-${slot}`}>
+      {field(leader!, true)}
+      {copyBtn('musicians', 'Musicians')}
+      {[keys!, guitar!, bass!, drums!].map((f) => field(f))}
+      {copyBtn('backup', 'Backup singers')}
+      {field(backup!, true)}
+    </div>
+  );
+}
 
 /** One line up: the date and the opening, welcome, praise and worship songs. */
 export function LineupPage({
@@ -134,7 +203,8 @@ export function LineupPage({
             const song = id ? byId.get(id) : undefined;
             const missing = !!id && !song;
             return (
-              <div class="slot" key={slot.key}>
+              <div class="slot-wrap" key={slot.key}>
+              <div class="slot">
                 {song ? (
                   <>
                     <button class="slot-main" onClick={() => onOpenSong(indexOf(slot.key))} aria-label={`Open ${song.title}, ${slot.label}`}>
@@ -170,6 +240,8 @@ export function LineupPage({
                     </span>
                   </button>
                 )}
+              </div>
+              {song && <People lineup={lineup} slot={slot.key} readOnly={readOnly} onChange={onChange} />}
               </div>
             );
           })}

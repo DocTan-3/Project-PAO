@@ -19,7 +19,7 @@ import {
 import type { SongStore } from '../model/store';
 import { webUrl } from '../model/url';
 import type { Line, Song } from '../model/types';
-import { LANGUAGES, languageOf } from '../model/library';
+import { CATEGORIES, LANGUAGES, languageOf } from '../model/library';
 import { applyTranspose, songKeyOf } from '../model/view';
 import { formatNote, parseChord } from '../theory';
 import { ChordToolbar } from './ChordToolbar';
@@ -254,6 +254,22 @@ export function Editor({
             ))}
           </select>
         </label>
+        <div class="ctl cat-ctl" role="group" aria-label="Category">
+          <span class="ctl-label">Category</span>
+          <div class="cat-seg" id="song-category">
+            {CATEGORIES.map((c) => (
+              <button
+                type="button"
+                key={c.id}
+                id={`cat-${c.id}`}
+                aria-pressed={song.category === c.id}
+                onClick={() => commit(setMeta(song, { category: song.category === c.id ? undefined : c.id }))}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <label class="notes-field">
           <span class="lbl">Notes for other players</span>
           <textarea

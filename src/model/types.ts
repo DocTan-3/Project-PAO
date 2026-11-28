@@ -22,12 +22,17 @@ export interface Section {
 
 export type Language = 'en' | 'tl';
 
+/** What a song is mostly used for in a service. Optional; a song has at most one. */
+export type Category = 'praise' | 'worship' | 'welcome';
+
 export interface Song {
   id: string;
   title: string;
   artist: string;
   /** which list the song belongs to; songs saved before this existed are English */
   language?: Language;
+  /** Praise, Worship or Welcome (optional) */
+  category?: Category;
   /** free-text details for other players (tuning, strumming, who plays what...) */
   notes?: string;
   /** a web link to a reference video (optional) */

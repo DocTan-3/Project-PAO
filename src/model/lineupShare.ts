@@ -2,7 +2,7 @@
  * Line ups published by the admin ("lineups.json" in the team Gist) and how a phone updates from them.
  * The admin is the only author of line ups, so Update makes a phone's list the same as the admin's.
  */
-import { type Lineup, SLOT_ORDER, type SlotKey, isISODate, normalizeLineup } from './lineup';
+import { type Lineup, MAX_NAME, PEOPLE_FIELDS, SLOT_ORDER, type SlotKey, type SlotPeople, isISODate, normalizeLineup } from './lineup';
 import type { AdminInfo } from './share';
 
 export const LINEUPS_APP = 'bpcg-paw-lineups';
@@ -24,8 +24,22 @@ export function cleanLineup(v: unknown): Lineup | null {
     if (x !== undefined && x !== null && typeof x !== 'string') return null;
     slots[k] = typeof x === 'string' && x ? x : null;
   }
+  // names of the song leader, musicians and backup singers: text only, trimmed and kept short
+  let people: Lineup['people'];
+  if (isObj(v.people)) {
+    for (const k of SLOT_ORDER) {
+      const raw = (v.people as Record<string, unknown>)[k];
+      if (!isObj(raw)) continue;
+      const one: Partial<SlotPeople> = {};
+      for (const f of PEOPLE_FIELDS) {
+        const t = raw[f.key];
+        if (typeof t === 'string' && t.trim()) one[f.key] = t.trim().slice(0, MAX_NAME);
+      }
+      if (Object.keys(one).length > 0) (people ??= {})[k] = one;
+    }
+  }
   const createdAt = num(v.createdAt, 0);
-  return normalizeLineup({ id: v.id, date: v.date, slots, createdAt, updatedAt: num(v.updatedAt, createdAt) });
+  return normalizeLineup({ id: v.id, date: v.date, slots, ...(people ? { people } : {}), createdAt, updatedAt: num(v.updatedAt, createdAt) });
 }
 
 export type ParsedLineups = { ok: true; lineups: Lineup[]; invalid: number } | { ok: false; error: string };

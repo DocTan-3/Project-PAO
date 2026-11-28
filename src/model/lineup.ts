@@ -4,12 +4,37 @@ import type { Song } from './types';
 /** The places a song can go in a service line up: six required, plus an optional Response. */
 export type SlotKey = 'opening' | 'welcome' | 'praise1' | 'praise2' | 'worship1' | 'worship2' | 'response';
 
+/** Who sings and plays on one song: names typed by the admin. */
+export interface SlotPeople {
+  leader: string;
+  keys: string;
+  guitar: string;
+  bass: string;
+  drums: string;
+  backup: string;
+}
+export type PersonField = keyof SlotPeople;
+
+export const PEOPLE_FIELDS: { key: PersonField; label: string }[] = [
+  { key: 'leader', label: 'Song Leader' },
+  { key: 'keys', label: 'Keyboard' },
+  { key: 'guitar', label: 'Guitar' },
+  { key: 'bass', label: 'Bass' },
+  { key: 'drums', label: 'Drums' },
+  { key: 'backup', label: 'Backup singers' },
+];
+/** The band: copied together from an earlier song. Backup singers are copied on their own. */
+export const MUSICIAN_FIELDS: PersonField[] = ['keys', 'guitar', 'bass', 'drums'];
+export const MAX_NAME = 80;
+
 export interface Lineup {
   id: string;
   /** the service date, "YYYY-MM-DD" */
   date: string;
   /** song id for each slot, or null when not chosen yet */
   slots: Record<SlotKey, string | null>;
+  /** song leader, musicians and backup singers for each song (only the admin types these) */
+  people?: Partial<Record<SlotKey, Partial<SlotPeople>>>;
   createdAt: number;
   updatedAt: number;
 }
@@ -97,6 +122,56 @@ export function lineupEntries(l: Lineup, songs: Song[]): LineupEntry[] {
     if (song) out.push({ key, label: slotLabel(key), song });
   }
   return out;
+}
+
+// ---- song leader, musicians, backup singers ----
+
+const blankPeople = (): SlotPeople => ({ leader: '', keys: '', guitar: '', bass: '', drums: '', backup: '' });
+
+export const peopleOf = (l: Lineup, key: SlotKey): SlotPeople => ({ ...blankPeople(), ...(l.people?.[key] ?? {}) });
+
+export function setPerson(l: Lineup, key: SlotKey, field: PersonField, value: string): Lineup {
+  const people = { ...(l.people ?? {}), [key]: { ...peopleOf(l, key), [field]: value.slice(0, MAX_NAME) } };
+  return touch({ ...l, people });
+}
+
+export const hasPeople = (l: Lineup, key: SlotKey): boolean => Object.values(peopleOf(l, key)).some((v) => v.trim() !== '');
+
+export type CopyKind = 'musicians' | 'backup';
+const fieldsOf = (kind: CopyKind): PersonField[] => (kind === 'musicians' ? MUSICIAN_FIELDS : ['backup']);
+
+/**
+ * The song to copy from: the nearest earlier song of the line up that has a song chosen and some names to copy.
+ * Null for the first song, or when no earlier song has names yet (then there is nothing to offer).
+ */
+export function copySource(l: Lineup, key: SlotKey, kind: CopyKind): SlotKey | null {
+  const at = SLOT_ORDER.indexOf(key);
+  for (let i = at - 1; i >= 0; i--) {
+    const k = SLOT_ORDER[i]!;
+    if (!l.slots[k]) continue;
+    const p = peopleOf(l, k);
+    if (fieldsOf(kind).some((f) => p[f].trim() !== '')) return k;
+  }
+  return null;
+}
+
+/** Copy the musicians (or the backup singers) of the source song into this song. Names stay editable. */
+export function copyPeople(l: Lineup, key: SlotKey, kind: CopyKind): Lineup {
+  const from = copySource(l, key, kind);
+  if (!from) return l;
+  const src = peopleOf(l, from);
+  const mine = peopleOf(l, key);
+  for (const f of fieldsOf(kind)) mine[f] = src[f];
+  return touch({ ...l, people: { ...(l.people ?? {}), [key]: mine } });
+}
+
+/** True while this song's musicians (or backup singers) are exactly the source song's. */
+export function isCopied(l: Lineup, key: SlotKey, kind: CopyKind): boolean {
+  const from = copySource(l, key, kind);
+  if (!from) return false;
+  const a = peopleOf(l, key);
+  const b = peopleOf(l, from);
+  return fieldsOf(kind).every((f) => a[f] === b[f]);
 }
 
 // ---- dates (local calendar dates as "YYYY-MM-DD") ----

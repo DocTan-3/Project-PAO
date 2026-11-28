@@ -4,6 +4,7 @@
  * Receiving merges the songs into the library: a song the receiver does not have is added, and when they
  * already have it the newer version wins.
  */
+import { isCategory } from './library';
 import { webUrl } from './url';
 import type { Language, Line, PlacedChord, Section, Song } from './types';
 
@@ -99,6 +100,7 @@ export function cleanSong(v: unknown): Song | null {
     updatedAt: num(v.updatedAt, createdAt),
   };
   if (language) song.language = language;
+  if (isCategory(v.category)) song.category = v.category;
   if (typeof v.notes === 'string' && v.notes) song.notes = v.notes;
   const video = typeof v.videoUrl === 'string' ? webUrl(v.videoUrl) : null;
   if (video) song.videoUrl = video;
