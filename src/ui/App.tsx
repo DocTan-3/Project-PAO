@@ -264,7 +264,7 @@ export function App() {
                   onDone: (count) => {
                     try {
                       localStorage.setItem('pao:lineuptab', 'upcoming');
-                      sessionStorage.setItem('pao:flash', `Published ${count} ${count === 1 ? 'line up' : 'line ups'}. Everyone gets them when they tap Update line ups.`);
+                      sessionStorage.setItem('pao:flash', `Published ${count} ${count === 1 ? 'line up' : 'line ups'}. Everyone gets them when they tap Update.`);
                     } catch {
                       /* ignore */
                     }

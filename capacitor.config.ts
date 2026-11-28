@@ -5,11 +5,10 @@ const config: CapacitorConfig = {
   appName: 'BPCG - PAW',
   webDir: 'dist',
   plugins: {
-    // The app draws behind the status and navigation bars, so its own background colour shows there (not the phone's
-    // light or dark setting) and the bar icons can always be chosen to contrast with it. The page pads itself with the
-    // --safe-area-inset-* values that Capacitor injects.
+    // 'native' lets the phone's window handle the bars (the page is never padded twice). The colour behind the bars
+    // is set by the app's own BarColor plugin (android/app/src/main/java/app/pao/songbook/BarColorPlugin.java).
     SystemBars: {
-      insetsHandling: 'css',
+      insetsHandling: 'native',
       initialViewportFitValueHint: 'cover',
     },
   },

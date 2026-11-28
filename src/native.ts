@@ -1,5 +1,5 @@
 import { App } from '@capacitor/app';
-import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core';
+import { Capacitor, SystemBars, SystemBarsStyle, registerPlugin } from '@capacitor/core';
 
 export type BackAction = 'close-overlay' | 'to-songs' | 'history-back' | 'exit';
 
@@ -18,6 +18,15 @@ const OVERLAYS = '.drawer-wrap.open, .sheet-backdrop, .picker, .ctb-wrap';
 
 const isDark = (): boolean => document.documentElement.getAttribute('data-tone') === 'dark';
 
+/** Android only: paints the area behind the status and navigation bars (see BarColorPlugin.java). */
+const BarColor = registerPlugin<{ set(options: { color: string }): Promise<void> }>('BarColor');
+
+/** The bars take the app's own background colour, so they always match the app and the icons contrast. */
+function syncBarColor(): void {
+  const color = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  if (color) BarColor.set({ color }).catch(() => undefined);
+}
+
 /** Match the status and navigation bar icons to the app's own theme (which can differ from the phone's). */
 function syncSystemBars(): void {
   SystemBars.setStyle({ style: isDark() ? SystemBarsStyle.Dark : SystemBarsStyle.Light }).catch(() => undefined);
@@ -35,6 +44,10 @@ export function initNative(): void {
     else void App.exitApp();
   });
 
-  syncSystemBars();
-  new MutationObserver(syncSystemBars).observe(document.documentElement, { attributes: true, attributeFilter: ['data-tone'] });
+  const syncBars = () => {
+    syncSystemBars();
+    syncBarColor();
+  };
+  syncBars();
+  new MutationObserver(syncBars).observe(document.documentElement, { attributes: true, attributeFilter: ['data-tone', 'data-palette', 'data-mode'] });
 }

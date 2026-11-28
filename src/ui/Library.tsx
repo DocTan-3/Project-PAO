@@ -3,7 +3,7 @@ import { LANGUAGES, countByLanguage, groupSongs } from '../model/library';
 import type { Language, Song } from '../model/types';
 import type { UpdatePlan } from '../model/pack';
 import { Icon } from './icons';
-import { TeamBar } from './TeamBar';
+import { SongsPill, SongsStatus, useSongsTeam } from './TeamBar';
 import { ThemeToggle } from './theme';
 import { useHold } from './useHold';
 
@@ -30,6 +30,7 @@ export function Library({
   onMenu: () => void;
   onUpdate: (pack: Song[]) => Promise<UpdatePlan>;
 }) {
+  const team = useSongsTeam(songs, onUpdate);
   const [lang, setLangState] = useState<Language>(loadLang);
   const [query, setQuery] = useState('');
   // Deleting takes two taps (hosted pages cannot show confirm dialogs).
@@ -84,7 +85,10 @@ export function Library({
           <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
           Songs
         </div>
-        <ThemeToggle />
+        <div class="lib-actions">
+          <SongsPill team={team} />
+          <ThemeToggle />
+        </div>
       </div>
 
       {songs.length > 0 && (
@@ -120,7 +124,7 @@ export function Library({
 
       </div>
 
-      <TeamBar songs={songs} onUpdate={onUpdate} />
+      <SongsStatus team={team} />
 
       {groups.length === 0 && (
         <div class="empty" role="tabpanel">

@@ -459,7 +459,7 @@ h1, h2, h3, p { margin: 0; }
 /* ==========================================================================
    Library
    ========================================================================== */
-.library { max-width: 720px; margin: 0 auto; padding-block: 18px calc(128px + var(--sai-bottom)); }
+.library { max-width: 720px; margin: 0 auto; padding-block: calc(18px + var(--sai-top)) calc(128px + var(--sai-bottom)); }
 .lib-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 1.55rem; letter-spacing: -.025em; }
 .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: var(--accent); color: var(--on-accent); }
@@ -516,7 +516,7 @@ h1, h2, h3, p { margin: 0; }
 /* ==========================================================================
    Reader
    ========================================================================== */
-.reader { max-width: 1120px; margin: 0 auto; padding-block: 0 calc(64px + var(--sai-bottom)); }
+.reader { max-width: 1120px; margin: 0 auto; padding-block: var(--sai-top) calc(64px + var(--sai-bottom)); }
 /* the title row and the controls stay pinned together while the lyrics scroll */
 .reader-head { position: sticky; top: var(--sai-top); z-index: 20; background: var(--bg); padding-bottom: 6px; border-bottom: 1px solid transparent; }
 .topbar { display: flex; align-items: center; gap: 2px; padding: 6px 0 4px; }
@@ -667,7 +667,7 @@ body::after { content: ""; position: fixed; inset: auto 0 0; height: var(--sai-b
 /* ==========================================================================
    Editor
    ========================================================================== */
-.editor { max-width: 860px; margin: 0 auto; padding-block: 0 calc(56px + var(--sai-bottom)); }
+.editor { max-width: 860px; margin: 0 auto; padding-block: var(--sai-top) calc(56px + var(--sai-bottom)); }
 .editor.has-toolbar { padding-bottom: 300px; }
 .ed-bar {
   position: sticky; top: var(--sai-top); z-index: 20; display: flex; align-items: center; gap: 8px; padding: 10px 0; background: var(--bg);
@@ -826,7 +826,7 @@ body::after { content: ""; position: fixed; inset: auto 0 0; height: var(--sai-b
 .lineup-card .chev { color: var(--muted); }
 
 /* line up form */
-.lineup-page { max-width: 720px; margin: 0 auto; padding-block: 0 calc(56px + var(--sai-bottom));
+.lineup-page { max-width: 720px; margin: 0 auto; padding-block: var(--sai-top) calc(56px + var(--sai-bottom));
   padding-left: max(var(--gutter), var(--sai-left)); padding-right: max(var(--gutter), var(--sai-right)); display: grid; gap: 12px; align-content: start; }
 .lineup-page .topbar { margin-bottom: 0; }
 /* the header stays pinned under the status bar; on the admin phone Publish sits next to Start */
@@ -1012,3 +1012,27 @@ a.btn { text-decoration: none; }
 .notes-field input { min-height: 46px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); }
 
 .about { margin: 28px 0 0; text-align: center; color: var(--muted); font-size: .85rem; }
+
+/* ---- compact header: small action buttons in the top row, smaller search box and tabs ---- */
+.lib-top { flex-wrap: wrap; row-gap: 4px; }
+.lib-top .brand { flex: 1 1 auto; min-width: 0; }
+.lib-actions { display: flex; align-items: center; gap: 4px; flex: none; margin-left: auto; }
+.pill-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--text); font-weight: 650; font-size: .9rem; white-space: nowrap;
+}
+.pill-btn:disabled { opacity: .45; }
+.pill-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.lib-pinned .search { margin: 8px 0 6px; }
+.lib-pinned .search input { min-height: 40px; padding-left: 38px; font-size: .95rem; border-radius: 12px; }
+.lib-pinned .search .icon { left: 12px; width: 18px; height: 18px; }
+.lib-pinned .lang-tabs { padding: 3px; border-radius: 12px; }
+.lib-pinned .lang-tab { min-height: 34px; font-size: .9rem; border-radius: 9px; padding: 0 10px; }
+.lib-pinned .lang-count { font-size: .72rem; padding: 0 6px; }
+.team-line { display: grid; gap: 4px; margin: 4px 0 6px; }
+.team-line .team-status { margin: 0; text-align: left; font-size: .78rem; }
+.team-line .badge { margin: 0 6px 0 0; padding: 1px 8px; font-size: .64rem; }
+.team-line .share-note { padding: 7px 10px; font-size: .9rem; }
+@media (max-width: 439px) { .lbl-pub { display: none; } .pill-btn:has(.lbl-pub) { padding: 0; width: 38px; } }
+@media (max-width: 339px) { .lbl-upd { display: none; } .pill-btn:has(.lbl-upd) { padding: 0; width: 38px; } }
+@media (max-width: 379px) { .lbl-new { display: none; } .pill-btn:has(.lbl-new) { padding: 0; width: 38px; } }

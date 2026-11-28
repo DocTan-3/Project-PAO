@@ -3,7 +3,7 @@ import { type Lineup, formatDate, groupLineups, isComplete, lineupEntries, lineu
 import type { LineupUpdatePlan } from '../model/lineupShare';
 import type { Song } from '../model/types';
 import { Icon } from './icons';
-import { LineupPublish, LineupUpdate } from './TeamBar';
+import { LineupPills, LineupStatus, useLineupsTeam } from './TeamBar';
 import { ThemeToggle } from './theme';
 import { useHold } from './useHold';
 
@@ -81,6 +81,11 @@ export function LineupList({
     }
   };
   const shown = tab === 'upcoming' ? upcoming : finished;
+  const team = useLineupsTeam(songs, lineups, onUpdate, () => {
+    setQuery('');
+    setTab('upcoming');
+    scrollTo({ top: 0 });
+  });
 
   const card = (l: Lineup, isFinished = false) => {
     const entries = lineupEntries(l, songs);
@@ -138,7 +143,10 @@ export function LineupList({
             <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
             Line up
           </div>
-          <ThemeToggle />
+          <div class="lib-actions">
+            <LineupPills team={team} canEdit={canEdit} onCreate={onCreate} />
+            <ThemeToggle />
+          </div>
         </div>
 
         {lineups.length > 0 && (
@@ -179,25 +187,14 @@ export function LineupList({
         )}
       </div>
 
+      <LineupStatus team={team} canEdit={canEdit} />
       {flash && <p class="share-note ok" role="status" id="flash-note">{flash}</p>}
-
-      {canEdit ? (
-        <>
-          <button class="btn primary create-btn" onClick={onCreate}>
-            <Icon name="plus" size={22} />
-            Create new line up
-          </button>
-          <LineupPublish lineups={lineups} onPublished={() => { setQuery(''); setTab('upcoming'); scrollTo({ top: 0 }); }} />
-        </>
-      ) : (
-        <LineupUpdate songs={songs} onUpdate={onUpdate} />
-      )}
 
       {lineups.length === 0 && (
         <div class="empty">
           <div class="art"><Icon name="calendar" size={34} /></div>
           <h2>No line ups yet</h2>
-          <p>{canEdit ? 'Plan a service: pick the date, then the opening, welcome, praise and worship songs.' : 'Tap Update line ups to get the line up from the admin.'}</p>
+          <p>{canEdit ? 'Plan a service: pick the date, then the opening, welcome, praise and worship songs.' : 'Tap Update at the top to get the line up from the admin.'}</p>
         </div>
       )}
 
