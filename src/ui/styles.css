@@ -765,8 +765,6 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .letter-rail::-webkit-scrollbar { display: none; }
 .letter-rail button { width: 16px; min-height: 26px; flex: none; padding: 0; border: 0; background: none; color: var(--accent-ink); font-family: var(--display); font-weight: 700; font-size: .72rem; }
 .letter-rail button:hover { background: var(--accent-soft); border-radius: 8px; }
-}
-}
 .lang-ctl { margin: 0; }
 
 /* ==========================================================================
