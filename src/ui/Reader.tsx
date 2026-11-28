@@ -5,8 +5,7 @@ import type { Song, ViewSettings } from '../model/types';
 import { webHost, webUrl } from '../model/url';
 import { displayChord, semitonesToKey, songKeyOf, viewKey } from '../model/view';
 import { type Key, formatKey, keySpelling, transposeKey } from '../theory';
-import { ChordPanel } from './ChordPanel';
-import { Fold } from './Fold';
+import { ChordBody } from './ChordPanel';
 import { toggleFavorite } from '../model/favorites';
 import { useFavorites } from './favorites';
 import { ChordSheet } from './ChordSheet';
@@ -65,6 +64,9 @@ export function Reader({
   const [width, setWidth] = useState(0);
   const fontsReady = useFontsReady();
   const favorite = useFavorites().includes(song.id);
+  // which of Notes / Reference video / Chords is open under the Key row (closed every time a song opens)
+  const [openSec, setOpenSec] = useState<'notes' | 'video' | 'chords' | null>(null);
+  const toggleSec = (s: 'notes' | 'video' | 'chords') => setOpenSec((o) => (o === s ? null : s));
 
   const auto = useAutoscroll({ speed, fontPx });
   const openSheet = (text: string) => {
@@ -125,6 +127,7 @@ export function Reader({
   }, []);
 
   const video = webUrl(song.videoUrl);
+  const hasNotes = !!song.notes?.trim();
   const chordPx = Math.round(fontPx * 0.9);
   const measureLyric = useMemo(() => makeMeasure(`400 ${fontPx}px ${songFamily()}`), [fontPx, fontsReady]);
   const measureChord = useMemo(() => makeMeasure(`700 ${chordPx}px ${songFamily()}`), [chordPx, fontsReady]);
@@ -256,35 +259,61 @@ export function Reader({
         </div>
       </header>
 
-      {shownKey && (
-        <div class="tags">
-          <span class={`tag${semis !== 0 ? ' changed' : ''}`}>
-            Key <b>{formatKey(shownKey)}</b>
-            {semis !== 0 && <span class="muted">({semisLabel})</span>}
+      {(shownKey || hasNotes || video || songChords.length > 0) && (
+        <div class="keyrow">
+          {shownKey && (
+            <span class={`keytag${semis !== 0 ? ' changed' : ''}`} id="key-tag">
+              Key <b>{formatKey(shownKey)}</b>
+              {semis !== 0 && <span class="muted">({semisLabel})</span>}
+            </span>
+          )}
+          <span class="secbtns">
+            {hasNotes && (
+              <button class="secbtn" id="sec-notes" aria-expanded={openSec === 'notes'} aria-controls="sec-panel" onClick={() => toggleSec('notes')}>
+                <Icon name="notes" size={16} />
+                <span>Notes</span>
+              </button>
+            )}
+            {video && (
+              <button class="secbtn" id="sec-video" aria-expanded={openSec === 'video'} aria-controls="sec-panel" onClick={() => toggleSec('video')}>
+                <Icon name="play" size={16} />
+                <span>Video</span>
+              </button>
+            )}
+            {songChords.length > 0 && (
+              <button class="secbtn" id="sec-chords" aria-expanded={openSec === 'chords'} aria-controls="sec-panel" onClick={() => toggleSec('chords')}>
+                <Icon name="chord" size={16} />
+                <span>Chords</span>
+              </button>
+            )}
           </span>
         </div>
       )}
-
-      <div class="reader-layout" ref={swipeRef}>
-        <aside class="reader-side">
-          {song.notes?.trim() && (
-            <Fold title="Notes" id="notes-fold" className="notes">
+      {openSec && (
+        <div class="sec-panel" id="sec-panel">
+          {openSec === 'notes' && (
+            <section class="notes" aria-label="Notes">
+              <h2>Notes</h2>
               <p>{song.notes}</p>
-            </Fold>
+            </section>
           )}
-
-          {video && (
-            <Fold title="Reference video" id="video-fold" className="video">
+          {openSec === 'video' && video && (
+            <section class="video" aria-label="Reference video">
+              <h2>Reference video</h2>
               <a class="btn video-link" id="video-link" href={video} target="_blank" rel="noopener noreferrer">
                 <Icon name="play" size={18} />
                 Watch reference video
               </a>
               <p class="video-host">{webHost(video)}</p>
-            </Fold>
+            </section>
           )}
+          {openSec === 'chords' && (
+            <ChordBody chords={songChords} instrument={instrument} onInstrument={setInstrument} onOpen={openSheet} />
+          )}
+        </div>
+      )}
 
-          <ChordPanel chords={songChords} instrument={instrument} onInstrument={setInstrument} onOpen={openSheet} />
-        </aside>
+      <div class="reader-layout" ref={swipeRef}>
 
         <div class="reader-main">
           <div class="song" ref={bodyRef}>

@@ -540,7 +540,7 @@ body::after { content: ""; position: fixed; inset: auto 0 0; height: var(--sai-b
 .reader-side > * { min-width: 0; }
 .reader-main { min-width: 0; }
 @media (min-width: 900px) {
-  .reader-layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 36px; align-items: start; margin-top: 8px; }
+  .reader-layout { display: block; margin-top: 8px; }
   .reader-side { position: sticky; top: calc(var(--head-h, 110px) + var(--sai-top) + 8px); max-height: calc(100vh - var(--head-h, 110px) - 32px); overflow-y: auto; padding: 2px 4px 16px 2px; scrollbar-width: thin; }
 }
 
@@ -1057,3 +1057,19 @@ a.btn { text-decoration: none; }
 .fav-btn.on svg path { fill: currentColor; }
 .verse { margin: 24px 16px 0; text-align: center; color: var(--muted); font-size: .9rem; font-style: italic; line-height: 1.5; }
 .verse + .about { margin-top: 8px; }
+
+/* ---- one row under the controls: Key (highlighted) on the left, Notes / Video / Chords on the right ---- */
+.keyrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 2px 0 8px; min-width: 0; }
+.keytag { display: inline-flex; align-items: center; gap: 6px; flex: none; min-height: 36px; padding: 0 12px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: .88rem; font-weight: 600; }
+.keytag b { color: inherit; font-family: var(--display); font-size: 1rem; }
+.keytag .muted { color: inherit; opacity: .8; }
+.secbtns { display: flex; align-items: center; gap: 6px; min-width: 0; margin-left: auto; }
+.secbtn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; flex: none; min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text); font-size: .85rem; font-weight: 650; }
+.secbtn[aria-expanded="true"] { background: var(--text); border-color: var(--text); color: var(--bg); }
+.secbtn:focus-visible { outline-offset: 2px; }
+@media (max-width: 399px) { .secbtn .icon { display: none; } .secbtn { padding: 0 9px; } .keytag { padding: 0 10px; } }
+.sec-panel { margin: 0 0 10px; display: grid; gap: 8px; }
+.sec-panel .notes, .sec-panel .video, .sec-panel .cpanel { padding: 10px 12px; }
+.sec-panel .notes h2, .sec-panel .video h2 { margin: 0 0 4px; }
+.sec-panel .notes p { margin: 0; font-size: .92rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.reader-layout { margin-top: 0; }
