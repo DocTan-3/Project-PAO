@@ -2,7 +2,7 @@
  * Line ups published by the admin ("lineups.json" in the team Gist) and how a phone updates from them.
  * The admin is the only author of line ups, so Update makes a phone's list the same as the admin's.
  */
-import { type Lineup, MAX_NAME, PEOPLE_FIELDS, SLOT_ORDER, type SlotKey, type SlotPeople, isISODate, normalizeLineup } from './lineup';
+import { type Lineup, MAX_NAME, PEOPLE_FIELDS, PEOPLE_KEYS, SLOT_ORDER, type SlotKey, type SlotPeople, isISODate, normalizeLineup } from './lineup';
 import type { AdminInfo } from './share';
 
 export const LINEUPS_APP = 'bpcg-paw-lineups';
@@ -27,7 +27,7 @@ export function cleanLineup(v: unknown): Lineup | null {
   // names of the song leader, musicians and backup singers: text only, trimmed and kept short
   let people: Lineup['people'];
   if (isObj(v.people)) {
-    for (const k of SLOT_ORDER) {
+    for (const k of PEOPLE_KEYS) {
       const raw = (v.people as Record<string, unknown>)[k];
       if (!isObj(raw)) continue;
       const one: Partial<SlotPeople> = {};

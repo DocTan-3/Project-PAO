@@ -10,9 +10,23 @@ export const VERSES = {
   settings: 'Psalms 34:3 - Glorify the Lord with me; let us exalt His name forever.',
 } as const;
 
-/** A verse in small italic type, centred. */
+/**
+ * A verse on a screen: only its reference ("Colossians 3:16 ▾") shows, in small type. Tap it to read the verse,
+ * tap again to fold it away. It starts folded every time the screen opens.
+ */
 export function Verse({ text, id }: { text: string; id?: string }) {
-  return <p class="verse" id={id}>{text}</p>;
+  const [open, setOpen] = useState(false);
+  const cut = text.indexOf(' - ');
+  const ref = cut > 0 ? text.slice(0, cut) : text;
+  const body = cut > 0 ? text.slice(cut + 3) : '';
+  return (
+    <div class="verse" id={id}>
+      <button type="button" class="verse-ref" id={id ? `${id}-toggle` : undefined} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        {ref} {open ? '▴' : '▾'}
+      </button>
+      {open && body && <p class="verse-text">{body}</p>}
+    </div>
+  );
 }
 
 // shown once each time the app starts, never again while it stays open

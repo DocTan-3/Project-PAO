@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { LANGUAGES, countByLanguage, groupSongs } from '../model/library';
-import type { Language, Song } from '../model/types';
+import { CATEGORIES, LANGUAGES, countByLanguage, groupSongs, isCategory } from '../model/library';
+import type { Category, Language, Song } from '../model/types';
 import type { UpdatePlan } from '../model/pack';
 import { Icon } from './icons';
 import { AdminBadge, SongsPill, SongsStatus, useSongsTeam } from './TeamBar';
@@ -13,6 +13,15 @@ function loadLang(): Language {
     return localStorage.getItem('pao:lang') === 'tl' ? 'tl' : 'en';
   } catch {
     return 'en';
+  }
+}
+
+function loadCategory(): Category | null {
+  try {
+    const v = localStorage.getItem('pao:category');
+    return isCategory(v) ? v : null;
+  } catch {
+    return null;
   }
 }
 
@@ -34,6 +43,19 @@ export function Library({
   const team = useSongsTeam(songs, onUpdate);
   const [lang, setLangState] = useState<Language>(loadLang);
   const [query, setQuery] = useState('');
+  // Praise / Worship / Welcome filter (null = all songs); the words open in place under the line
+  const [category, setCategoryState] = useState<Category | null>(loadCategory);
+  const [catOpen, setCatOpen] = useState(false);
+  const setCategory = (c: Category | null) => {
+    setCategoryState(c);
+    setCatOpen(false);
+    try {
+      if (c) localStorage.setItem('pao:category', c);
+      else localStorage.removeItem('pao:category');
+    } catch {
+      /* ignore */
+    }
+  };
   // Deleting takes two taps (hosted pages cannot show confirm dialogs).
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
@@ -52,8 +74,11 @@ export function Library({
 
   const q = query.trim().toLowerCase();
   const filtered = useMemo(
-    () => (q ? songs.filter((s) => `${s.title} ${s.artist}`.toLowerCase().includes(q)) : songs),
-    [songs, q],
+    () =>
+      songs.filter(
+        (s) => (!q || `${s.title} ${s.artist}`.toLowerCase().includes(q)) && (!category || s.category === category),
+      ),
+    [songs, q, category],
   );
   const counts = countByLanguage(filtered);
   const groups = useMemo(() => groupSongs(filtered, lang), [filtered, lang]);
@@ -131,9 +156,11 @@ export function Library({
 
       {groups.length === 0 && (
         <div class="empty" role="tabpanel">
-          {q ? (
+          {q || category ? (
             <>
-              <h2>No {langLabel} songs match “{query}”</h2>
+              <h2>
+                {q ? <>No {langLabel} songs match “{query}”</> : <>No {category} {langLabel} songs yet</>}
+              </h2>
               {counts[other.id] > 0 ? (
                 <button class="btn" onClick={() => setLang(other.id)}>
                   Show {counts[other.id]} in {other.label}
@@ -151,6 +178,30 @@ export function Library({
           )}
         </div>
       )}
+
+      <div class="cat-filter">
+        <div class="cat-rule">
+          <i aria-hidden="true" />
+          <button
+            type="button"
+            class="cat-toggle"
+            id="cat-toggle"
+            aria-expanded={catOpen}
+            aria-controls="cat-words"
+            onClick={() => setCatOpen((o) => !o)}
+          >
+            {category ? CATEGORIES.find((c) => c.id === category)!.label : 'Category'} {catOpen ? '▴' : '▾'}
+          </button>
+        </div>
+        {catOpen && (
+          <div class="cat-words" id="cat-words" role="group" aria-label="Category">
+            <button type="button" id="cat-all" aria-pressed={category === null} onClick={() => setCategory(null)}>All</button>
+            {CATEGORIES.map((c) => (
+              <button type="button" key={c.id} id={`filter-${c.id}`} aria-pressed={category === c.id} onClick={() => setCategory(c.id)}>{c.label}</button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div role="tabpanel" aria-labelledby={`tab-${lang}`}>
         {groups.map((g) => (

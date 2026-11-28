@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assignSlot, copyPeople, copySource, hasPeople, isCopied, newLineup, peopleOf, setPerson } from './lineup';
+import { assignSlot, copyPeople, peopleKey, teamLabel, copySource, hasPeople, isCopied, newLineup, peopleOf, setPerson } from './lineup';
 import { cleanLineup } from './lineupShare';
 
 const withSongs = () => {
@@ -44,6 +44,26 @@ describe('song leader, musicians and backup singers', () => {
     expect(copySource(l, 'praise1', 'backup')).toBe('welcome');
     const c = copyPeople(l, 'praise1', 'backup');
     expect(peopleOf(c, 'praise1')).toMatchObject({ backup: 'Joy', keys: '' });
+  });
+  it('Praise 1 and 2 share one team, and so do Worship 1 and 2', () => {
+    let l = withSongs();
+    l = assignSlot(assignSlot(l, 'praise2', 'd'), 'worship2', 'e');
+    l = setPerson(l, 'praise2', 'leader', 'Ben');
+    expect(peopleOf(l, 'praise1').leader).toBe('Ben');
+    expect(peopleOf(l, 'praise2').leader).toBe('Ben');
+    l = setPerson(l, 'worship1', 'drums', 'Caleb');
+    expect(peopleOf(l, 'worship2').drums).toBe('Caleb');
+    expect(peopleKey('praise2')).toBe('praise1');
+    expect(teamLabel('praise2')).toBe('Praise');
+    expect(teamLabel('opening')).toBe('Opening Song');
+  });
+  it('Worship copies from Praise as one team', () => {
+    let l = withSongs();
+    l = assignSlot(assignSlot(l, 'praise2', 'd'), 'worship1', 'e');
+    l = setPerson(l, 'praise1', 'keys', 'Paolo');
+    expect(copySource(l, 'worship1', 'musicians')).toBe('praise1');
+    expect(copySource(l, 'worship2', 'musicians')).toBe('praise1');
+    expect(peopleOf(copyPeople(l, 'worship2', 'musicians'), 'worship1').keys).toBe('Paolo');
   });
   it('skips songs that are not chosen yet', () => {
     let l = newLineup('2026-12-06');

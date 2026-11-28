@@ -128,10 +128,27 @@ export function lineupEntries(l: Lineup, songs: Song[]): LineupEntry[] {
 
 const blankPeople = (): SlotPeople => ({ leader: '', keys: '', guitar: '', bass: '', drums: '', backup: '' });
 
-export const peopleOf = (l: Lineup, key: SlotKey): SlotPeople => ({ ...blankPeople(), ...(l.people?.[key] ?? {}) });
+/**
+ * Praise 1 and 2 share one team, and so do Worship 1 and 2, so names are kept under the first song of each pair
+ * (Opening, Welcome, Praise, Worship and Response each have their own team).
+ */
+export const PEOPLE_KEYS: SlotKey[] = ['opening', 'welcome', 'praise1', 'worship1', 'response'];
+export const peopleKey = (key: SlotKey): SlotKey => (key === 'praise2' ? 'praise1' : key === 'worship2' ? 'worship1' : key);
+
+/** The name of the team's song group, for messages like "Copy musicians from Welcome Song". */
+export const teamLabel = (key: SlotKey): string => {
+  const k = peopleKey(key);
+  return k === 'praise1' ? 'Praise' : k === 'worship1' ? 'Worship' : slotLabel(k);
+};
+
+/** Does this team have a song chosen (either of the pair)? */
+const teamHasSong = (l: Lineup, key: SlotKey): boolean => SLOT_ORDER.some((k) => peopleKey(k) === key && !!l.slots[k]);
+
+export const peopleOf = (l: Lineup, key: SlotKey): SlotPeople => ({ ...blankPeople(), ...(l.people?.[peopleKey(key)] ?? {}) });
 
 export function setPerson(l: Lineup, key: SlotKey, field: PersonField, value: string): Lineup {
-  const people = { ...(l.people ?? {}), [key]: { ...peopleOf(l, key), [field]: value.slice(0, MAX_NAME) } };
+  const k = peopleKey(key);
+  const people = { ...(l.people ?? {}), [k]: { ...peopleOf(l, k), [field]: value.slice(0, MAX_NAME) } };
   return touch({ ...l, people });
 }
 
@@ -141,31 +158,32 @@ export type CopyKind = 'musicians' | 'backup';
 const fieldsOf = (kind: CopyKind): PersonField[] => (kind === 'musicians' ? MUSICIAN_FIELDS : ['backup']);
 
 /**
- * The song to copy from: the nearest earlier song of the line up that has a song chosen and some names to copy.
- * Null for the first song, or when no earlier song has names yet (then there is nothing to offer).
+ * The team to copy from: the nearest earlier team that has a song chosen and some names to copy.
+ * Null for the first team, or when no earlier team has names yet (then there is nothing to offer).
  */
 export function copySource(l: Lineup, key: SlotKey, kind: CopyKind): SlotKey | null {
-  const at = SLOT_ORDER.indexOf(key);
+  const at = PEOPLE_KEYS.indexOf(peopleKey(key));
   for (let i = at - 1; i >= 0; i--) {
-    const k = SLOT_ORDER[i]!;
-    if (!l.slots[k]) continue;
+    const k = PEOPLE_KEYS[i]!;
+    if (!teamHasSong(l, k)) continue;
     const p = peopleOf(l, k);
     if (fieldsOf(kind).some((f) => p[f].trim() !== '')) return k;
   }
   return null;
 }
 
-/** Copy the musicians (or the backup singers) of the source song into this song. Names stay editable. */
+/** Copy the musicians (or the backup singers) of the source team into this team. Names stay editable. */
 export function copyPeople(l: Lineup, key: SlotKey, kind: CopyKind): Lineup {
   const from = copySource(l, key, kind);
   if (!from) return l;
+  const k = peopleKey(key);
   const src = peopleOf(l, from);
-  const mine = peopleOf(l, key);
+  const mine = peopleOf(l, k);
   for (const f of fieldsOf(kind)) mine[f] = src[f];
-  return touch({ ...l, people: { ...(l.people ?? {}), [key]: mine } });
+  return touch({ ...l, people: { ...(l.people ?? {}), [k]: mine } });
 }
 
-/** True while this song's musicians (or backup singers) are exactly the source song's. */
+/** True while this team's musicians (or backup singers) are exactly the source team's. */
 export function isCopied(l: Lineup, key: SlotKey, kind: CopyKind): boolean {
   const from = copySource(l, key, kind);
   if (!from) return false;

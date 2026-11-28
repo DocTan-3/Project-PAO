@@ -1055,9 +1055,11 @@ a.btn { text-decoration: none; }
 /* ---- Favorites heart, verse in Settings ---- */
 .fav-btn.on { color: var(--accent); }
 .fav-btn.on svg path { fill: currentColor; }
-.verse { margin: 18px 12px 0; text-align: center; color: var(--muted); font-size: .88rem; font-style: italic; line-height: 1.5; }
-.team-line + .verse, .lib-pinned + .verse { margin: 4px 12px 14px; }
-.verse + .about { margin-top: 8px; }
+.verse { margin: 4px 12px 6px; text-align: center; }
+.verse-ref { border: 0; background: none; padding: 4px 8px; min-height: 32px; color: var(--muted); font-size: .78rem; font-style: italic; font-weight: 600; }
+.verse-text { margin: 0 4px 6px; color: var(--muted); font-size: .76rem; font-style: italic; line-height: 1.4; }
+
+.verse + .about { margin-top: 0; }
 
 /* ---- one row under the controls: Key (highlighted) on the left, Notes / Video / Chords on the right ---- */
 .keyrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 2px 0 8px; min-width: 0; }
@@ -1107,3 +1109,15 @@ a.btn { text-decoration: none; }
   .lib-top .brand .admin-badge { padding: 2px 6px; gap: 0; }
   .admin-badge .icon { display: none; }
 }
+
+.people-title { grid-column: 1 / -1; margin: 6px 0 0; font-family: var(--display); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--accent-ink); }
+.people.ro dt.people-title { width: auto; flex: none; color: var(--accent-ink); font-size: .72rem; font-weight: 700; }
+
+/* ---- category filter: a thin line with "Category ▾" at the right; the words open in place ---- */
+.cat-filter { margin: 2px 0 6px; }
+.cat-rule { display: flex; align-items: center; gap: 10px; min-height: 34px; }
+.cat-rule i { flex: 1; height: 1px; background: var(--line); }
+.cat-toggle { border: 0; background: none; padding: 4px 0 4px 2px; min-height: 34px; color: var(--text); font-size: .85rem; font-weight: 650; white-space: nowrap; }
+.cat-words { display: flex; justify-content: flex-end; gap: 16px; }
+.cat-words button { border: 0; background: none; padding: 4px 0; min-height: 34px; color: var(--muted); font-size: .85rem; font-weight: 650; }
+.cat-words button[aria-pressed="true"] { color: var(--text); text-decoration: underline; text-underline-offset: 5px; }

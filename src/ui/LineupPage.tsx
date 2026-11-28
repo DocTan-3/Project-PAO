@@ -19,6 +19,7 @@ import {
   progressLabel,
   setLineupDate,
   slotLabel,
+  teamLabel,
   type CopyKind,
 } from '../model/lineup';
 import { languageOf } from '../model/library';
@@ -30,12 +31,13 @@ import { SongPicker } from './SongPicker';
  * Song Leader, musicians and backup singers of one song. The admin types the names; everyone else just reads them.
  * From the second song on, the musicians (and, separately, the backup singers) can be copied from an earlier song.
  */
-function People({ lineup, slot, readOnly, onChange }: { lineup: Lineup; slot: SlotKey; readOnly: boolean; onChange: (l: Lineup) => void }) {
+function People({ lineup, slot, pair, readOnly, onChange }: { lineup: Lineup; slot: SlotKey; pair?: string; readOnly: boolean; onChange: (l: Lineup) => void }) {
   const p = peopleOf(lineup, slot);
   if (readOnly) {
     if (!hasPeople(lineup, slot)) return null;
     return (
       <dl class="people ro" id={`people-${slot}`}>
+        {pair && <dt class="people-title">{pair} team</dt>}
         {PEOPLE_FIELDS.filter((f) => p[f.key].trim() !== '').map((f) => (
           <div key={f.key}>
             <dt>{f.label}</dt>
@@ -57,7 +59,7 @@ function People({ lineup, slot, readOnly, onChange }: { lineup: Lineup; slot: Sl
         aria-pressed={done}
         onClick={() => onChange(copyPeople(lineup, slot, kind))}
       >
-        {done ? `${noun} copied from ${slotLabel(from)}` : `Copy ${noun.toLowerCase()} from ${slotLabel(from)}`}
+        {done ? `${noun} copied from ${teamLabel(from)}` : `Copy ${noun.toLowerCase()} from ${teamLabel(from)}`}
       </button>
     );
   };
@@ -78,6 +80,7 @@ function People({ lineup, slot, readOnly, onChange }: { lineup: Lineup; slot: Sl
   const [leader, keys, guitar, bass, drums, backup] = PEOPLE_FIELDS;
   return (
     <div class="people" id={`people-${slot}`}>
+      {pair && <h3 class="people-title">{pair} team (both songs)</h3>}
       {field(leader!, true)}
       {copyBtn('musicians', 'Musicians')}
       {[keys!, guitar!, bass!, drums!].map((f) => field(f))}
@@ -241,10 +244,12 @@ export function LineupPage({
                   </button>
                 )}
               </div>
-              {song && <People lineup={lineup} slot={slot.key} readOnly={readOnly} onChange={onChange} />}
               </div>
             );
           })}
+          {g.slots.some((sl) => byId.has(lineup.slots[sl.key] ?? '')) && (
+            <People lineup={lineup} slot={g.slots[0]!.key} pair={g.slots.length > 1 ? g.title : undefined} readOnly={readOnly} onChange={onChange} />
+          )}
         </section>
       ))}
 
