@@ -26,11 +26,13 @@ export function packErrorText(e: unknown): string {
 }
 
 const url = () => `https://api.github.com/gists/${GIST_ID}`;
+/** GitHub may hand out a copy that is up to a minute old; a different address each time always gets the current one. */
+const fresh = () => `${url()}?t=${Date.now()}`;
 
 async function request(init?: RequestInit): Promise<Response> {
   let res: Response;
   try {
-    res = await fetch(url(), { cache: 'no-store', ...init });
+    res = await fetch(init?.method === 'PATCH' ? url() : fresh(), { cache: 'no-store', ...init });
   } catch {
     throw new PackError('offline');
   }
@@ -52,7 +54,7 @@ export async function fetchPackText(): Promise<string> {
   if (!file) throw new PackError('missing');
   if (file.truncated && file.raw_url) {
     try {
-      return await (await fetch(file.raw_url, { cache: 'no-store' })).text();
+      return await (await fetch(`${file.raw_url}${file.raw_url.includes('?') ? '&' : '?'}t=${Date.now()}`, { cache: 'no-store' })).text();
     } catch {
       throw new PackError('offline');
     }

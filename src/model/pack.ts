@@ -53,6 +53,17 @@ export function planUpdate(local: Song[], pack: Song[]): UpdatePlan {
   return plan;
 }
 
+/**
+ * Is this phone still the admin, judging by the admin named in the published file?
+ * It only loses the role when the file names a different phone that signed in AFTER this phone did.
+ * A file that names nobody, or an older admin, may simply be an out-of-date copy (GitHub can serve a copy that is
+ * up to a minute old), so that is never a reason to switch off.
+ */
+export function adminVerdict(inFile: { deviceId: string; since: number } | null, myDeviceId: string, mySince: number): 'mine' | 'lost' {
+  if (!inFile || inFile.deviceId === myDeviceId) return 'mine';
+  return inFile.since >= mySince ? 'lost' : 'mine';
+}
+
 /** A short fingerprint of a library (which songs, and when each was last changed), to tell if it differs from what was published. */
 export function packSignature(songs: Song[]): string {
   const parts = songs.map((s) => `${s.id}:${s.updatedAt}`).sort().join('|');

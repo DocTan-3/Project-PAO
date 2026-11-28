@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { mkLine, mkSection, mkSong } from './build';
 import { mapLine, newSong, setLyrics, setMeta } from './edit';
-import { packSignature, planUpdate } from './pack';
+import { adminVerdict, packSignature, planUpdate } from './pack';
 import { exportSongs, parseSongsFile, readAdmin } from './share';
 import type { Song } from './types';
 
@@ -90,5 +90,21 @@ describe('packSignature', () => {
     expect(packSignature([a])).not.toBe(base);
     expect(packSignature([a, { ...b, updatedAt: 3 }])).not.toBe(base);
     expect(packSignature([a, b, song('C', { id: 'c' })])).not.toBe(base);
+  });
+});
+
+describe('adminVerdict', () => {
+  it('stays admin when the file names this phone', () => {
+    expect(adminVerdict({ deviceId: 'me', since: 5 }, 'me', 5)).toBe('mine');
+  });
+  it('stays admin when the file names nobody (an old or empty copy)', () => {
+    expect(adminVerdict(null, 'me', 100)).toBe('mine');
+  });
+  it('stays admin when the file shows an older admin than this phone\'s own sign-in (a stale copy)', () => {
+    expect(adminVerdict({ deviceId: 'other', since: 50 }, 'me', 100)).toBe('mine');
+  });
+  it('is replaced only when another phone signed in later', () => {
+    expect(adminVerdict({ deviceId: 'other', since: 200 }, 'me', 100)).toBe('lost');
+    expect(adminVerdict({ deviceId: 'other', since: 100 }, 'me', 100)).toBe('lost');
   });
 });

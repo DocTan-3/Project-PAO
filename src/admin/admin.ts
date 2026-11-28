@@ -4,7 +4,7 @@
  * (when it next checks) that it is no longer the admin and goes back to normal.
  */
 import { useEffect, useState } from 'preact/hooks';
-import { packSignature } from '../model/pack';
+import { adminVerdict, packSignature } from '../model/pack';
 import { exportSongs, parseSongsFile, readAdmin } from '../model/share';
 import type { Song } from '../model/types';
 import { ADMIN_PIN, adminAvailable } from './config';
@@ -12,6 +12,7 @@ import { fetchPackText, writePackText } from './github';
 
 const KEY_ADMIN = 'pao:admin';
 const KEY_DEVICE = 'pao:deviceid';
+const KEY_SINCE = 'pao:adminsince';
 const KEY_PUBLISHED = 'pao:published';
 const KEY_UPDATED = 'pao:lastupdate';
 const EVENT = 'pao:admin-changed';
@@ -73,7 +74,9 @@ export async function activateAdmin(pin: string): Promise<ActivateResult> {
   const parsed = text ? parseSongsFile(text) : null;
   const current: Song[] = parsed && parsed.ok ? parsed.songs : [];
   const before = text ? readAdmin(text) : null;
-  await writePackText(exportSongs(current, Date.now(), { deviceId: deviceId(), since: Date.now() }));
+  const since = Date.now();
+  await writePackText(exportSongs(current, since, { deviceId: deviceId(), since }));
+  write(KEY_SINCE, String(since));
   setAdmin(true);
   return { ok: true, tookOver: !!before && before.deviceId !== deviceId() };
 }
@@ -82,11 +85,13 @@ export function turnOffAdmin(): void {
   setAdmin(false);
 }
 
-/** Ask the published file whether this phone is still the admin; if not, go back to normal. */
+const mySince = (): number => Number(read(KEY_SINCE)) || 0;
+
+/** Ask the published file whether this phone is still the admin; if another phone signed in later, go back to normal. */
 export async function stillAdmin(): Promise<boolean> {
   if (!isAdmin()) return false;
   const a = readAdmin(await fetchPackText());
-  if (a && a.deviceId === deviceId()) return true;
+  if (adminVerdict(a, deviceId(), mySince()) === 'mine') return true;
   setAdmin(false);
   return false;
 }
@@ -96,13 +101,13 @@ export type PublishResult = { ok: true; count: number } | { ok: false; reason: '
 /** Publish this phone's songs as the team's songs. */
 export async function publishSongs(songs: Song[]): Promise<PublishResult> {
   if (songs.length === 0) return { ok: false, reason: 'empty' };
-  const text = await fetchPackText();
-  const a = readAdmin(text);
-  if (!a || a.deviceId !== deviceId()) {
+  const a = readAdmin(await fetchPackText());
+  if (adminVerdict(a, deviceId(), mySince()) === 'lost') {
     setAdmin(false);
     return { ok: false, reason: 'not-admin' };
   }
-  await writePackText(exportSongs(songs, Date.now(), { deviceId: a.deviceId, since: a.since }));
+  // write this phone as the admin again, so even an out-of-date copy of the file is corrected
+  await writePackText(exportSongs(songs, Date.now(), { deviceId: deviceId(), since: mySince() || a?.since || Date.now() }));
   write(KEY_PUBLISHED, JSON.stringify({ at: Date.now(), sig: packSignature(songs) }));
   return { ok: true, count: songs.length };
 }
