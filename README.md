@@ -54,7 +54,7 @@ The admin password is built into the app (`ADMIN_PASSWORD` in `src/admin/config.
 
 **Using it**
 
-- On the admin phone: Settings, scroll to **Admin**, enter the admin password. The Songs and Line up screens then show **Update** (under the tabs) to send them to everyone, a ✨ADMIN✨ badge next to the title, and the Line up screen has a round **+** button at the bottom right to create a line up. Songs and line ups are published (and updated) separately; they are two files in the Gist.
+- On the admin phone: Settings, scroll to **Admin**, enter the admin password. The Songs and Line up screens then show **Update** (under the tabs) to send them to everyone, a sparkle-outlined ADMIN badge next to the title, and the Line up screen has a round **+** button at the bottom right to create a line up. Songs and line ups are published (and updated) separately; they are two files in the Gist.
 - Only one phone is the admin: the phone that enters the password last. An older admin phone switches itself off the next time it opens the Songs screen or Settings.
 - On any other phone: **Update** on the Songs screen, and **Update** on the Line up screen. Line ups are view-only there: only the admin phone creates or changes them, and Update makes a phone's line ups the same as the admin's.
 - When the admin has published something new, a notice ("The admin has added N songs to the app" or "…N line ups…") appears on the matching screen when the app is opened.

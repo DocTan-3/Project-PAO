@@ -1,8 +1,10 @@
-import '@fontsource-variable/inter';
-import '@fontsource-variable/lora';
-import '@fontsource-variable/nunito';
-import '@fontsource-variable/jetbrains-mono';
-import '@fontsource-variable/caveat';
+import '@fontsource-variable/dm-sans';
+import '@fontsource-variable/quicksand';
+import '@fontsource-variable/merriweather';
+import '@fontsource/courier-prime/400.css';
+import '@fontsource/courier-prime/700.css';
+import '@fontsource/kalam/400.css';
+import '@fontsource/kalam/700.css';
 import { render } from 'preact';
 import { App } from './ui/App';
 import { initNative } from './native';

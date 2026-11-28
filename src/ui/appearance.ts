@@ -106,11 +106,11 @@ export type FontFace = 'loved' | 'chosen' | 'saved' | 'redeemed' | 'forgiven';
 export type FontInfo = { id: FontFace; label: string; family: string; note: string };
 
 export const FONTS: FontInfo[] = [
-  { id: 'loved', label: 'Loved', family: '"Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif', note: 'Clean and neutral (default)' },
-  { id: 'chosen', label: 'Chosen', family: '"Nunito Variable", system-ui, sans-serif', note: 'Soft and rounded' },
-  { id: 'saved', label: 'Saved', family: '"Lora Variable", Georgia, serif', note: 'Book-like serif' },
-  { id: 'redeemed', label: 'Redeemed', family: '"JetBrains Mono Variable", ui-monospace, monospace', note: 'Typewriter style, chords line up' },
-  { id: 'forgiven', label: 'Forgiven', family: '"Caveat Variable", cursive', note: 'Pen on a notebook page' },
+  { id: 'loved', label: 'Loved', family: '"DM Sans Variable", system-ui, -apple-system, "Segoe UI", sans-serif', note: 'Clean and friendly (default)' },
+  { id: 'chosen', label: 'Chosen', family: '"Quicksand Variable", system-ui, sans-serif', note: 'Light and airy' },
+  { id: 'saved', label: 'Saved', family: '"Merriweather Variable", Georgia, serif', note: 'Sturdy book-like serif' },
+  { id: 'redeemed', label: 'Redeemed', family: '"Courier Prime", ui-monospace, "Courier New", monospace', note: 'True typewriter, chords line up' },
+  { id: 'forgiven', label: 'Forgiven', family: '"Kalam", cursive', note: 'Quick marker writing' },
 ];
 
 const FONT_KEY = 'pao:fontface';

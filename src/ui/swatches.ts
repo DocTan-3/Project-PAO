@@ -14,14 +14,14 @@ export const SWATCHES: Record<string, Record<"day" | "night", [string, string, s
   },
   "bpcg": {
     "day": [
-      "#d8c5ad",
-      "#2a1a10",
-      "#5a3a22"
+      "#cdb89b",
+      "#241509",
+      "#4d2f1a"
     ],
     "night": [
-      "#1a1009",
-      "#e6d3b8",
-      "#b88a5a"
+      "#150d07",
+      "#e2cfb3",
+      "#c49565"
     ]
   },
   "devotion": {
@@ -38,26 +38,26 @@ export const SWATCHES: Record<string, Record<"day" | "night", [string, string, s
   },
   "deep": {
     "day": [
-      "#e6ebf0",
-      "#1f2f3f",
-      "#3f6285"
+      "#e3e9ef",
+      "#1c2b3a",
+      "#3a5c80"
     ],
     "night": [
-      "#0f1720",
-      "#dde6ee",
-      "#7fa6c9"
+      "#0d141c",
+      "#dae3ec",
+      "#7ca2c6"
     ]
   },
   "freedom": {
     "day": [
-      "#e9eee3",
-      "#2b3a2d",
-      "#6b8f5e"
+      "#e7ece1",
+      "#283628",
+      "#648a58"
     ],
     "night": [
-      "#161d17",
-      "#e0e8dc",
-      "#a3c293"
+      "#141b15",
+      "#dde6d9",
+      "#9fbf8f"
     ]
   },
   "grace": {

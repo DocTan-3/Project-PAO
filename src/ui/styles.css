@@ -10,9 +10,9 @@
 :root {
   --radius: 14px;
   --radius-sm: 10px;
-  --display: "Inter Variable", system-ui, sans-serif; /* all three fonts are replaced by the font chosen in Settings */
-  --sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --song-font: "Inter Variable", system-ui, sans-serif; /* the song text; changed in Settings */
+  --display: "DM Sans Variable", system-ui, sans-serif; /* all three fonts are replaced by the font chosen in Settings */
+  --sans: "DM Sans Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --song-font: "DM Sans Variable", system-ui, sans-serif; /* the song text; changed in Settings */
   /* The app draws behind the phone's status and navigation bars and keeps its content clear of them with these four
      values. The Android app injects --safe-area-inset-*; a browser or newer WebView reports env(safe-area-inset-*). */
   --sai-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
@@ -98,52 +98,52 @@
   color-scheme: dark;
 }
 :root[data-palette="bpcg"][data-mode="day"] {
-  --bg: #d8c5ad;
-  --surface: #e6d6c1;
-  --surface-2: #dbcbb6;
-  --text: #2a1a10;
-  --lyric: #3f2f23;
-  --muted: #5b4a3c;
-  --line: #bcaa94;
-  --accent: #5a3a22;
-  --accent-soft: #c4af97;
-  --accent-line: #998068;
-  --on-accent: #d8c5ad;
-  --chord: #2a1a10;
+  --bg: #cdb89b;
+  --surface: #dccaad;
+  --surface-2: #d1bfa3;
+  --text: #241509;
+  --lyric: #39291b;
+  --muted: #544332;
+  --line: #b29e84;
+  --accent: #4d2f1a;
+  --accent-soft: #b9a287;
+  --accent-line: #8d745b;
+  --on-accent: #cdb89b;
+  --chord: #241509;
   --danger: #a3281c;
-  --danger-soft: #d0ac96;
-  --key-white: #f2eae0;
-  --key-black: #2a1a10;
-  --key-edge: #786757;
-  --key-lit: #5a3a22;
-  --on-lit: #d8c5ad;
+  --danger-soft: #bfa283;
+  --key-white: #ebe3c8;
+  --key-black: #241509;
+  --key-edge: #705f4b;
+  --key-lit: #4d2f1a;
+  --on-lit: #cdb89b;
   --ok: #3d7a3f;
-  --accent-ink: #5a3a22;
+  --accent-ink: #4d2f1a;
   --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
 :root[data-palette="bpcg"][data-mode="night"] {
-  --bg: #1a1009;
-  --surface: #24170e;
-  --surface-2: #32241a;
-  --text: #e6d3b8;
-  --lyric: #cebca3;
-  --muted: #9d8d79;
-  --line: #372b22;
-  --accent: #b88a5a;
-  --accent-soft: #3d2b1b;
-  --accent-line: #715336;
-  --on-accent: #1a1009;
-  --chord: #dcb88a;
+  --bg: #150d07;
+  --surface: #20150d;
+  --surface-2: #2e2318;
+  --text: #e2cfb3;
+  --lyric: #cab89f;
+  --muted: #998975;
+  --line: #32281f;
+  --accent: #c49565;
+  --accent-soft: #3c2b1c;
+  --accent-line: #75583b;
+  --on-accent: #150d07;
+  --chord: #e4bd90;
   --danger: #ff8f87;
-  --danger-soft: #3a221b;
-  --key-white: #4f4336;
-  --key-black: #0c0704;
-  --key-edge: #8a7b69;
-  --key-lit: #b88a5a;
-  --on-lit: #1a1009;
+  --danger-soft: #362619;
+  --key-white: #4b3f34;
+  --key-black: #050200;
+  --key-edge: #867765;
+  --key-lit: #c49565;
+  --on-lit: #150d07;
   --ok: #7fd1a0;
-  --accent-ink: #b88a5a;
+  --accent-ink: #c49565;
   --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
@@ -200,102 +200,102 @@
   color-scheme: dark;
 }
 :root[data-palette="deep"][data-mode="day"] {
-  --bg: #e6ebf0;
-  --surface: #f1f4f7;
-  --surface-2: #e4e8ec;
-  --text: #1f2f3f;
-  --lyric: #374654;
-  --muted: #576471;
-  --line: #c6cdd4;
-  --accent: #3f6285;
-  --accent-soft: #cbd5df;
-  --accent-line: #92a6ba;
-  --on-accent: #e6ebf0;
-  --chord: #1f2f3f;
+  --bg: #e3e9ef;
+  --surface: #eef2f6;
+  --surface-2: #e1e6eb;
+  --text: #1c2b3a;
+  --lyric: #344250;
+  --muted: #54616d;
+  --line: #c3cbd2;
+  --accent: #3a5c80;
+  --accent-soft: #c8d2dd;
+  --accent-line: #8ea2b7;
+  --on-accent: #e3e9ef;
+  --chord: #1c2b3a;
   --danger: #a3281c;
-  --danger-soft: #dbccce;
-  --key-white: #f8fafb;
-  --key-black: #1f2f3f;
-  --key-edge: #79848f;
-  --key-lit: #3f6285;
-  --on-lit: #e6ebf0;
+  --danger-soft: #d6d1ca;
+  --key-white: #f5f8fb;
+  --key-black: #1c2b3a;
+  --key-edge: #76818c;
+  --key-lit: #3a5c80;
+  --on-lit: #e3e9ef;
   --ok: #3d7a3f;
-  --accent-ink: #3f6285;
+  --accent-ink: #3a5c80;
   --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
 :root[data-palette="deep"][data-mode="night"] {
-  --bg: #0f1720;
-  --surface: #17222e;
-  --surface-2: #25303b;
-  --text: #dde6ee;
-  --lyric: #c4cdd5;
-  --muted: #939ba4;
-  --line: #2c343d;
-  --accent: #7fa6c9;
-  --accent-soft: #283645;
-  --accent-line: #4d667d;
-  --on-accent: #0f1720;
-  --chord: #b0cbe3;
+  --bg: #0d141c;
+  --surface: #151f2a;
+  --surface-2: #232d37;
+  --text: #dae3ec;
+  --lyric: #c1cad3;
+  --muted: #9098a1;
+  --line: #2a3139;
+  --accent: #7ca2c6;
+  --accent-soft: #263341;
+  --accent-line: #4a627a;
+  --on-accent: #0d141c;
+  --chord: #adc7e1;
   --danger: #ff8f87;
-  --danger-soft: #31282e;
-  --key-white: #454d56;
-  --key-black: #070a0e;
-  --key-edge: #808991;
-  --key-lit: #7fa6c9;
-  --on-lit: #0f1720;
+  --danger-soft: #2d2a28;
+  --key-white: #434a52;
+  --key-black: #05070a;
+  --key-edge: #7e868e;
+  --key-lit: #7ca2c6;
+  --on-lit: #0d141c;
   --ok: #7fd1a0;
-  --accent-ink: #7fa6c9;
+  --accent-ink: #7ca2c6;
   --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
 :root[data-palette="freedom"][data-mode="day"] {
-  --bg: #e9eee3;
-  --surface: #f3f6ee;
-  --surface-2: #e7ebe2;
-  --text: #2b3a2d;
-  --lyric: #425043;
-  --muted: #606c60;
-  --line: #cbd1c6;
-  --accent: #6b8f5e;
-  --accent-soft: #d5dfce;
-  --accent-line: #aabea0;
+  --bg: #e7ece1;
+  --surface: #f2f4ec;
+  --surface-2: #e5e9e0;
+  --text: #283628;
+  --lyric: #3f4c3e;
+  --muted: #5d695c;
+  --line: #c9cfc4;
+  --accent: #648a58;
+  --accent-soft: #d2ddcb;
+  --accent-line: #a5bb9c;
   --on-accent: #000000;
-  --chord: #2b3a2d;
+  --chord: #283628;
   --danger: #a3281c;
-  --danger-soft: #decec3;
-  --key-white: #f9faf6;
-  --key-black: #2b3a2d;
-  --key-edge: #808b7f;
-  --key-lit: #6b8f5e;
+  --danger-soft: #ced1cb;
+  --key-white: #f9f8f4;
+  --key-black: #283628;
+  --key-edge: #7e887b;
+  --key-lit: #648a58;
   --on-lit: #000000;
   --ok: #3d7a3f;
-  --accent-ink: #55714d;
+  --accent-ink: #4f6c48;
   --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12);
   color-scheme: light;
 }
 :root[data-palette="freedom"][data-mode="night"] {
-  --bg: #161d17;
-  --surface: #1e2820;
-  --surface-2: #2c352d;
-  --text: #e0e8dc;
-  --lyric: #c8d0c4;
-  --muted: #979f95;
-  --line: #323933;
-  --accent: #a3c293;
-  --accent-soft: #354132;
-  --accent-line: #64785b;
-  --on-accent: #161d17;
-  --chord: #c4dcb6;
+  --bg: #141b15;
+  --surface: #1d251d;
+  --surface-2: #2b332a;
+  --text: #dde6d9;
+  --lyric: #c5cec1;
+  --muted: #959d92;
+  --line: #303731;
+  --accent: #9fbf8f;
+  --accent-soft: #323f30;
+  --accent-line: #617658;
+  --on-accent: #141b15;
+  --chord: #c0d9b3;
   --danger: #ff8f87;
-  --danger-soft: #372d27;
-  --key-white: #4b524a;
-  --key-black: #0a0d0a;
-  --key-edge: #858d83;
-  --key-lit: #a3c293;
-  --on-lit: #161d17;
+  --danger-soft: #2a2f2c;
+  --key-white: #485048;
+  --key-black: #070c09;
+  --key-edge: #828b80;
+  --key-lit: #9fbf8f;
+  --on-lit: #141b15;
   --ok: #7fd1a0;
-  --accent-ink: #a3c293;
+  --accent-ink: #9fbf8f;
   --shadow: 0 1px 2px rgba(0, 0, 0, .6), 0 10px 30px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
@@ -1037,7 +1037,8 @@ a.btn { text-decoration: none; }
 /* ---- Update button under the tabs, ✨ADMIN✨ badge next to the title ---- */
 .update-bar { width: 100%; min-height: 40px; margin-top: 6px; gap: 8px; border-radius: 12px; font-size: .95rem; }
 .lib-top .brand { gap: 8px; }
-.lib-top .brand .admin-badge { margin: 0; padding: 2px 8px; font-size: .68rem; white-space: nowrap; flex: none; }
+.lib-top .brand .admin-badge { display: inline-flex; align-items: center; gap: 4px; margin: 0; padding: 2px 8px; font-size: .68rem; white-space: nowrap; flex: none; }
+.admin-badge .icon { width: 12px; height: 12px; }
 
 /* ---- smaller collapsible boxes: Notes, Reference video, Chords ---- */
 .fold, .cpanel { padding: 4px 12px; }

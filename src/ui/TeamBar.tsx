@@ -112,7 +112,11 @@ export type SongsTeam = ReturnType<typeof useSongsTeam>;
 export function AdminBadge() {
   const admin = useAdmin();
   if (!updatesAvailable || !admin) return null;
-  return <span class="badge admin-badge" id="admin-badge">✨ADMIN✨</span>;
+  return <span class="badge admin-badge" id="admin-badge" aria-label="Admin">
+      <Icon name="sparkles" size={12} />
+      ADMIN
+      <Icon name="sparkles" size={12} />
+    </span>;
 }
 
 /** The Update button under the language tabs (on the admin phone it sends the songs to everyone). */
