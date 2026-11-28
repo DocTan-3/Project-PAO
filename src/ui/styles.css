@@ -13,7 +13,7 @@
   --display: "Inter Variable", system-ui, sans-serif; /* all three fonts are replaced by the font chosen in Settings */
   --sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
   --song-font: "Inter Variable", system-ui, sans-serif; /* the song text; changed in Settings */
-  --gutter: 16px;
+  --gutter: 18px; /* the page margin on every screen; the letter index on the Songs screen sits inside it */
 
   /* Servant Day (the default until a palette is chosen) */
   --bg: #ffffff;
@@ -758,17 +758,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .letter-group .lib-list { margin-bottom: 14px; }
 
 .letter-rail {
-  position: fixed; z-index: 28; right: max(3px, env(safe-area-inset-right, 0px)); top: 50%; transform: translateY(-50%);
-  display: flex; flex-direction: column; max-height: calc(100vh - 170px); overflow-y: auto; padding: 4px 1px; border-radius: 14px;
-  background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); scrollbar-width: none;
+  position: fixed; z-index: 28; right: max(1px, env(safe-area-inset-right, 0px)); top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; max-height: calc(100vh - 170px); overflow-y: auto; padding: 4px 0; border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent); border: 0; scrollbar-width: none;
 }
 .letter-rail::-webkit-scrollbar { display: none; }
-.letter-rail button { width: 26px; min-height: 22px; flex: none; padding: 0; border: 0; background: none; color: var(--accent-ink); font-family: var(--display); font-weight: 700; font-size: .72rem; }
+.letter-rail button { width: 16px; min-height: 26px; flex: none; padding: 0; border: 0; background: none; color: var(--accent-ink); font-family: var(--display); font-weight: 700; font-size: .72rem; }
 .letter-rail button:hover { background: var(--accent-soft); border-radius: 8px; }
-@media (max-width: 1000px) {
-  .library.has-rail { padding-right: calc(max(var(--gutter), env(safe-area-inset-right, 0px)) + 26px); }
-  /* the pinned title, search and language tabs stay centred on the screen; only the list gives way to the letter index */
-  .library.has-rail .lib-pinned { margin-right: -30px; }
+}
 }
 .lang-ctl { margin: 0; }
 
@@ -983,8 +980,10 @@ label.btn.big.disabled { opacity: .5; }
 .pin-row input { flex: 1; min-width: 0; min-height: 52px; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); font-size: 1.4rem; letter-spacing: .4em; text-align: center; }
 .pin-row .btn { min-height: 52px; }
 
-.team-bar { display: grid; gap: 8px; margin: 12px 0 6px; }
-.team-btn { min-height: 56px; width: 100%; font-size: 1.05rem; border-radius: var(--radius); gap: 10px; }
+.team-bar { display: grid; gap: 6px; margin: 10px 0 4px; }
+.team-btn { min-height: 42px; width: 100%; padding: 0 14px; font-size: .95rem; border-radius: 12px; gap: 8px; }
 .team-btn .badge { margin-left: 4px; background: var(--on-accent); color: var(--accent); }
-.team-status { margin: 0; color: var(--muted); font-size: .9rem; text-align: center; }
+.team-status { margin: 0; color: var(--muted); font-size: .8rem; text-align: center; }
 a.btn { text-decoration: none; }
+
+.library.lineups .lib-pinned .lang-tabs { margin-top: 6px; }

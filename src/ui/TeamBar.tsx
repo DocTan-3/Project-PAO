@@ -91,7 +91,7 @@ export function TeamBar({ songs, onUpdate }: { songs: Song[]; onUpdate: (pack: S
       {admin ? (
         <>
           <button class="btn primary team-btn" id="publish-btn" onClick={publish} disabled={busy || songs.length === 0}>
-            <Icon name="share" size={22} />
+            <Icon name="share" size={18} />
             Publish songs
             <span class="badge">Admin</span>
           </button>
@@ -103,10 +103,10 @@ export function TeamBar({ songs, onUpdate }: { songs: Song[]; onUpdate: (pack: S
       ) : (
         <>
           <button class="btn team-btn" id="update-btn" onClick={update} disabled={busy}>
-            <Icon name="download" size={22} />
+            <Icon name="download" size={18} />
             {busy ? 'Updating…' : 'Update songs'}
           </button>
-          <p class="team-status">{lastUpd ? `Last updated ${whenText(lastUpd)}.` : 'Tap to get the latest songs from the team. You need internet.'}</p>
+          <p class="team-status">{lastUpd ? `Last updated ${whenText(lastUpd)}.` : 'Get the latest songs from the team. Needs internet.'}</p>
         </>
       )}
       {note && <p class={`share-note ${note.ok ? 'ok' : 'bad'}`} role={note.ok ? 'status' : 'alert'} id={admin ? 'publish-note' : 'update-note'}>{note.text}</p>}

@@ -25,6 +25,7 @@ import {
   swatchOf,
 } from './appearance';
 import { Icon } from './icons';
+import { ThemeToggle } from './theme';
 
 /** Settings: how the app looks. Every change applies at once and is remembered. */
 export function SettingsPage({ onMenu }: { onMenu: () => void }) {
@@ -93,6 +94,7 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
             <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
             Settings
           </div>
+          <ThemeToggle />
         </div>
       </div>
 
