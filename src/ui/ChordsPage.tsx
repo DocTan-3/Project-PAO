@@ -6,6 +6,7 @@ import { InstrumentSwitch } from './ChordPanel';
 import { ChordDiagram, loadInstrument, saveInstrument, shapeCount } from './ChordView';
 import { Icon } from './icons';
 import { ThemeToggle } from './theme';
+import { VERSES, Verse } from './verses';
 
 const ROOTS = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 
@@ -107,6 +108,7 @@ export function ChordsPage({ onMenu }: { onMenu: () => void }) {
           </li>
         ))}
       </ul>
+      <Verse id="chords-verse" text={VERSES.chords} />
 
       {open && <ChordSheet text={open} instrument={instrument} onInstrument={setInstrument} onClose={() => setOpen(null)} />}
     </main>

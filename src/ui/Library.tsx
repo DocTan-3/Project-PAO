@@ -6,6 +6,7 @@ import { Icon } from './icons';
 import { AdminBadge, SongsPill, SongsStatus, useSongsTeam } from './TeamBar';
 import { ThemeToggle } from './theme';
 import { useHold } from './useHold';
+import { VERSES, Verse } from './verses';
 
 function loadLang(): Language {
   try {
@@ -126,6 +127,7 @@ export function Library({
       </div>
 
       <SongsStatus team={team} />
+      <Verse id="songs-verse" text={VERSES.songs} />
 
       {groups.length === 0 && (
         <div class="empty" role="tabpanel">

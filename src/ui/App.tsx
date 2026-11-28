@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'preact/hooks';
-import { demoSongs, tagalogDemoSongs } from '../model/demo';
+import { MORE_SAMPLES, demoSongs, tagalogDemoSongs } from '../model/demo';
+import { allHymns } from '../model/hymns';
 import { newSong } from '../model/edit';
 import { groupSongs, languageOf } from '../model/library';
 import {
@@ -25,6 +26,7 @@ import { useAdmin } from '../admin/admin';
 import { updatesAvailable } from '../admin/config';
 import { setLocalSource, startNoticeChecks } from '../admin/notice';
 import { useKeepAwakeSetting } from './keepAwake';
+import { Splash } from './verses';
 import { Reader, type ReaderNav } from './Reader';
 import { SettingsPage } from './SettingsPage';
 
@@ -83,6 +85,15 @@ const go = (hash: string) => {
 const swap = (hash: string) => location.replace(hash.startsWith('#') ? hash : `#${hash}`);
 
 export function App() {
+  return (
+    <>
+      <AppInner />
+      <Splash />
+    </>
+  );
+}
+
+function AppInner() {
   const [songs, setSongs] = useState<Song[] | null>(null);
   const [lineups, setLineups] = useState<Lineup[]>([]);
   const [route, setRoute] = useState<Route>(parseRoute);
@@ -114,6 +125,12 @@ export function App() {
       if (!flag('pao:seeded-tl')) {
         for (const s of tagalogDemoSongs()) await store.put(s);
         flag('pao:seeded-tl', '1');
+        all = await store.list();
+      }
+      // more sample songs (public-domain hymns), added once to every phone
+      if (MORE_SAMPLES && !flag('pao:seeded-hymns')) {
+        for (const s of allHymns()) if (!all.some((x) => x.id === s.id)) await store.put(s);
+        flag('pao:seeded-hymns', '1');
         all = await store.list();
       }
       setSongs(all);

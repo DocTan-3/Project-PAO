@@ -25,6 +25,7 @@ import {
   swatchOf,
 } from './appearance';
 import { Icon } from './icons';
+import { VERSES, Verse } from './verses';
 import { ThemeToggle } from './theme';
 
 /** Settings: how the app looks. Every change applies at once and is remembered. */
@@ -225,7 +226,7 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
         </section>
       )}
 
-      <p class="verse" id="verse">Psalms 34:3 - Glorify the Lord with me; let us exalt His name forever.</p>
+      <Verse id="verse" text={VERSES.settings} />
       <p class="about" id="app-version">BPCG - PAW · version {__APP_VERSION__}</p>
     </main>
   );

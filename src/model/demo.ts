@@ -1,6 +1,9 @@
 import { mkLine as L, mkSection as S, mkSong } from './build';
 import type { Song } from './types';
 
+/** More sample songs (hymns) are added unless the build says VITE_SAMPLES=basic (used by the automatic tests). */
+export const MORE_SAMPLES = import.meta.env.VITE_SAMPLES !== 'basic';
+
 /** Public-domain songs used to seed an empty library. */
 export function demoSongs(): Song[] {
   return [...englishDemoSongs(), ...tagalogDemoSongs()].map(fixed);

@@ -12,4 +12,6 @@ interface ImportMetaEnv {
   readonly VITE_TEAM?: string;
   /** the id of the Gist that holds the team's songs */
   readonly VITE_GIST_ID?: string;
+  /** set to "basic" to start with only the original sample songs (used by the automatic tests) */
+  readonly VITE_SAMPLES?: string;
 }

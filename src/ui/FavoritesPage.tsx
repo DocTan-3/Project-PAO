@@ -4,6 +4,7 @@ import type { Song } from '../model/types';
 import { useFavorites } from './favorites';
 import { Icon } from './icons';
 import { ThemeToggle } from './theme';
+import { VERSES, Verse } from './verses';
 
 export function FavoritesPage({ songs, onMenu, onOpen }: { songs: Song[]; onMenu: () => void; onOpen: (id: string) => void }) {
   const ids = useFavorites();
@@ -28,6 +29,7 @@ export function FavoritesPage({ songs, onMenu, onOpen }: { songs: Song[]; onMenu
           <div class="art"><Icon name="heart" size={34} /></div>
           <h2>No favorites yet</h2>
           <p>Open a song and tap the heart to keep it here.</p>
+          <Verse id="favorites-verse" text={VERSES.favorites} />
         </div>
       ) : (
         <ul class="lib-list" id="favorites-list">
@@ -45,6 +47,7 @@ export function FavoritesPage({ songs, onMenu, onOpen }: { songs: Song[]; onMenu
           ))}
         </ul>
       )}
+      {list.length > 0 && <Verse id="favorites-verse" text={VERSES.favorites} />}
     </main>
   );
 }

@@ -6,6 +6,7 @@ import { Icon } from './icons';
 import { AdminBadge, LineupPills, LineupStatus, useLineupsTeam } from './TeamBar';
 import { ThemeToggle } from './theme';
 import { useHold } from './useHold';
+import { VERSES, Verse } from './verses';
 
 export function LineupList({
   lineups,
@@ -141,7 +142,7 @@ export function LineupList({
         <div class="lib-top">
           <div class="brand">
             <button class="btn icon ghost menu-btn" onClick={onMenu} aria-label="Open menu"><Icon name="menu" /></button>
-            Line up
+            Line Ups
             <AdminBadge />
           </div>
           <div class="lib-actions">
@@ -191,6 +192,7 @@ export function LineupList({
 
       <LineupStatus team={team} canEdit={canEdit} />
       {flash && <p class="share-note ok" role="status" id="flash-note">{flash}</p>}
+      <Verse id="lineups-verse" text={VERSES.lineups} />
 
       {lineups.length === 0 && (
         <div class="empty">
