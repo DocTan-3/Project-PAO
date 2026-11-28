@@ -40,7 +40,11 @@ jobs:
           # team updates and admin mode (all optional; see README, "Team updates")
           VITE_GIST_ID: ${{ vars.GIST_ID }}
           VITE_ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
+          # the version number shown in Settings (a tag like v0.4.1, or the version typed when starting the run)
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then export VITE_APP_VERSION="${GITHUB_REF_NAME#v}"; fi
+          if [[ -n "$INPUT_VERSION" ]]; then export VITE_APP_VERSION="${INPUT_VERSION#v}"; fi
           npm run build
           npx cap sync android
 

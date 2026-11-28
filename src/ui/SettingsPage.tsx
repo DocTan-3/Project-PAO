@@ -233,6 +233,8 @@ export function SettingsPage({ onMenu }: { onMenu: () => void }) {
           {adminMsg && <p class={`share-note ${adminMsg.ok ? 'ok' : 'bad'}`} role={adminMsg.ok ? 'status' : 'alert'} id="admin-note">{adminMsg.text}</p>}
         </section>
       )}
+
+      <p class="about" id="app-version">BPCG - PAW · version {__APP_VERSION__}</p>
     </main>
   );
 }

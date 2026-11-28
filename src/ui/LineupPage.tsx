@@ -1,4 +1,6 @@
 import { useState } from 'preact/hooks';
+import { publishLineups } from '../admin/admin';
+import { packErrorText } from '../admin/github';
 import {
   type Lineup,
   SLOT_GROUPS,
@@ -25,6 +27,7 @@ export function LineupPage({
   onOpenSong,
   onDelete,
   readOnly = false,
+  publish,
 }: {
   lineup: Lineup;
   songs: Song[];
@@ -35,9 +38,27 @@ export function LineupPage({
   onDelete: () => void;
   /** view only: no changing the date or songs, no delete (phones that are not the admin) */
   readOnly?: boolean;
+  /** the admin's Publish button next to Start: publishes all line ups, then calls onDone */
+  publish?: { lineups: Lineup[]; onDone: (count: number) => void };
 }) {
   const [picking, setPicking] = useState<SlotKey | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [pubBusy, setPubBusy] = useState(false);
+  const [pubError, setPubError] = useState<string | null>(null);
+  const doPublish = async () => {
+    if (!publish) return;
+    setPubError(null);
+    setPubBusy(true);
+    try {
+      const r = await publishLineups(publish.lineups);
+      if (r.ok) publish.onDone(r.count);
+      else setPubError(r.reason === 'empty' ? 'There are no line ups to publish.' : 'Another phone is now the admin. This phone is back to normal.');
+    } catch (e) {
+      setPubError(packErrorText(e));
+    } finally {
+      setPubBusy(false);
+    }
+  };
   const byId = new Map(songs.map((s) => [s.id, s]));
   const entries = lineupEntries(lineup, songs);
   const used = new Set(entries.map((e) => e.song.id));
@@ -62,6 +83,12 @@ export function LineupPage({
           <p>{progressLabel(entries)}</p>
         </div>
         <span class="lh-right">
+          {publish && !readOnly && (
+            <button class="btn publish-btn" id="publish-lineup-header" onClick={doPublish} disabled={pubBusy} aria-label="Publish line ups to everyone">
+              <Icon name="share" size={18} />
+              <span class="lbl">{pubBusy ? 'Publishing…' : 'Publish'}</span>
+            </button>
+          )}
         <button
           class="btn primary start-btn"
           disabled={entries.length === 0}
@@ -73,6 +100,8 @@ export function LineupPage({
         </button>
         </span>
       </header>
+
+      {pubError && <p class="share-note bad" role="alert" id="publish-error">{pubError}</p>}
 
       <section class="card date-card">
         {readOnly ? (

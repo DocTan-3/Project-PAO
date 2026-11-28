@@ -52,6 +52,16 @@ export function LineupList({
     };
   }, []);
   const [query, setQuery] = useState('');
+  // a one-time message left by the line up page after the admin published from there
+  const [flash] = useState<string | null>(() => {
+    try {
+      const f = sessionStorage.getItem('pao:flash');
+      sessionStorage.removeItem('pao:flash');
+      return f;
+    } catch {
+      return null;
+    }
+  });
   const shownLineups = useMemo(() => lineups.filter((l) => lineupMatches(l, songs, query)), [lineups, songs, query]);
   const { upcoming, finished } = useMemo(() => groupLineups(shownLineups, today), [shownLineups, today]);
   const [tab, setTabState] = useState<'upcoming' | 'finished'>(() => {
@@ -168,6 +178,8 @@ export function LineupList({
           </>
         )}
       </div>
+
+      {flash && <p class="share-note ok" role="status" id="flash-note">{flash}</p>}
 
       {canEdit ? (
         <>

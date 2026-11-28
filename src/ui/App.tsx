@@ -92,7 +92,9 @@ export function App() {
     startNoticeChecks();
     (async () => {
       let all = await store.list();
-      if (all.length === 0 && !flag('pao:seeded')) {
+      // first start: add the sample songs. If the app was closed part-way through, the next start finishes the job
+      // (the sample songs have fixed ids, so saving them again is harmless).
+      if (!flag('pao:seeded') && all.every((s) => s.id.startsWith('demo-'))) {
         for (const s of demoSongs()) await store.put(s);
         flag('pao:seeded', '1');
         flag('pao:seeded-tl', '1');
@@ -255,6 +257,22 @@ export function App() {
           songs={songs}
           onChange={saveLineup}
           readOnly={!canEditLineups}
+          publish={
+            updatesAvailable && admin
+              ? {
+                  lineups,
+                  onDone: (count) => {
+                    try {
+                      localStorage.setItem('pao:lineuptab', 'upcoming');
+                      sessionStorage.setItem('pao:flash', `Published ${count} ${count === 1 ? 'line up' : 'line ups'}. Everyone gets them when they tap Update line ups.`);
+                    } catch {
+                      /* ignore */
+                    }
+                    go('#lineups');
+                  },
+                }
+              : undefined
+          }
           onBack={() => go('#lineups')}
           onOpenSong={(index) => go(`#set-${lineup.id}-${index}`)}
           onDelete={async () => {

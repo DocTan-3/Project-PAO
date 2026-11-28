@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
 
+/** The app version, filled in when the app is built ("dev" while developing). */
+declare const __APP_VERSION__: string;
+
 interface ImportMetaEnv {
   /** the admin password (optional: the app has one built in) */
   readonly VITE_ADMIN_PASSWORD?: string;

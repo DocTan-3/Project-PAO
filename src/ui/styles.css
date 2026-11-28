@@ -829,12 +829,13 @@ body::after { content: ""; position: fixed; inset: auto 0 0; height: var(--sai-b
 .lineup-page { max-width: 720px; margin: 0 auto; padding-block: 0 calc(56px + var(--sai-bottom));
   padding-left: max(var(--gutter), var(--sai-left)); padding-right: max(var(--gutter), var(--sai-right)); display: grid; gap: 12px; align-content: start; }
 .lineup-page .topbar { margin-bottom: 0; }
-/* the header stays pinned under the status bar, with the title centred between the back arrow and Start */
-.lineup-head { position: sticky; top: var(--sai-top); z-index: 20; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 6px 0; background: var(--bg); }
-.lineup-head .titles { flex: none; text-align: center; max-width: 52vw; }
-.lineup-head .titles h1, .lineup-head .titles p { text-align: center; }
-.lineup-head .lh-left { justify-self: start; display: flex; }
-.lineup-head .lh-right { justify-self: end; display: flex; }
+/* the header stays pinned under the status bar; on the admin phone Publish sits next to Start */
+.lineup-head { position: sticky; top: var(--sai-top); z-index: 20; display: flex; align-items: center; gap: 6px; padding: 6px 0; background: var(--bg); }
+.lineup-head .titles { flex: 1; min-width: 0; }
+.lineup-head .lh-left { display: flex; flex: none; }
+.lineup-head .lh-right { display: flex; flex: none; align-items: center; gap: 6px; }
+.publish-btn { gap: 6px; padding: 0 12px; }
+@media (max-width: 350px) { .publish-btn .lbl { display: none; } .publish-btn { padding: 0; width: 44px; } }
 .slot-readonly { flex: 1; display: grid; min-width: 0; padding: 12px 14px; border: 1px dashed var(--line); border-radius: var(--radius); color: var(--muted); }
 .slot-readonly .t { font-weight: 600; }
 .start-btn { gap: 8px; padding: 0 16px; }
@@ -1009,3 +1010,5 @@ a.btn { text-decoration: none; }
 .video-host { margin: 0; color: var(--muted); font-size: .85rem; }
 .field-hint.bad { color: var(--danger); font-size: .85rem; }
 .notes-field input { min-height: 46px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); }
+
+.about { margin: 28px 0 0; text-align: center; color: var(--muted); font-size: .85rem; }
