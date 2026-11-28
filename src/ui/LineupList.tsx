@@ -196,7 +196,7 @@ export function LineupList({
         <div class="empty">
           <div class="art"><Icon name="calendar" size={34} /></div>
           <h2>No line ups yet</h2>
-          <p>{canEdit ? 'Plan a service: pick the date, then the opening, welcome, praise and worship songs.' : 'Tap Update to get the line up from the admin.'}</p>
+          <p>{canEdit ? 'Plan a service: pick the date, then the opening, welcome, praise and worship songs.' : 'Update to get the line up from the admin.'}</p>
         </div>
       )}
 

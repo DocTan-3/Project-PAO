@@ -48,7 +48,7 @@ export function updatedLineupsMessage(plan: LineupUpdatePlan, missingSongs: numb
   if (plan.removed) parts.push(`${plural(plan.removed, 'line up was', 'line ups were')} removed because the admin no longer has ${plan.removed === 1 ? 'it' : 'them'}.`);
   if (!plan.added && !plan.updated && !plan.removed) parts.unshift('You already have the latest line ups.');
   else parts.unshift('Done!');
-  if (missingSongs > 0) parts.push(`${plural(missingSongs, 'song in these line ups is', 'songs in these line ups are')} not on your phone yet. Tap Update on the Songs screen.`);
+  if (missingSongs > 0) parts.push(`${plural(missingSongs, 'song in these line ups is', 'songs in these line ups are')} not on your phone yet. Update on the Songs screen.`);
   return parts.join(' ');
 }
 
@@ -155,7 +155,7 @@ export function SongsStatus({ team }: { team: SongsTeam }) {
         <p class="share-note ok notice" role="status" id="songs-notice">{addedText(team.notice.songsCount, 'song', 'songs', 'The admin has updated the songs.')}</p>
       ) : (
         <p class="team-status" id="songs-updated">
-          {team.lastUpd ? `Songs are updated last ${whenLong(team.lastUpd)}. Everything is updated.` : 'Tap Update to get the latest songs from the team (needs internet).'}
+          {team.lastUpd ? `Songs are updated last ${whenLong(team.lastUpd)}. Everything is updated.` : 'Update to get the latest songs from the team.'}
         </p>
       )}
       {team.note && <p class={`share-note ${team.note.ok ? 'ok' : 'bad'}`} role={team.note.ok ? 'status' : 'alert'} id={team.admin ? 'publish-note' : 'update-note'}>{team.note.text}</p>}
@@ -259,7 +259,7 @@ export function LineupStatus({ team, canEdit }: { team: LineupsTeam; canEdit: bo
         <p class="share-note ok notice" role="status" id="lineups-notice">{addedText(team.notice.lineupsCount, 'line up', 'line ups', 'The admin has updated the line ups.')}</p>
       ) : (
         <p class="team-status" id="lineups-updated">
-          {team.last ? `Line ups are updated last ${whenLong(team.last)}. Everything is updated.` : 'Tap Update to get the latest line ups from the admin (needs internet).'}
+          {team.last ? `Line ups are updated last ${whenLong(team.last)}. Everything is updated.` : 'Update to get the latest line ups from the admin.'}
         </p>
       )}
       {team.note && <p class={`share-note ${team.note.ok ? 'ok' : 'bad'}`} role={team.note.ok ? 'status' : 'alert'} id="lineups-note">{team.note.text}</p>}
